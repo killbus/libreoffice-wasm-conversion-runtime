@@ -71,7 +71,7 @@ log_info "[1/7] Checking system dependencies..."
 
 check_deps() {
     local missing=()
-    for cmd in git python3 make gcc g++ cmake autoconf automake flex bison gawk pkg-config; do
+    for cmd in git python3 make gcc g++ cmake autoconf automake flex bison gawk gperf nasm pkg-config; do
         if ! command -v $cmd &> /dev/null; then
             missing+=($cmd)
         fi
