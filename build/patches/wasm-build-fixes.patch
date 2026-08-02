@@ -102,12 +102,14 @@ diff --git a/RepositoryFixes.mk b/RepositoryFixes.mk
 index 2139b2f82..3dc542536 100644
 --- a/RepositoryFixes.mk
 +++ b/RepositoryFixes.mk
-@@ -38,7 +38,7 @@ ifeq ($(OS),EMSCRIPTEN)
+@@ -38,7 +38,9 @@ ifeq ($(OS),EMSCRIPTEN)
  ifeq ($(ENABLE_QT6),TRUE)
  gb_Executable_FILENAMES := $(patsubst soffice_bin:soffice_bin%,soffice_bin:soffice.js,$(gb_Executable_FILENAMES))
  else
 -gb_Executable_FILENAMES := $(patsubst soffice_bin:soffice_bin%,soffice_bin:soffice.html,$(gb_Executable_FILENAMES))
-+gb_Executable_FILENAMES := $(patsubst soffice_bin:soffice_bin%,soffice_bin:soffice.mjs,$(gb_Executable_FILENAMES))
++# Emit classic Emscripten glue as soffice.js (script-loadable Module), not
++# an ES module (.mjs). Consumers load via require/script + shared Module.
++gb_Executable_FILENAMES := $(patsubst soffice_bin:soffice_bin%,soffice_bin:soffice.js,$(gb_Executable_FILENAMES))
  endif
  else
  gb_Executable_FILENAMES := $(patsubst soffice_bin:soffice_bin%,soffice_bin:soffice.bin,$(gb_Executable_FILENAMES))
@@ -454,30 +456,25 @@ index 04f8e7f80..3ef86f6a5 100644
  # Use -isystem (gcc) if possible, to avoid warnings in 3rd party headers.
  # NOTE: must _not_ be used for bundled external libraries!
 diff --git a/desktop/Executable_soffice_bin.mk b/desktop/Executable_soffice_bin.mk
-index d6a271dec..5bd492926 100644
+index d6a271dec..a1c0de001 100644
 --- a/desktop/Executable_soffice_bin.mk
 +++ b/desktop/Executable_soffice_bin.mk
-@@ -62,14 +62,18 @@ $(call gb_LinkTarget_get_headers_target,$(call gb_Executable_get_linktarget,soff
+@@ -62,7 +62,12 @@ $(call gb_LinkTarget_get_headers_target,$(call gb_Executable_get_linktarget,soff
  $(call gb_LinkTarget__static_lib_dummy_depend,unoembind)
- 
+
  $(eval $(call gb_Executable_add_ldflags,soffice_bin,\
 -	-s EXPORTED_FUNCTIONS=["_main"$(COMMA)"_libreofficekit_hook"$(COMMA)"_libreofficekit_hook_2"$(COMMA)"_lok_preinit"$(COMMA)"_lok_preinit_2"$(COMMA)"_malloc"$(COMMA)"_free"] -Wl$(COMMA)--whole-archive $(call gb_StaticLibrary_get_target,unoembind) -Wl$(COMMA)--no-whole-archive \
 +	-s EXPORTED_FUNCTIONS=["_main"$(COMMA)"_libreofficekit_hook"$(COMMA)"_libreofficekit_hook_2"$(COMMA)"_lok_preinit"$(COMMA)"_lok_preinit_2"$(COMMA)"_lok_documentLoad"$(COMMA)"_lok_documentLoadWithOptions"$(COMMA)"_lok_documentSaveAs"$(COMMA)"_lok_documentDestroy"$(COMMA)"_lok_destroy"$(COMMA)"_lok_getError"$(COMMA)"_lok_documentGetParts"$(COMMA)"_lok_documentGetPart"$(COMMA)"_lok_documentSetPart"$(COMMA)"_lok_documentGetDocumentType"$(COMMA)"_lok_documentGetDocumentSize"$(COMMA)"_lok_documentInitializeForRendering"$(COMMA)"_lok_documentPaintTile"$(COMMA)"_lok_documentGetTileMode"$(COMMA)"_lok_documentGetTextSelection"$(COMMA)"_lok_documentSetTextSelection"$(COMMA)"_lok_documentGetSelectionType"$(COMMA)"_lok_documentResetSelection"$(COMMA)"_lok_documentPostMouseEvent"$(COMMA)"_lok_documentPostKeyEvent"$(COMMA)"_lok_documentPostUnoCommand"$(COMMA)"_lok_documentGetCommandValues"$(COMMA)"_lok_documentGetPartPageRectangles"$(COMMA)"_lok_documentGetPartInfo"$(COMMA)"_lok_documentGetPartName"$(COMMA)"_lok_documentPaste"$(COMMA)"_lok_documentSetClientZoom"$(COMMA)"_lok_documentSetClientVisibleArea"$(COMMA)"_lok_documentGetA11yFocusedParagraph"$(COMMA)"_lok_documentGetA11yCaretPosition"$(COMMA)"_lok_documentSetAccessibilityState"$(COMMA)"_lok_documentGetDataArea"$(COMMA)"_lok_documentGetEditMode"$(COMMA)"_lok_documentSetEditMode"$(COMMA)"_lok_documentCreateView"$(COMMA)"_lok_documentCreateViewWithOptions"$(COMMA)"_lok_documentDestroyView"$(COMMA)"_lok_documentSetView"$(COMMA)"_lok_documentGetView"$(COMMA)"_lok_documentGetViewsCount"$(COMMA)"_lok_enableSyncEvents"$(COMMA)"_lok_disableSyncEvents"$(COMMA)"_lok_runLoop"$(COMMA)"_lok_documentRegisterCallback"$(COMMA)"_lok_documentUnregisterCallback"$(COMMA)"_lok_hasCallbackEvents"$(COMMA)"_lok_getCallbackEventCount"$(COMMA)"_lok_pollCallback"$(COMMA)"_lok_clearCallbackQueue"$(COMMA)"_lok_flushCallbacks"$(COMMA)"_lok_abortOperation"$(COMMA)"_lok_setOperationTimeout"$(COMMA)"_lok_getOperationState"$(COMMA)"_lok_resetAbort"$(COMMA)"_malloc"$(COMMA)"_free"] -Wl$(COMMA)--whole-archive $(call gb_StaticLibrary_get_target,unoembind) -Wl$(COMMA)--no-whole-archive \
  ))
--ifeq ($(ENABLE_QT6),TRUE)
-+# MODULARIZE wraps the Emscripten output in a factory function, allowing
-+# proper async initialization and multiple instantiations if needed.
-+# EXPORT_ES6 outputs ES6 module format with import/export syntax.
-+# EXPORT_NAME defines the name for the default export factory function.
++# LOK C shims for headless conversion. Keep QT6 modularize gated; do not
++# enable EXPORT_ES6 here (would force .mjs factory output).
+ ifeq ($(ENABLE_QT6),TRUE)
  $(eval $(call gb_Executable_add_ldflags,soffice_bin, \
      -s MODULARIZE=1 \
--    -s EXPORT_NAME=soffice_entry \
-+    -s EXPORT_ES6=1 \
-+    -s EXPORT_NAME=createSofficeModule \
-+    --minify 0 \
+     -s EXPORT_NAME=soffice_entry \
  ))
--endif
- 
+ endif
+
  $(call gb_Executable_get_linktarget_target,soffice_bin): \
      $(gb_CustomTarget_workdir)/static/unoembind/bindings_uno.js \
 diff --git a/desktop/inc/lib/init.hxx b/desktop/inc/lib/init.hxx

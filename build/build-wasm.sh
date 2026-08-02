@@ -311,12 +311,17 @@ echo "Finished: $(date)"
 # ============================================================
 # Step 7: Package Output
 # ============================================================
+# Deliver classic Emscripten glue for two loaders that share one body:
+#   soffice.cjs — Node (require after setting global.Module)
+#   soffice.js  — browser (<script> after setting window.Module)
+# Build tree must provide ARTIFACT_DIR/soffice.js (not only .mjs).
+# Clear OUTPUT_DIR first so a failed copy cannot leave stale files.
+# ============================================================
 log_info "[7/7] Packaging WASM output..."
 
 mkdir -p "${OUTPUT_DIR}"
 
 # Remove duplicate soffice.data from SDK (saves 80MB)
-# LibreOffice creates identical copies in both program/ and sdk/bin/
 if [ -f "instdir/sdk/bin/soffice.data" ] && [ -f "instdir/program/soffice.data" ]; then
     log_info "Removing duplicate soffice.data from sdk/bin/ (saves 80MB)..."
     rm -f instdir/sdk/bin/soffice.data
@@ -325,107 +330,146 @@ if [ -f "instdir/sdk/bin/soffice.data" ] && [ -f "instdir/program/soffice.data" 
 fi
 
 # Add minimal fallback fonts if --without-fonts was used
-# LibreOffice needs at least one sans and one serif font
 FONTS_DIR="instdir/share/fonts/truetype"
 if [ ! -d "$FONTS_DIR" ] || [ -z "$(ls -A $FONTS_DIR 2>/dev/null)" ]; then
     log_info "Adding minimal fallback fonts..."
     mkdir -p "$FONTS_DIR"
-    
-    # Download minimal Noto fonts if not present
     if [ ! -f "$FONTS_DIR/NotoSans-Regular.ttf" ]; then
         curl -sL "https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf" \
             -o "$FONTS_DIR/NotoSans-Regular.ttf" 2>/dev/null || \
         log_warn "Could not download NotoSans font"
     fi
-    
     if [ ! -f "$FONTS_DIR/NotoSerif-Regular.ttf" ]; then
         curl -sL "https://github.com/googlefonts/noto-fonts/raw/main/hinted/ttf/NotoSerif/NotoSerif-Regular.ttf" \
             -o "$FONTS_DIR/NotoSerif-Regular.ttf" 2>/dev/null || \
         log_warn "Could not download NotoSerif font"
     fi
-    
     log_success "Added minimal fonts"
 fi
 
-# Find and copy the main WASM artifacts
-WASM_FILES_FOUND=0
-
-# Primary location: instdir/program
+# Resolve artifact directory
+ARTIFACT_DIR=""
 if [ -f "instdir/program/soffice.wasm" ]; then
-    cp instdir/program/soffice.wasm "${OUTPUT_DIR}/"
-    cp instdir/program/soffice.js "${OUTPUT_DIR}/soffice.cjs" 2>/dev/null || true
-    cp instdir/program/soffice.data "${OUTPUT_DIR}/" 2>/dev/null || true
-    cp instdir/program/soffice.worker.js "${OUTPUT_DIR}/soffice.worker.cjs" 2>/dev/null || true
-    WASM_FILES_FOUND=1
-    log_success "Copied WASM files from instdir/program"
-fi
-
-# Alternative: workdir/LinkTarget
-if [ "$WASM_FILES_FOUND" = "0" ]; then
+    ARTIFACT_DIR="instdir/program"
+else
     WASM_IN_WORKDIR=$(find workdir -name "soffice.wasm" 2>/dev/null | head -1)
     if [ -n "$WASM_IN_WORKDIR" ]; then
-        WASM_WORKDIR=$(dirname "$WASM_IN_WORKDIR")
-        cp "${WASM_WORKDIR}/soffice.wasm" "${OUTPUT_DIR}/"
-        cp "${WASM_WORKDIR}/soffice.js" "${OUTPUT_DIR}/soffice.cjs" 2>/dev/null || true
-        cp "${WASM_WORKDIR}/soffice.data" "${OUTPUT_DIR}/" 2>/dev/null || true
-        WASM_FILES_FOUND=1
-        log_success "Copied WASM files from workdir"
+        ARTIFACT_DIR=$(dirname "$WASM_IN_WORKDIR")
     fi
 fi
 
-if [ "$WASM_FILES_FOUND" = "0" ]; then
+if [ -z "$ARTIFACT_DIR" ]; then
     log_error "Could not find soffice.wasm output!"
-    echo "Searching for .wasm files..."
     find . -name "*.wasm" -size +1M 2>/dev/null | head -10
     exit 1
 fi
 
-# Apply patches to soffice.cjs for Node.js compatibility
-log_info "Applying patches to soffice.cjs..."
-
-cd "${OUTPUT_DIR}"
-
-# 1. Add global.Module for Node.js compatibility
-if ! head -c 50 soffice.cjs | grep -q "global.Module"; then
-    sed -i '1s/^/if(typeof global!=="undefined"){var Module=global.Module=global.Module||{}}\n/' soffice.cjs
-    log_success "Added global.Module patch"
+# Require classic glue filename. ES-module-only builds emit .mjs and break
+# require()/script loaders that expect a shared Module object.
+if [ ! -f "${ARTIFACT_DIR}/soffice.js" ]; then
+    log_error "Missing ${ARTIFACT_DIR}/soffice.js (classic Emscripten glue)."
+    if [ -f "${ARTIFACT_DIR}/soffice.mjs" ]; then
+        log_error "Found soffice.mjs only — link flags likely set EXPORT_ES6."
+        log_error "Use classic soffice.js output (see Executable_soffice_bin / RepositoryFixes)."
+    fi
+    ls -la "${ARTIFACT_DIR}"/soffice* 2>/dev/null || true
+    exit 1
 fi
 
-# 2. Fix hardcoded PACKAGE_NAME path (from build directory to relative)
+if [ ! -f "${ARTIFACT_DIR}/soffice.data" ]; then
+    log_error "Missing ${ARTIFACT_DIR}/soffice.data"
+    exit 1
+fi
+
+# Remove prior outputs so packaging never ships a mix of old and new files
+log_info "Clearing previous outputs in ${OUTPUT_DIR}..."
+rm -f "${OUTPUT_DIR}/soffice.wasm" \
+      "${OUTPUT_DIR}/soffice.cjs" \
+      "${OUTPUT_DIR}/soffice.js" \
+      "${OUTPUT_DIR}/soffice.data" \
+      "${OUTPUT_DIR}/soffice.data.js.metadata" \
+      "${OUTPUT_DIR}/soffice.worker.cjs" \
+      "${OUTPUT_DIR}/soffice.worker.js"
+
+log_info "Copying from ${ARTIFACT_DIR} (fail on error)..."
+cp "${ARTIFACT_DIR}/soffice.wasm" "${OUTPUT_DIR}/soffice.wasm"
+cp "${ARTIFACT_DIR}/soffice.js"   "${OUTPUT_DIR}/soffice.cjs"
+cp "${ARTIFACT_DIR}/soffice.data" "${OUTPUT_DIR}/soffice.data"
+if [ -f "${ARTIFACT_DIR}/soffice.data.js.metadata" ]; then
+    cp "${ARTIFACT_DIR}/soffice.data.js.metadata" "${OUTPUT_DIR}/"
+fi
+if [ -f "${ARTIFACT_DIR}/soffice.worker.js" ]; then
+    cp "${ARTIFACT_DIR}/soffice.worker.js" "${OUTPUT_DIR}/soffice.worker.cjs"
+fi
+log_success "Copied WASM artifacts"
+
+# Node compatibility patches on soffice.cjs
+log_info "Applying patches to soffice.cjs..."
+cd "${OUTPUT_DIR}"
+
+# 1. Prepend a single Node global.Module bootstrap line.
+#    Guard must scan the whole file: a short head -c N truncates inside the
+#    token "global.Module" and re-inserts on every run.
+#    If duplicates already exist, keep exactly one line.
+PATCH_GLOBAL_MODULE='if(typeof global!=="undefined"){var Module=global.Module=global.Module||{}}'
+if grep -qF "${PATCH_GLOBAL_MODULE}" soffice.cjs; then
+    awk -v p="${PATCH_GLOBAL_MODULE}" 'BEGIN{first=1} {
+        if ($0 == p) { if (first) { print; first=0 } }
+        else print
+    }' soffice.cjs > soffice.cjs.tmp && mv soffice.cjs.tmp soffice.cjs
+    log_success "global.Module bootstrap present (deduped)"
+else
+    { printf '%s\n' "${PATCH_GLOBAL_MODULE}"; cat soffice.cjs; } > soffice.cjs.tmp
+    mv soffice.cjs.tmp soffice.cjs
+    log_success "Added global.Module bootstrap"
+fi
+
+PATCH_COUNT=$(grep -cF "${PATCH_GLOBAL_MODULE}" soffice.cjs || true)
+if [ "${PATCH_COUNT}" != "1" ]; then
+    log_error "global.Module bootstrap count is ${PATCH_COUNT}, expected 1"
+    exit 1
+fi
+
+# 2. PACKAGE_NAME path → relative
 sed -i 's|PACKAGE_NAME="[^"]*emscripten_fs_image/soffice\.data"|PACKAGE_NAME="soffice.data"|g' soffice.cjs
 sed -i "s|PACKAGE_NAME='[^']*emscripten_fs_image/soffice\.data'|PACKAGE_NAME='soffice.data'|g" soffice.cjs
 
-# 3. Fix datafile_ reference
+# 3. datafile_ reference
 sed -i 's|datafile_[^"]*emscripten_fs_image/soffice\.data|datafile_soffice.data|g' soffice.cjs
 
-# 4. Create browser-compatible copy (.js from .cjs)
+# 4. Browser copy (same classic body)
 cp soffice.cjs soffice.js
 if [ -f "soffice.worker.cjs" ]; then
     cp soffice.worker.cjs soffice.worker.js
 fi
-log_success "Created browser copies (soffice.js, soffice.worker.js)"
+log_success "Created browser copies"
+
+for req in soffice.wasm soffice.data soffice.cjs soffice.js; do
+    if [ ! -f "$req" ]; then
+        log_error "Packaging incomplete: missing ${OUTPUT_DIR}/${req}"
+        exit 1
+    fi
+done
 
 cd "${LO_DIR}"
 
-# Calculate sizes
 echo ""
 echo "=============================================="
-echo "  Build Complete!"  
+echo "  Build Complete!"
 echo "=============================================="
 echo ""
 echo "Output files in ${OUTPUT_DIR}:"
-ls -lh "${OUTPUT_DIR}"/*.wasm "${OUTPUT_DIR}"/*.js "${OUTPUT_DIR}"/*.data 2>/dev/null || true
+ls -lh "${OUTPUT_DIR}"/*.wasm "${OUTPUT_DIR}"/*.js "${OUTPUT_DIR}"/*.cjs "${OUTPUT_DIR}"/*.data 2>/dev/null || true
 
-# Show compressed sizes
 if command -v gzip &> /dev/null; then
     echo ""
     echo "Compressed sizes (gzip -9):"
     for f in "${OUTPUT_DIR}"/*.wasm "${OUTPUT_DIR}"/*.data; do
         if [ -f "$f" ]; then
             COMPRESSED=$(gzip -9 -c "$f" | wc -c)
-            ORIGINAL=$(stat -c %s "$f")
+            ORIGINAL=$(stat -c %s "$f" 2>/dev/null || stat -f %z "$f")
             RATIO=$((COMPRESSED * 100 / ORIGINAL))
-            echo "  $(basename $f): $(numfmt --to=iec $COMPRESSED) (${RATIO}% of original)"
+            echo "  $(basename $f): $(numfmt --to=iec $COMPRESSED 2>/dev/null || echo $COMPRESSED) (${RATIO}% of original)"
         fi
     done
 fi
