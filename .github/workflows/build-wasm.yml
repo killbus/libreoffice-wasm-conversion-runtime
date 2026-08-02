@@ -103,9 +103,9 @@ jobs:
       - name: Show produced artifacts
         run: ls -lh wasm/soffice.*
 
+      # SubprocessConverter forks dist/subprocess.worker.cjs; runs against the
+      # freshly built wasm/soffice.* (overwrites the LFS-checked-out copy).
       - name: Run conversion gate test against freshly built wasm
-        env:
-          # SubprocessConverter forks dist/subprocess.worker.cjs
         run: npx vitest run tests/converter-gate.test.ts
 
       - name: Upload WASM artifacts
