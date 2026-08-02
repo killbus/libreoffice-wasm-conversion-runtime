@@ -9,6 +9,10 @@
  * The trimmed wasm (produced by the GHA build workflow) must also pass
  * this same gate.
  *
+ * Gate input: tests/sample_large.docx (tracked, ~32K) so the file is
+ * present on the GHA runner. Locally, override with GATE_INPUT_DOCX for
+ * a heavier smoke test (e.g. the untracked repo-root test.docx, 6.4M).
+ *
  * Runs through `convertDocument`, which in Node uses SubprocessConverter
  * (forks dist/subprocess.worker.cjs). Requires `npm run build` first so
  * that dist/ is present.
@@ -26,9 +30,13 @@ import { convertDocument, ConversionError } from '../src/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// test.docx lives at the repo root (real 6.6MB DOCX, the gate input).
-const ROOT = path.resolve(__dirname, '..');
-const DOCX_PATH = path.join(ROOT, 'test.docx');
+// Gate input. Default: tests/sample_large.docx (tracked, 32K, available on
+// GHA). Locally, set GATE_INPUT_DOCX to a larger file (e.g. the repo-root
+// test.docx, 6.4M, untracked) for a heavier real-content smoke test.
+const DEFAULT_DOCX = path.join(__dirname, 'sample_large.docx');
+const DOCX_PATH = process.env.GATE_INPUT_DOCX
+  ? path.resolve(process.env.GATE_INPUT_DOCX)
+  : DEFAULT_DOCX;
 
 // PDF magic bytes
 const PDF_SIGNATURE = Buffer.from('%PDF', 'ascii');
