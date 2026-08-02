@@ -103,3 +103,31 @@ The `build-wasm.yml` `conversion-only` mode currently only swaps
 `autogen.input`. The patch-trim step (reverse-patch application) will be wired
 into the workflow once the first cut is validated manually; see implement.md
 Phase 4.
+
+## Module-level conditional compile (the stronger UI-cut lever)
+
+In addition to the patch cuts above, Phase 4 should use `.mk` / `.component`
+conditional compilation to stop UI / non-conversion submodules from being
+compiled at all — instead of relying on LTO to drop them. This is **already
+established practice** in this repo's patch (NOT a new risky technique):
+
+- `writerperfect/Module_writerperfect.mk` gates `Library_wpftdraw` /
+  `Library_wpftimpress` on `$(ENABLE_CDR)` / `$(ENABLE_ETONYEK)`, and already
+  honors `ENABLE_WASM_STRIP_BASIC_DRAW_MATH_IMPRESS` / `ENABLE_WASM_STRIP_CALC`.
+- `xmlsecurity/Module_xmlsecurity.mk` wraps `UIConfig_xmlsec` and
+  `AllLangMoTarget_xsc` in `$(if $(DISABLE_GUI),,)` — i.e. UI config and l10n
+  are NOT built when `DISABLE_GUI` is set.
+- `svx/util/svxcore.component` removes the `<optional/>` tag (component
+  registration metadata, not C++ logic).
+
+Pattern to apply for conversion-only: wrap UI submodule targets in
+`sc/Module_sc.mk`, `sd/Module_sd.mk`, etc. with `$(if $(DISABLE_GUI),,)` (or
+the existing `ENABLE_WASM_STRIP_*` flags), so `sc/source/ui`, `sd/source/ui`
+do not compile/link/register under DISABLE_GUI. This keeps UI code out of
+`soffice.wasm` deterministically, not by LTO luck.
+
+> NOTE: this is **build metadata** (`.mk`/`.component`), NOT C++ implementation
+> logic (`.cxx`/`.hxx`). The task's "do not modify C++ source" constraint
+> applies to the latter; modifying the former is in-scope and is the
+> established trim method. See design.md §5 and §6 (cognitive discipline).
+

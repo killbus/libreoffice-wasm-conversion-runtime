@@ -53,7 +53,16 @@
 
 ## Out of Scope
 
-- 改 C++ 源码(裁剪只通过 autogen.input 开关 + patch)。
+- 改 LO 的 C++ **实现逻辑**(`.cxx`/`.hxx`)——保留。
 - 本机本地构建(无 Docker/WSL)。
 - 自动回推 LFS / 自动 commit wasm 产物。
 - 编辑/渲染/交互职能的保留(本任务就是要裁掉它们)。
+
+## In Scope(裁剪工具箱,需精确区分)
+
+裁剪手段分两类,**都属于本任务范围**:
+
+1. **autogen.input 开关**:`--disable-*` / `--without-*` / `--enable-wasm-strip` 等。
+2. **patch 改模块结构与注册**(`.mk` / `.component`):通过 `$(if $(FLAG),,目标)` 条件编译,把 UI / 非转换子模块挡在编译之外。**这不是"改 C++ 源码"**——是改构建/注册元数据,本仓库 patch 已大量采用(见 `writerperfect/Module_writerperfect.mk`、`xmlsecurity/Module_xmlsecurity.mk` 用 `DISABLE_GUI`/`ENABLE_WASM_STRIP_*` 条件化;`svx/util/svxcore.component` 改 optional)。
+
+> 关键纠正:早先版本把"改模块结构"与"改 C++ 源码"混为一谈、笼统判为高风险并排除——那是先入为主,与 patch 既有实践不符。Phase 4 应**主动用 `.mk`/`.component` 条件编译**挡掉 `sc/source/ui`、`sd/source/ui` 等 UI 子模块(参照 writerperfect/xmlsecurity 范式),而不是依赖 LTO 碰运气清 UI 死代码。

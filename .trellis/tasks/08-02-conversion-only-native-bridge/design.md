@@ -79,6 +79,15 @@
   - `--disable-lotuswordpro`(Lotus Word Pro 导入过滤器,冷门,可禁)
   - `--enable-lto`(链接时优化,减小体积,但增加构建时间)
 - **不动的项**:`--with-main-module=all`(全格式必需)、`--enable-pdfimport`/`--enable-pdfium`(PDF 支持)、`--enable-wasm-strip`、cairo-canvas/skia(注释明示 PDF/SVG 渲染需要)。
+- **不可裁的核心引擎(重要护栏)**:editeng / svx / svxcore / filter 等被各文档模块**共用**的核心引擎不能整个 `--disable`。它们同时承担两类职能:
+  - **文本处理 / 布局 / 渲染(filter 转换路径依赖)**——conversion 必需。例:导入 docx 时 filter 经 `editeng` 解析富文本、字体(`#include <editeng/flstitem.hxx>`);导出 pdf 时文本布局经 editeng/svxcore。裁掉这些核心会让 `docx→pdf` 直接挂(文本无法布局)。
+  - **交互编辑 / UI / UNO 接口**——conversion 不需要,但裁的是**这部分**,不是整个模块。例:editeng 的 `spellmenu.ui`(拼写菜单 UI 资源)、UNO 文本编辑接口、光标/选择交互。
+
+  > 因此 conversion-only 裁剪的粒度是"模块的 UI/交互面 + 非转换模块",不是"模块本身"。Phase 4 看到 `[build CXX] editeng/...` 在编译是**预期内、正确**的——editeng 核心必须保留。
+  >
+  > 裁 UI/交互面的三道手段(由强到弱):① **`.mk` 条件编译挡编译**(参照 writerperfect/xmlsecurity 范式,用 `$(if $(DISABLE_GUI),,目标)` 让 `sc/source/ui`、`sd/source/ui` 等 UI 子模块在 DISABLE_GUI 时根本不编——UI 代码不进 wasm,不靠 LTO 碰运气);② **fs image 裁 UI 资源**(把 `editeng/ui/spellmenu.ui`、`sc/uiconfig/*.ui` 从 017 fs image patch 去掉,运行时无 UI 资源);③ **裁 LOK shim 导出**(014/015 那批,去掉 UI/交互的 API 入口)。
+  >
+  > 这条认知修正了上文"裁掉 editor/渲染模块"可能被误读为"砍 editeng/svxcore"的表述:能裁的是"编辑/渲染的交互入口与 UI",不是"被 filter 共用的核心引擎"。也纠正了早先"UI 死代码只能靠 LTO 清"的判断——那是没考虑 `.mk` 条件编译的先入为主。
 
 > 风险:部分 `--disable-*` 可能在 WASM 构建里联动失败或影响 filter。每个开关在 Phase 4 构建验证时单独确认;失败则回退该开关。
 
@@ -137,13 +146,25 @@
 | LFS 配额 | 不自动推,人工评估 |
 
 ## 5. 不做的事
-- 不改 C++ 源码(只动 autogen.input 开关 + patch 选择)。
+- 不改 LO 的 C++ **实现逻辑**(`.cxx`/`.hxx`)。
 - 不本地构建(本机无 Docker/WSL)。
 - 不自动回推 LFS / 不自动 commit wasm。
 - 不走 minimal(writer-only)路线。
 - 不保留 editor/渲染/交互/a11y 职能(本任务目的就是裁掉)。
 
-## 6. 待验证项(Phase 4 构建)
+> 范围澄清(纠正先入为主):"改模块结构"(`.mk`/`.component`)**不**属于"不改 C++ 源码"约束,且是本任务 Phase 4 的正解工具。patch 既有实践(writerperfect/xmlsecurity 用 `DISABLE_GUI`/`ENABLE_WASM_STRIP_*` 条件化 `.mk`;svxcore.component 改 optional)证明这条路可工作。早期"改模块结构风险极高"的判断是先入为主、与证据不符,已废弃。
+
+## 6. 认知纪律(贯穿始终)
+
+Phase 4 操作及后续任何裁剪决策,遵守以下纪律(详见 memory: `avoid-priors-verify-against-evidence`):
+
+1. **先验证再断言**:下"X 风险高/不可行/不在范围"前,先 grep/读 patch 与代码找正反例。先入为主的判断会伪装成约束固化进设计。
+2. **精确命名被排除的对象**:区分"改 C++ 实现逻辑(`.cxx`)"与"改构建元数据(`.mk`/`.component`)",不要用笼统的"改源码/动结构"一起排除。
+3. **用户质疑先入为主时,默认质疑成立**:去查证据,不为原判断辩护。
+4. **显式标注废弃判断**:被推翻的先入为主判断在文档里标注"已废弃",防止后续会话重新踩坑(如本节上方那条)。
+5. **第一性原理优先**:裁剪对象是产物 `wasm/data`,不是源码树。判断"在不在最终产物"只看是否被链接进 wasm 或打进 data,不看源码编没编。
+
+## 7. 待验证项(Phase 4 构建)
 - 3.1 每个 `--disable-*` 是否真不影响全格式转换(filter 注册、fs 资源)。
 - 3.1 patch 裁剪的连锁依赖(017 fs image 是否引用 a11y/impress-draw 文件)。
 - 3.2 JS 裁剪后 `convertDocument`/`exportAsImage` 在现有 wasm 上仍跑通(基线测试覆盖)。
