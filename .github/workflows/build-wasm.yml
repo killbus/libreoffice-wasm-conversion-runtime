@@ -1,0 +1,138 @@
+name: Build WASM
+
+# Manual-only trigger. LibreOffice WASM builds take 2-4h+ on 4 cores and
+# must not run on every push/PR. Use workflow_dispatch and pick a mode.
+#
+#   baseline         — current untrimmed autogen.input + full patch.
+#                      Validates the build pipeline itself + gate test on GHA.
+#   conversion-only  — trimmed autogen.input + trimmed patch (conversion-only).
+#                      Validates that trimming keeps docx→pdf working and
+#                      produces a smaller soffice.wasm.
+#
+# Artifacts (soffice.wasm/data/cjs) are uploaded, NEVER auto-pushed to LFS
+# or auto-committed. Download, verify locally, then push manually.
+#
+# See .trellis/tasks/08-02-conversion-only-native-bridge/{prd,design,implement}.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Build mode'
+        required: true
+        type: choice
+        default: baseline
+        options:
+          - baseline
+          - conversion-only
+      clean_build:
+        description: 'CLEAN_BUILD=1 (full rebuild, slower)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350 # GHA 6h cap is 360; leave a margin
+    steps:
+      - name: Checkout (with LFS)
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build TypeScript (dist for subprocess worker)
+        run: npm run build
+
+      - name: Configure build mode
+        id: mode
+        run: |
+          echo "mode=${{ inputs.mode }}" >> "$GITHUB_OUTPUT"
+          # Resolve which autogen.input + patch set to use.
+          # baseline: build/autogen.input + full build/patches/wasm-build-fixes.patch
+          # conversion-only: build/autogen.conversion-only.input + trimmed patch
+          # (conversion-only artifacts are produced in later steps; for now this
+          #  only switches the autogen.input path the build script copies in.)
+          if [ "${{ inputs.mode }}" = "conversion-only" ] && [ -f build/autogen.conversion-only.input ]; then
+            cp build/autogen.conversion-only.input build/autogen.input
+            echo "Using conversion-only autogen.input"
+          else
+            echo "Using baseline (current) autogen.input"
+          fi
+
+      - name: Cache LibreOffice source + emsdk
+        id: cache-lo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/libreoffice-wasm-build/libreoffice
+            ~/libreoffice-wasm-build/emsdk
+          # Bump the prefix when patch/autogen changes invalidate the cache.
+          # CLEAN_BUILD input also forces a miss via restore-keys exclusion.
+          key: ${{ runner.os }}-lo-24-8-emsdk-3.1.74-${{ inputs.mode }}-${{ hashFiles('build/patches/**', 'build/autogen.input') }}-${{ inputs.clean_build }}
+          restore-keys: |
+            ${{ runner.os }}-lo-24-8-emsdk-3.1.74-${{ inputs.mode }}-
+
+      - name: Free disk space
+        run: |
+          df -h /
+          # LO build needs ~50GB; reclaim what we can on the runner.
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                     /usr/local/.ghcup /opt/hostedtoolcache/CodeQL 2>/dev/null || true
+          df -h /
+
+      - name: Build LibreOffice WASM
+        env:
+          BUILD_JOBS: '4'
+          SKIP_DEPS: '0'
+          CLEAN_BUILD: ${{ inputs.clean_build && '1' || '0' }}
+        run: bash build/build-wasm.sh
+
+      - name: Show produced artifacts
+        run: ls -lh wasm/soffice.*
+
+      # SubprocessConverter forks dist/subprocess.worker.cjs; runs against the
+      # freshly built wasm/soffice.* (overwrites the LFS-checked-out copy).
+      - name: Run conversion gate test against freshly built wasm
+        run: npx vitest run tests/converter-gate.test.ts
+
+      - name: Upload WASM artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soffice-wasm-${{ inputs.mode }}-${{ github.run_id }}
+          path: |
+            wasm/soffice.wasm
+            wasm/soffice.data
+            wasm/soffice.cjs
+            wasm/soffice.js
+            wasm/soffice.worker.cjs
+            wasm/soffice.worker.js
+            wasm/soffice.data.js.metadata
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Report sizes
+        if: always()
+        run: |
+          echo "## WASM build (${{ inputs.mode }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| file | size |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          for f in wasm/soffice.wasm wasm/soffice.data wasm/soffice.cjs; do
+            if [ -f "$f" ]; then
+              echo "| $f | $(du -h "$f" | cut -f1) |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
