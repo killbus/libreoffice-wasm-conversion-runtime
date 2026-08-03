@@ -98,21 +98,6 @@ index 4a505655d..9e103a493 100644
  ))
  
  $(eval $(call gb_Helper_register_libraries_for_install,OOOLIBS,onlineupdate, \
-diff --git a/RepositoryFixes.mk b/RepositoryFixes.mk
-index 2139b2f82..3dc542536 100644
---- a/RepositoryFixes.mk
-+++ b/RepositoryFixes.mk
-@@ -38,7 +38,9 @@ ifeq ($(OS),EMSCRIPTEN)
- ifeq ($(ENABLE_QT6),TRUE)
- gb_Executable_FILENAMES := $(patsubst soffice_bin:soffice_bin%,soffice_bin:soffice.js,$(gb_Executable_FILENAMES))
- else
--gb_Executable_FILENAMES := $(patsubst soffice_bin:soffice_bin%,soffice_bin:soffice.html,$(gb_Executable_FILENAMES))
-+# Emit classic Emscripten glue as soffice.js (script-loadable Module), not
-+# an ES module (.mjs). Consumers load via require/script + shared Module.
-+gb_Executable_FILENAMES := $(patsubst soffice_bin:soffice_bin%,soffice_bin:soffice.js,$(gb_Executable_FILENAMES))
- endif
- else
- gb_Executable_FILENAMES := $(patsubst soffice_bin:soffice_bin%,soffice_bin:soffice.bin,$(gb_Executable_FILENAMES))
 diff --git a/autogen.input b/autogen.input
 new file mode 100644
 index 000000000..c7aa6ef85

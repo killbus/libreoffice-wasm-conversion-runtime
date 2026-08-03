@@ -45,12 +45,14 @@ Why does `wasm-build-fixes.patch` (upstream main / this fork) enable `EXPORT_ES6
 
 **Single contract for this runtime:**
 
-1. **Link** classic Emscripten glue named **`soffice.js`** (no `EXPORT_ES6` on the headless conversion binary).
-2. **Package** to **`soffice.cjs`** (Node) and copy to **`soffice.js`** (browser); required files must exist or the job **fails**.
-3. **Clear** `OUTPUT_DIR` glue/binaries before copy so checkout leftovers cannot ship.
-4. **Bootstrap** at most one `global.Module` line, whole-file idempotent.
+1. **Link (gbuild primary name, non-QT6):** keep tip default **`soffice.html`** (`gb_Executable_EXT := .html`). Do **not** rename the primary executable to `soffice.js` or `soffice.mjs` without the matching modularize/EXPORT_ES6 model.
+2. **Take glue from emscripten aux output:** after a successful html link, **`instdir/program/soffice.js`** (and `.wasm` / `.worker.js`) exist beside the html shell.
+3. **Package** that aux **`soffice.js` → `wasm/soffice.cjs`**, then copy to **`wasm/soffice.js`** for the browser; required files must exist or the job **fails**. Do not ship `soffice.html` as the npm entry.
+4. **Clear** `OUTPUT_DIR` glue/binaries before copy so checkout leftovers cannot ship.
+5. **Bootstrap** at most one `global.Module` line, whole-file idempotent.
+6. **No `EXPORT_ES6`** on the headless conversion binary unless loaders are rewritten for `createSofficeModule`.
 
-Rationale: loaders and npm already assume shared `Module` + classic glue. Enabling ES-module factory output without changing loaders creates two incompatible pipelines; packaging then silently ships LFS leftovers.
+Rationale: loaders and npm already assume shared `Module` + classic glue. Upstream tip’s `soffice.html` primary is correct for gbuild/emscripten; delivery renames the **aux** `.js`. Mapping FILENAMES to primary `soffice.js` without QT6/EXPORT_ES6 caused `em++: soffice.js not a valid object file` (GHA 30782309363).
 
 ## Non-goals of this note
 

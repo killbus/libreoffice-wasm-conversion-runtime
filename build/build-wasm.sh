@@ -314,7 +314,9 @@ echo "Finished: $(date)"
 # Deliver classic Emscripten glue for two loaders that share one body:
 #   soffice.cjs — Node (require after setting global.Module)
 #   soffice.js  — browser (<script> after setting window.Module)
-# Build tree must provide ARTIFACT_DIR/soffice.js (not only .mjs).
+# EMSCRIPTEN gbuild links the executable as soffice.html (gb_Executable_EXT);
+# emscripten also emits aux soffice.js / .wasm / .worker.js beside it.
+# Packaging copies that aux soffice.js → soffice.cjs (not the .html shell).
 # Clear OUTPUT_DIR first so a failed copy cannot leave stale files.
 # ============================================================
 log_info "[7/7] Packaging WASM output..."
@@ -364,13 +366,14 @@ if [ -z "$ARTIFACT_DIR" ]; then
     exit 1
 fi
 
-# Require classic glue filename. ES-module-only builds emit .mjs and break
-# require()/script loaders that expect a shared Module object.
+# Aux classic glue from emscripten (-o soffice.html). Required for packaging.
 if [ ! -f "${ARTIFACT_DIR}/soffice.js" ]; then
-    log_error "Missing ${ARTIFACT_DIR}/soffice.js (classic Emscripten glue)."
+    log_error "Missing ${ARTIFACT_DIR}/soffice.js (emscripten aux glue next to soffice.html)."
+    if [ -f "${ARTIFACT_DIR}/soffice.html" ]; then
+        log_error "soffice.html exists but soffice.js does not — link step incomplete."
+    fi
     if [ -f "${ARTIFACT_DIR}/soffice.mjs" ]; then
-        log_error "Found soffice.mjs only — link flags likely set EXPORT_ES6."
-        log_error "Use classic soffice.js output (see Executable_soffice_bin / RepositoryFixes)."
+        log_error "Found soffice.mjs — ES module primary output; not used by require/script loaders."
     fi
     ls -la "${ARTIFACT_DIR}"/soffice* 2>/dev/null || true
     exit 1
