@@ -2441,12 +2441,11 @@ index 45beedd1a..0c3d5976b 100644
 +gb_EMSCRIPTEN_LDFLAGS += --bind -s FORCE_FILESYSTEM=1 -s WASM_BIGINT=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s FETCH=1 -s ASSERTIONS=1 -s EXIT_RUNTIME=0 -s EXPORTED_RUNTIME_METHODS=["FS","wasmMemory","wasmTable","UTF16ToString","stringToUTF16","UTF8ToString","ccall","cwrap","addOnPreMain","addOnPostRun","registerType","throwBindingError","ENV"$(if $(ENABLE_QT6),$(COMMA)"callMain"$(COMMA)"specialHTMLTargets")]
  gb_EMSCRIPTEN_QTDEFS := -DQT_NO_LINKED_LIST -DQT_NO_JAVA_STYLE_ITERATORS -DQT_NO_EXCEPTIONS -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
  
--gb_Executable_EXT := .html
-+gb_Executable_EXT := .mjs
+ gb_Executable_EXT := .html
  gb_EMSCRIPTEN_EXCEPT = -fwasm-exceptions -s SUPPORT_LONGJMP=wasm
  
-+# EXPORTED_FUNCTIONS for LOK API moved to desktop/Executable_soffice_bin.mk
-+# They should only apply to the final soffice link, not to external libraries
++# LOK EXPORTED_FUNCTIONS live in desktop/Executable_soffice_bin.mk only.
++# Primary executable extension stays .html (emscripten aux: .js/.wasm/.worker.js).
 +
  gb_CXXFLAGS += $(gb_EMSCRIPTEN_CPPFLAGS)
  
