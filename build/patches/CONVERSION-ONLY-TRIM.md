@@ -1,30 +1,65 @@
-# Conversion-only patch trim strategy (DRAFT)
+# Conversion-only patch trim strategy
 
-How to trim `wasm-build-fixes.patch` for the conversion-only build. This is a
-strategy document, NOT an applied patch. The 4034-line consolidated patch has
-internal cross-dependencies (notably the fs-image patches), so blind deletion
-is risky. Trimming is done incrementally in the GHA conversion-only build with
-bisection; this file lists what to cut and the known dependencies.
+How conversion-only mode trims the baseline LOK surface. The authoritative
+baseline is `wasm-build-fixes.patch` (full H-group green: GHA 30832043019).
+Conversion-only atoms are applied **on top of** that consolidated patch when
+`CONVERSION_ONLY=1`.
 
-See `.trellis/tasks/08-02-conversion-only-native-bridge/design.md` §3.1/§3.2
-for the full rationale.
+## First principles (why atoms, not one giant reverse-diff)
 
-## Shim classification
+382ad12's `wasm-trim-conversion-only.patch` was a single 1116-line reverse
+diff that mixed two independent contracts:
 
-The LOK shims come from archive patches 012/013 (basic) and 014/015 (extended),
-all merged into `wasm-build-fixes.patch`.
+1. **Link contract** — `EXPORTED_FUNCTIONS` in `desktop/Executable_soffice_bin.mk`
+2. **Shim bodies** — C++ wrappers in `desktop/source/lib/init.cxx`
 
-### KEEP (conversion needs these)
-From 012-lok-shim-exports.patch + 013-lok-shim-functions.patch:
+That shape is wrong for three reasons:
+
+- Archive already split these as **014** (exports) and **015** (bodies).
+- Bisection requires each lever to be independently reversible.
+- A failed conversion-only build cannot attribute fault to "exports" vs
+  "bodies" vs "autogen" when they ship as one blob.
+
+The replacement is two atoms, matching the archive boundary.
+
+## Atoms (apply order: exports → shims)
+
+| atom | file | touches | reversible alone? |
+|---|---|---|---|
+| **exports** | `wasm-trim-lok-exports-conversion-only.patch` | `desktop/Executable_soffice_bin.mk` only | yes |
+| **shims** | `wasm-trim-lok-shims-conversion-only.patch` | `desktop/source/lib/init.cxx` only | yes |
+
+Generated from local LO tree:
+
+- A = `946c5d226` (full `wasm-build-fixes.patch` applied on tip `d1c9e0e4e`)
+- B = `f33576ec3` (A + both atoms)
+
+```
+git diff A B -- desktop/Executable_soffice_bin.mk  > exports atom
+git diff A B -- desktop/source/lib/init.cxx        > shims atom
+```
+
+Verified on A:
+
+- atom1 alone → mk == B, init still A
+- atom2 alone → init == c219eb02b, mk still A
+- atom1 then atom2 → both files == B (git diff 0)
+
+## KEEP (conversion + abort)
+
+From 012/013 basic set + abort group:
+
 - `_libreofficekit_hook`, `_libreofficekit_hook_2`
 - `_lok_preinit`, `_lok_preinit_2`
 - `_lok_documentLoad`, `_lok_documentLoadWithOptions`
-- `_lok_documentSaveAs`  ← core of conversion
+- `_lok_documentSaveAs`
 - `_lok_documentDestroy`, `_lok_destroy`, `_lok_getError`
+- `_lok_abortOperation`, `_lok_setOperationTimeout`, `_lok_getOperationState`, `_lok_resetAbort`
 - `_malloc`, `_free`
 
-### CUT (editor / rendering / interaction / a11y — conversion does not need)
-From 014-lok-exported-functions.patch + 015-lok-shim-functions-extended.patch:
+## CUT (editor / rendering / interaction / a11y)
+
+From 014/015 extended set — removed by the two atoms:
 
 | group | shims |
 |---|---|
@@ -42,92 +77,77 @@ From 014-lok-exported-functions.patch + 015-lok-shim-functions-extended.patch:
 | event loop | `enableSyncEvents`, `disableSyncEvents`, `runLoop` |
 | callbacks | `RegisterCallback`, `UnregisterCallback`, `hasCallbackEvents`, `getCallbackEventCount`, `pollCallback`, `clearCallbackQueue`, `flushCallbacks` |
 
-> NOTE: the JS side (`src/lok-bindings.ts`) references these via
-> `module._lok_*`. Trimming the C shims MUST be paired with trimming the JS
-> methods (see design §3.2). JS trim happens AFTER the trimmed wasm is
-> verified, to keep the baseline gate green.
+> NOTE: JS (`src/lok-bindings.ts`) still references the cut shims via
+> `module._lok_*`. Trim the C surface first; JS method trim happens **after**
+> the trimmed wasm is verified green, so the baseline gate stays green.
 
-## Patch-level cut plan
+## What these atoms do NOT do
 
-### CUT these archive patches entirely
-- `014-lok-exported-functions.patch` — adds the extended EXPORTED_FUNCTIONS list.
-  Revert to the 012 basic list (only the KEEP shims above). This is the single
-  most important cut: it removes the wasm exports the editor JS calls.
-- `015-lok-shim-functions-extended.patch` — C++ implementations of the cut
-  shims. With the exports gone, the implementations are dead code; removing
-  them shrinks the binary.
-- `005-fix-math-accessibility.patch` — a11y fix, conversion does not need.
-- `007-fix-sd-annotationwindow-accessibility.patch` — a11y fix.
-- `008-fix-slidesorter-accessibility.patch` — a11y fix.
+Per task first principles, the delivery target is the final
+`soffice.wasm` / `soffice.data`, not the LO source tree. LOK shim trim is
+**lever ④** only — the weakest of the toolbox:
 
-### KEEP (do NOT cut)
-- `001-fix-xmlsecurity-headless.patch` — headless build fix.
-- `002-emscripten-exports.patch` — base emscripten exports.
-- `003-skip-preload-option.patch` — WASM preload fix.
-- `004-remove-xmlsec-ui-from-fs-image.patch` — removes xmlsec UI.
-- `009-fix-repository.patch` — repo config.
-- `010-fix-writerperfect.patch` — filter fix.
-- `018-graphicexportfilter-fix.patch` — PNG/SVG/JPG image export fix. Image
-  export IS conversion (exportAsImage), keep it.
-- `pdfium-emscripten.patch` — PDF support, keep.
+1. `autogen.input` switches (`build/autogen.conversion-only.input`, all
+   marked `# PENDING-VERIFY`)
+2. `.mk` / `.component` conditional compile (UI submodules never built)
+3. fs-image resource cut
+4. **LOK shim export/body trim** ← these atoms
 
-### PENDING-VERIFY (may have cross-deps with fs-image)
-- `006-add-impress-draw-math-fs-image.patch` — adds impress/draw/math files to
-  the fs image. Impress/Draw CONVERSION (pptx→pdf, odp→pdf) may need these fs
-  resources. Try to keep; only cut if independently confirmed unused.
-- `010-emscripten-fs-image-ui-files.patch` — UI files for fs image. The fs
-  image (017) may reference these. HIGH RISK of cross-dep — keep initially.
-- `014-emscripten-unipoll-fix.patch` — unipoll event loop fix. Needed only if
-  sync events / callbacks run. Since we cut the callback shims, this MIGHT be
-  droppable — but the base event loop may still be referenced at link time.
-  PENDING-VERIFY: try dropping after cutting callback shims.
-- `016-emscripten-platform.patch` — platform config, keep.
-- `017-emscripten-fs-image.patch` — fs image config. This is large and likely
-  references files added by 006/010. Do NOT cut; it is load-bearing.
+Cutting shim wrappers does **not** by itself drop `sd`/`sc` UI symbols from
+the wasm — those come from being compiled and linked. Do not expect a large
+wasm size win from atoms alone; use them to narrow the ABI surface and to
+bisect cleanly.
 
-## How to apply the trim (Phase 4)
+## How the pipeline applies them
 
-Because `wasm-build-fixes.patch` is a single consolidated file, the trim is
-done by maintaining a reverse-patch that un-applies the cut sections, OR by
-maintaining two patch files. Recommended approach for the first conversion-only
-build:
+`build/build-wasm.sh`, after `wasm-build-fixes.patch`:
 
-1. Start from baseline (full patch). Confirm gate passes on GHA.
-2. Apply ONE cut at a time (start with 014 EXPORTED_FUNCTIONS revert, since
-   that is the highest-value, lowest-risk cut).
-3. Rebuild (CLEAN_BUILD=0 incremental — `rebuild-minimal.sh` style relink).
-4. Run gate. If green, keep the cut; if red, revert.
-5. Proceed through the CUT list. Stop when gate fails or binary stops shrinking.
+```
+if CONVERSION_ONLY=1:
+  apply exports atom   # fail hard on error
+  apply shims atom     # fail hard on error
+```
 
-The `build-wasm.yml` `conversion-only` mode currently only swaps
-`autogen.input`. The patch-trim step (reverse-patch application) will be wired
-into the workflow once the first cut is validated manually; see implement.md
-Phase 4.
+`build-wasm.yml` sets `CONVERSION_ONLY` from `inputs.mode == conversion-only`.
+It also swaps `autogen.input` ← `autogen.conversion-only.input` in the
+Configure step. Those are **independent levers** — do not treat a red
+conversion-only run as "the atoms failed" without isolating autogen.
 
-## Module-level conditional compile (the stronger UI-cut lever)
+## Bisection order (Phase 4)
 
-In addition to the patch cuts above, Phase 4 should use `.mk` / `.component`
-conditional compilation to stop UI / non-conversion submodules from being
-compiled at all — instead of relying on LTO to drop them. This is **already
-established practice** in this repo's patch (NOT a new risky technique):
+Full builds are ~4h. Isolate one lever per run:
 
-- `writerperfect/Module_writerperfect.mk` gates `Library_wpftdraw` /
-  `Library_wpftimpress` on `$(ENABLE_CDR)` / `$(ENABLE_ETONYEK)`, and already
-  honors `ENABLE_WASM_STRIP_BASIC_DRAW_MATH_IMPRESS` / `ENABLE_WASM_STRIP_CALC`.
-- `xmlsecurity/Module_xmlsecurity.mk` wraps `UIConfig_xmlsec` and
-  `AllLangMoTarget_xsc` in `$(if $(DISABLE_GUI),,)` — i.e. UI config and l10n
-  are NOT built when `DISABLE_GUI` is set.
-- `svx/util/svxcore.component` removes the `<optional/>` tag (component
-  registration metadata, not C++ logic).
+1. **exports only** — `CONVERSION_ONLY` path modified to skip shims atom;
+   keep baseline `autogen.input`. Expectation: ABI surface narrower; wasm
+   size roughly baseline (dead shim bodies still linked unless LTO drops them).
+2. **exports + shims** — both atoms, still baseline autogen. Expectation:
+   same as (1) plus smaller compile of `init.cxx`; LOK init must still work.
+3. **autogen deltas** — only after (2) is green, introduce
+   `autogen.conversion-only.input` switches one-by-one (LTO last or first
+   as a dedicated run — never mix with unproven atoms).
 
-Pattern to apply for conversion-only: wrap UI submodule targets in
-`sc/Module_sc.mk`, `sd/Module_sd.mk`, etc. with `$(if $(DISABLE_GUI),,)` (or
-the existing `ENABLE_WASM_STRIP_*` flags), so `sc/source/ui`, `sd/source/ui`
-do not compile/link/register under DISABLE_GUI. This keeps UI code out of
-`soffice.wasm` deterministically, not by LTO luck.
+If gate red: reverse the last atom / last autogen switch. Do not stack
+unproven changes.
 
-> NOTE: this is **build metadata** (`.mk`/`.component`), NOT C++ implementation
-> logic (`.cxx`/`.hxx`). The task's "do not modify C++ source" constraint
-> applies to the latter; modifying the former is in-scope and is the
-> established trim method. See design.md §5 and §6 (cognitive discipline).
+## Module-level conditional compile (stronger UI-cut lever)
 
+Still the primary size lever (design §3.1). Existing patch already gates:
+
+- `writerperfect/Module_writerperfect.mk` on `ENABLE_CDR` / `ENABLE_ETONYEK`
+  / `ENABLE_WASM_STRIP_*`
+- `xmlsecurity/Module_xmlsecurity.mk` on `DISABLE_GUI`
+
+Phase 4 should extend that pattern to `sc/source/ui`, `sd/source/ui`, etc.
+That work is **out of scope of these two atoms**.
+
+## Local verification commands
+
+```bash
+# On clean tip d1c9e0e4e with wasm-build-fixes.patch applied (= A):
+patch -p1 --dry-run < build/patches/wasm-trim-lok-exports-conversion-only.patch
+patch -p1 --dry-run < build/patches/wasm-trim-lok-shims-conversion-only.patch
+
+# Pipeline syntax:
+bash -n build/build-wasm.sh
+bash scripts/test-wasm-packaging-contract.sh
+```

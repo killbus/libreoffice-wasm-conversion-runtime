@@ -208,6 +208,45 @@ else
     log_warn "Please ensure build/patches/wasm-build-fixes.patch exists"
 fi
 
+# Conversion-only atoms -- applied ON TOP of the consolidated baseline patch
+# when CONVERSION_ONLY=1. Two independent atoms (archive 014/015 style), NOT
+# one giant reverse-diff:
+#   1. exports -- EXPORTED_FUNCTIONS link contract only (Executable_soffice_bin.mk)
+#   2. shims   -- non-conversion LOK shim bodies only (desktop/source/lib/init.cxx)
+# Each atom is independently reversible for bisection. Order: exports then shims.
+# KEEP: conversion group (hook/preinit/load/saveAs/destroy/getError/malloc/free)
+#       + abort group (abortOperation/setOperationTimeout/getOperationState/resetAbort).
+# See build/patches/CONVERSION-ONLY-TRIM.md.
+apply_conversion_atom() {
+    local atom_name="$1"
+    local atom_path="$2"
+    if [ ! -f "$atom_path" ]; then
+        log_error "Conversion-only atom not found: $atom_path"
+        exit 1
+    fi
+    if patch -R -p1 -s -f --dry-run < "$atom_path" &>/dev/null; then
+        log_success "${atom_name} already applied"
+    else
+        log_info "Applying ${atom_name}..."
+        if patch -f -p1 < "$atom_path"; then
+            log_success "Applied ${atom_name}"
+        else
+            log_error "Failed to apply ${atom_name}"
+            exit 1
+        fi
+    fi
+}
+
+if [ "${CONVERSION_ONLY:-0}" = "1" ]; then
+    log_info "CONVERSION_ONLY=1 -- applying conversion-only atoms (exports, then shims)..."
+    apply_conversion_atom \
+        "wasm-trim-lok-exports-conversion-only.patch" \
+        "${SCRIPT_DIR}/patches/wasm-trim-lok-exports-conversion-only.patch"
+    apply_conversion_atom \
+        "wasm-trim-lok-shims-conversion-only.patch" \
+        "${SCRIPT_DIR}/patches/wasm-trim-lok-shims-conversion-only.patch"
+fi
+
 # Create autotext files (handled in Step 6 background process)
 # The mytexts autotext build tries to zip files that don't exist in WASM builds
 

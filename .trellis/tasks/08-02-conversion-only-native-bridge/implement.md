@@ -43,11 +43,29 @@
   - **baseline 体积**:wasm 148,067,113 B(~141.4 MiB)、data 99,735,790 B(~95.1 MiB)、cjs/js 各 444,500 B
   - 仓库 wasm 已恢复 LFS,树干净;新编产物存 `/d/tmp/lo-artifacts-08-04/`(本地参考)
 
-### Conversion-only 裁剪(待做)
-- [ ] 4.2 触发 conversion-only 构建(mode=conversion-only)。验证:门禁测试过 + `soffice.wasm` 体积 < baseline。
-  - 按 `CONVERSION-ONLY-TRIM.md` 二分裁剪 patch:先 revert 014 EXPORTED_FUNCTIONS,重跑(CLEAN_BUILD=0 增量),gate 绿则保,红则回退。
-  - autogen `# PENDING-VERIFY` 项逐一确认。
-  - 回退:门禁挂→二分回退裁剪项(design §4.3)。
+### Conversion-only 裁剪(进行中)
+
+#### 4.1.x 回退 382ad12 并按原子边界重产 (本轮)
+- [x] soft reset `382ad12` → `6280880`(baseline 绿点文档 commit)。
+- [x] 删除巨型 reverse-diff `wasm-trim-conversion-only.patch`(1116 行,混 exports+shims)。
+- [x] 按 archive 014/015 边界重产两个原子(从本地 LO A=`946c5d226` → B=`f33576ec3`):
+  - `wasm-trim-lok-exports-conversion-only.patch` — 仅 `Executable_soffice_bin.mk`
+  - `wasm-trim-lok-shims-conversion-only.patch` — 仅 `desktop/source/lib/init.cxx`
+- [x] 独立验证:atom1 alone / atom2 alone / both → 分别对齐 B 的对应文件。
+- [x] `build-wasm.sh` 以 `apply_conversion_atom` 顺序应用 exports→shims(`CONVERSION_ONLY=1`)。
+- [x] workflow 传 `CONVERSION_ONLY`;`CONVERSION-ONLY-TRIM.md` 重写为原子策略。
+- [x] workflow 加 `use_conversion_autogen`(default false):conversion-only 默认只打原子、不叠 PENDING-VERIFY autogen(4.2a 隔离)。
+- [ ] commit + force-with-lease 替换 origin 上的 382ad12(需确认)。
+- [ ] 触发 GHA 4.2a。
+
+#### 4.2 隔离构建(一次一杠杆)
+- [ ] 4.2a **exports+shims + baseline autogen**  
+  `mode=conversion-only` + `use_conversion_autogen=false`(默认)+ `clean_build=true`。  
+  验证:LOK init + gate + 体积(不期望大幅小于 baseline;shim 裁的是 ABI 不是 UI 模块)。
+- [ ] 4.2b 若 4.2a 绿:同 mode + `use_conversion_autogen=true`,再引入 autogen `# PENDING-VERIFY`(LTO 可再单独)。
+- [ ] 4.2c 若需更小体积:`.mk` 条件编译挡 UI 子模块(design §3.1 杠杆 ②),与 shim 原子无关。
+- 回退:门禁挂→只回退上一个原子/开关。
+
 - [ ] 4.3 裁剪 wasm 验证 OK 后,执行 JS 侧 src 裁剪(design §3.2),用门禁测试立即验证。
 - [ ] 4.4 (人工)下载 artifact,复核 `test.docx → pdf` 产物可正常打开。验证 OK 后人工回推 LFS。
 

@@ -1,0 +1,1103 @@
+diff --git a/desktop/source/lib/init.cxx b/desktop/source/lib/init.cxx
+index eb3037281..d00594174 100644
+--- a/desktop/source/lib/init.cxx
++++ b/desktop/source/lib/init.cxx
+@@ -8596,835 +8596,46 @@ void lok_destroy(LibreOfficeKit* pKit)
+ // Page/Part rendering shims for thumbnails
+ // ==========================================
+ 
+-SAL_JNI_EXPORT
+-int lok_documentGetParts(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetParts(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetParts(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getParts)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetParts: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetParts: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return 0;
+-    }
+-
+-    int nParts = pDoc->pClass->getParts(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetParts returns: " << nParts);
+-    fprintf(stderr, "[LOK C++] lok_documentGetParts returns: %d\n", nParts);
+-    fflush(stderr);
+-    return nParts;
+-}
+-
+-SAL_JNI_EXPORT
+-int lok_documentGetPart(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetPart(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetPart(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getPart)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetPart: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetPart: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return 0;
+-    }
+-
+-    int nPart = pDoc->pClass->getPart(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetPart returns: " << nPart);
+-    fprintf(stderr, "[LOK C++] lok_documentGetPart returns: %d\n", nPart);
+-    fflush(stderr);
+-    return nPart;
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentSetPart(LibreOfficeKitDocument* pDoc, int nPart)
+-{
+-    SAL_INFO("lok.shim", "lok_documentSetPart(" << pDoc << ", " << nPart << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentSetPart(%p, %d)\n", (void*)pDoc, nPart);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->setPart)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentSetPart: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentSetPart: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->setPart(pDoc, nPart);
+-    SAL_INFO("lok.shim", "lok_documentSetPart done");
+-    fprintf(stderr, "[LOK C++] lok_documentSetPart done\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-int lok_documentGetDocumentType(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetDocumentType(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetDocumentType(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getDocumentType)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetDocumentType: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetDocumentType: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return 0;
+-    }
+-
+-    int nType = pDoc->pClass->getDocumentType(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetDocumentType returns: " << nType);
+-    fprintf(stderr, "[LOK C++] lok_documentGetDocumentType returns: %d\n", nType);
+-    fflush(stderr);
+-    return nType;
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentGetDocumentSize(LibreOfficeKitDocument* pDoc, long* pWidth, long* pHeight)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetDocumentSize(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetDocumentSize(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getDocumentSize)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetDocumentSize: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetDocumentSize: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        if (pWidth) *pWidth = 0;
+-        if (pHeight) *pHeight = 0;
+-        return;
+-    }
+-
+-    pDoc->pClass->getDocumentSize(pDoc, pWidth, pHeight);
+-    SAL_INFO("lok.shim", "lok_documentGetDocumentSize returns: " << *pWidth << "x" << *pHeight);
+-    fprintf(stderr, "[LOK C++] lok_documentGetDocumentSize returns: %ldx%ld\n", *pWidth, *pHeight);
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentInitializeForRendering(LibreOfficeKitDocument* pDoc, const char* pArguments)
+-{
+-    SAL_INFO("lok.shim", "lok_documentInitializeForRendering(" << pDoc << ", '"
+-             << (pArguments ? pArguments : "(null)") << "')");
+-    fprintf(stderr, "[LOK C++] lok_documentInitializeForRendering(%p, '%s')\n",
+-            (void*)pDoc, pArguments ? pArguments : "(null)");
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->initializeForRendering)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentInitializeForRendering: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentInitializeForRendering: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->initializeForRendering(pDoc, pArguments);
+-    SAL_INFO("lok.shim", "lok_documentInitializeForRendering done");
+-    fprintf(stderr, "[LOK C++] lok_documentInitializeForRendering done\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentPaintTile(LibreOfficeKitDocument* pDoc,
+-                           unsigned char* pBuffer,
+-                           int nCanvasWidth, int nCanvasHeight,
+-                           int nTilePosX, int nTilePosY,
+-                           int nTileWidth, int nTileHeight)
+-{
+-    SAL_INFO("lok.shim", "lok_documentPaintTile(" << pDoc << ", buffer, "
+-             << nCanvasWidth << "x" << nCanvasHeight << ", pos=" << nTilePosX << "," << nTilePosY
+-             << ", tile=" << nTileWidth << "x" << nTileHeight << ")");
+-    // Direct stderr output for debugging (always visible)
+-    fprintf(stderr, "[LOK C++] paintTile START: %dx%d pos=(%d,%d) tile=%dx%d\n",
+-            nCanvasWidth, nCanvasHeight, nTilePosX, nTilePosY, nTileWidth, nTileHeight);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->paintTile)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentPaintTile: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] paintTile ERROR: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    fprintf(stderr, "[LOK C++] paintTile calling pDoc->pClass->paintTile...\n");
+-    fflush(stderr);
+-    pDoc->pClass->paintTile(pDoc, pBuffer, nCanvasWidth, nCanvasHeight,
+-                            nTilePosX, nTilePosY, nTileWidth, nTileHeight);
+-    fprintf(stderr, "[LOK C++] paintTile DONE\n");
+-    fflush(stderr);
+-    SAL_INFO("lok.shim", "lok_documentPaintTile done");
+-}
+-
+-SAL_JNI_EXPORT
+-int lok_documentGetTileMode(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetTileMode(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetTileMode(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getTileMode)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetTileMode: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetTileMode: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return 0; // LOK_TILEMODE_RGBA
+-    }
+-
+-    int nMode = pDoc->pClass->getTileMode(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetTileMode returns: " << nMode);
+-    fprintf(stderr, "[LOK C++] lok_documentGetTileMode returns: %d\n", nMode);
+-    fflush(stderr);
+-    return nMode;
+-}
+-
+-// ==========================================
+-// Text Selection and Content shims
+-// ==========================================
+-
+-SAL_JNI_EXPORT
+-char* lok_documentGetTextSelection(LibreOfficeKitDocument* pDoc, const char* pMimeType, char** pUsedMimeType)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetTextSelection(" << pDoc << ", '"
+-             << (pMimeType ? pMimeType : "(null)") << "')");
+-    fprintf(stderr, "[LOK C++] lok_documentGetTextSelection(%p, '%s')\n",
+-            (void*)pDoc, pMimeType ? pMimeType : "(null)");
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getTextSelection)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetTextSelection: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetTextSelection: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return nullptr;
+-    }
+-
+-    char* pResult = pDoc->pClass->getTextSelection(pDoc, pMimeType, pUsedMimeType);
+-    SAL_INFO("lok.shim", "lok_documentGetTextSelection returns: "
+-             << (pResult ? pResult : "(null)"));
+-    fprintf(stderr, "[LOK C++] lok_documentGetTextSelection returns: '%s'\n",
+-            pResult ? pResult : "(null)");
+-    fflush(stderr);
+-    return pResult;
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentSetTextSelection(LibreOfficeKitDocument* pDoc, int nType, int nX, int nY)
+-{
+-    SAL_INFO("lok.shim", "lok_documentSetTextSelection(" << pDoc << ", type=" << nType
+-             << ", x=" << nX << ", y=" << nY << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentSetTextSelection(%p, type=%d, x=%d, y=%d)\n",
+-            (void*)pDoc, nType, nX, nY);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->setTextSelection)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentSetTextSelection: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentSetTextSelection: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->setTextSelection(pDoc, nType, nX, nY);
+-    SAL_INFO("lok.shim", "lok_documentSetTextSelection done");
+-    fprintf(stderr, "[LOK C++] lok_documentSetTextSelection done\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-int lok_documentGetSelectionType(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetSelectionType(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetSelectionType(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getSelectionType)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetSelectionType: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetSelectionType: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return 0;
+-    }
+-
+-    int nType = pDoc->pClass->getSelectionType(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetSelectionType returns: " << nType);
+-    fprintf(stderr, "[LOK C++] lok_documentGetSelectionType returns: %d\n", nType);
+-    fflush(stderr);
+-    return nType;
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentResetSelection(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentResetSelection(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentResetSelection(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->resetSelection)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentResetSelection: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentResetSelection: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->resetSelection(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentResetSelection done");
+-    fprintf(stderr, "[LOK C++] lok_documentResetSelection done\n");
+-    fflush(stderr);
+-}
+-
+-// ==========================================
+-// Mouse and Keyboard Event shims
+-// ==========================================
+-
+-SAL_JNI_EXPORT
+-void lok_documentPostMouseEvent(LibreOfficeKitDocument* pDoc,
+-                                 int nType, int nX, int nY,
+-                                 int nCount, int nButtons, int nModifier)
+-{
+-    SAL_INFO("lok.shim", "lok_documentPostMouseEvent(" << pDoc << ", type=" << nType
+-             << ", x=" << nX << ", y=" << nY << ", count=" << nCount
+-             << ", buttons=" << nButtons << ", modifier=" << nModifier << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentPostMouseEvent(%p, type=%d, x=%d, y=%d, count=%d, buttons=%d, modifier=%d)\n",
+-            (void*)pDoc, nType, nX, nY, nCount, nButtons, nModifier);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->postMouseEvent)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentPostMouseEvent: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentPostMouseEvent: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->postMouseEvent(pDoc, nType, nX, nY, nCount, nButtons, nModifier);
+-    SAL_INFO("lok.shim", "lok_documentPostMouseEvent done");
+-    fprintf(stderr, "[LOK C++] lok_documentPostMouseEvent done\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentPostKeyEvent(LibreOfficeKitDocument* pDoc, int nType, int nCharCode, int nKeyCode)
+-{
+-    SAL_INFO("lok.shim", "lok_documentPostKeyEvent(" << pDoc << ", type=" << nType
+-             << ", charCode=" << nCharCode << ", keyCode=" << nKeyCode << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentPostKeyEvent(%p, type=%d, charCode=%d, keyCode=%d)\n",
+-            (void*)pDoc, nType, nCharCode, nKeyCode);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->postKeyEvent)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentPostKeyEvent: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentPostKeyEvent: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->postKeyEvent(pDoc, nType, nCharCode, nKeyCode);
+-    SAL_INFO("lok.shim", "lok_documentPostKeyEvent done");
+-    fprintf(stderr, "[LOK C++] lok_documentPostKeyEvent done\n");
+-    fflush(stderr);
+-}
+-
+-// ==========================================
+-// UNO Command shims
+-// ==========================================
+-
+-SAL_JNI_EXPORT
+-void lok_documentPostUnoCommand(LibreOfficeKitDocument* pDoc,
+-                                 const char* pCommand,
+-                                 const char* pArguments,
+-                                 int bNotifyWhenFinished)
+-{
+-    SAL_INFO("lok.shim", "lok_documentPostUnoCommand(" << pDoc << ", '"
+-             << (pCommand ? pCommand : "(null)") << "', '"
+-             << (pArguments ? pArguments : "(null)") << "', notify=" << bNotifyWhenFinished << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentPostUnoCommand(%p, '%s', '%s', notify=%d)\n",
+-            (void*)pDoc, pCommand ? pCommand : "(null)", pArguments ? pArguments : "(null)", bNotifyWhenFinished);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->postUnoCommand)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentPostUnoCommand: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentPostUnoCommand: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->postUnoCommand(pDoc, pCommand, pArguments, bNotifyWhenFinished != 0);
+-    SAL_INFO("lok.shim", "lok_documentPostUnoCommand done");
+-    fprintf(stderr, "[LOK C++] lok_documentPostUnoCommand done\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-char* lok_documentGetCommandValues(LibreOfficeKitDocument* pDoc, const char* pCommand)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetCommandValues(" << pDoc << ", '"
+-             << (pCommand ? pCommand : "(null)") << "')");
+-    fprintf(stderr, "[LOK C++] lok_documentGetCommandValues(%p, '%s')\n",
+-            (void*)pDoc, pCommand ? pCommand : "(null)");
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getCommandValues)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetCommandValues: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetCommandValues: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return nullptr;
+-    }
+-
+-    char* pResult = pDoc->pClass->getCommandValues(pDoc, pCommand);
+-    SAL_INFO("lok.shim", "lok_documentGetCommandValues returns: "
+-             << (pResult ? "(data)" : "(null)"));
+-    fprintf(stderr, "[LOK C++] lok_documentGetCommandValues returns: %s\n",
+-            pResult ? "(data)" : "(null)");
+-    fflush(stderr);
+-    return pResult;
+-}
+-
+-// ==========================================
+-// Page/Part Information shims
+-// ==========================================
+-
+-SAL_JNI_EXPORT
+-char* lok_documentGetPartPageRectangles(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetPartPageRectangles(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetPartPageRectangles(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getPartPageRectangles)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetPartPageRectangles: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetPartPageRectangles: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return nullptr;
+-    }
+-
+-    char* pResult = pDoc->pClass->getPartPageRectangles(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetPartPageRectangles returns: "
+-             << (pResult ? pResult : "(null)"));
+-    fprintf(stderr, "[LOK C++] lok_documentGetPartPageRectangles returns: '%s'\n",
+-            pResult ? pResult : "(null)");
+-    fflush(stderr);
+-    return pResult;
+-}
+-
+-SAL_JNI_EXPORT
+-char* lok_documentGetPartInfo(LibreOfficeKitDocument* pDoc, int nPart)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetPartInfo(" << pDoc << ", part=" << nPart << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetPartInfo(%p, part=%d)\n", (void*)pDoc, nPart);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getPartInfo)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetPartInfo: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetPartInfo: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return nullptr;
+-    }
+-
+-    char* pResult = pDoc->pClass->getPartInfo(pDoc, nPart);
+-    SAL_INFO("lok.shim", "lok_documentGetPartInfo returns: "
+-             << (pResult ? pResult : "(null)"));
+-    fprintf(stderr, "[LOK C++] lok_documentGetPartInfo returns: '%s'\n",
+-            pResult ? pResult : "(null)");
+-    fflush(stderr);
+-    return pResult;
+-}
+-
+-SAL_JNI_EXPORT
+-char* lok_documentGetPartName(LibreOfficeKitDocument* pDoc, int nPart)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetPartName(" << pDoc << ", part=" << nPart << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetPartName(%p, part=%d)\n", (void*)pDoc, nPart);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getPartName)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetPartName: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetPartName: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return nullptr;
+-    }
+-
+-    char* pResult = pDoc->pClass->getPartName(pDoc, nPart);
+-    SAL_INFO("lok.shim", "lok_documentGetPartName returns: "
+-             << (pResult ? pResult : "(null)"));
+-    fprintf(stderr, "[LOK C++] lok_documentGetPartName returns: '%s'\n",
+-            pResult ? pResult : "(null)");
+-    fflush(stderr);
+-    return pResult;
+-}
+-
+-// ==========================================
+-// Clipboard shims
+-// ==========================================
+-
+-SAL_JNI_EXPORT
+-int lok_documentPaste(LibreOfficeKitDocument* pDoc, const char* pMimeType, const char* pData, size_t nSize)
+-{
+-    SAL_INFO("lok.shim", "lok_documentPaste(" << pDoc << ", '"
+-             << (pMimeType ? pMimeType : "(null)") << "', size=" << nSize << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentPaste(%p, '%s', size=%zu)\n",
+-            (void*)pDoc, pMimeType ? pMimeType : "(null)", nSize);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->paste)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentPaste: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentPaste: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return 0;
+-    }
+-
+-    bool bResult = pDoc->pClass->paste(pDoc, pMimeType, pData, nSize);
+-    SAL_INFO("lok.shim", "lok_documentPaste returns: " << bResult);
+-    fprintf(stderr, "[LOK C++] lok_documentPaste returns: %d\n", bResult ? 1 : 0);
+-    fflush(stderr);
+-    return bResult ? 1 : 0;
+-}
+-
+-// ==========================================
+-// View and Zoom shims
+-// ==========================================
+-
+-SAL_JNI_EXPORT
+-void lok_documentSetClientZoom(LibreOfficeKitDocument* pDoc,
+-                                int nTilePixelWidth, int nTilePixelHeight,
+-                                int nTileTwipWidth, int nTileTwipHeight)
+-{
+-    SAL_INFO("lok.shim", "lok_documentSetClientZoom(" << pDoc
+-             << ", pixel=" << nTilePixelWidth << "x" << nTilePixelHeight
+-             << ", twip=" << nTileTwipWidth << "x" << nTileTwipHeight << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentSetClientZoom(%p, pixel=%dx%d, twip=%dx%d)\n",
+-            (void*)pDoc, nTilePixelWidth, nTilePixelHeight, nTileTwipWidth, nTileTwipHeight);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->setClientZoom)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentSetClientZoom: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentSetClientZoom: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->setClientZoom(pDoc, nTilePixelWidth, nTilePixelHeight,
+-                                 nTileTwipWidth, nTileTwipHeight);
+-    SAL_INFO("lok.shim", "lok_documentSetClientZoom done");
+-    fprintf(stderr, "[LOK C++] lok_documentSetClientZoom done\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentSetClientVisibleArea(LibreOfficeKitDocument* pDoc, int nX, int nY, int nWidth, int nHeight)
+-{
+-    SAL_INFO("lok.shim", "lok_documentSetClientVisibleArea(" << pDoc
+-             << ", x=" << nX << ", y=" << nY << ", w=" << nWidth << ", h=" << nHeight << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentSetClientVisibleArea(%p, x=%d, y=%d, w=%d, h=%d)\n",
+-            (void*)pDoc, nX, nY, nWidth, nHeight);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->setClientVisibleArea)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentSetClientVisibleArea: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentSetClientVisibleArea: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->setClientVisibleArea(pDoc, nX, nY, nWidth, nHeight);
+-    SAL_INFO("lok.shim", "lok_documentSetClientVisibleArea done");
+-    fprintf(stderr, "[LOK C++] lok_documentSetClientVisibleArea done\n");
+-    fflush(stderr);
+-}
+-
+-// ==========================================
+-// Accessibility shims
+-// ==========================================
+-
+-SAL_JNI_EXPORT
+-char* lok_documentGetA11yFocusedParagraph(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetA11yFocusedParagraph(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetA11yFocusedParagraph(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getA11yFocusedParagraph)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetA11yFocusedParagraph: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetA11yFocusedParagraph: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return nullptr;
+-    }
+-
+-    char* pResult = pDoc->pClass->getA11yFocusedParagraph(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetA11yFocusedParagraph returns: "
+-             << (pResult ? pResult : "(null)"));
+-    fprintf(stderr, "[LOK C++] lok_documentGetA11yFocusedParagraph returns: '%s'\n",
+-            pResult ? pResult : "(null)");
+-    fflush(stderr);
+-    return pResult;
+-}
+-
+-SAL_JNI_EXPORT
+-int lok_documentGetA11yCaretPosition(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetA11yCaretPosition(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetA11yCaretPosition(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getA11yCaretPosition)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetA11yCaretPosition: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetA11yCaretPosition: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return -1;
+-    }
+-
+-    int nPos = pDoc->pClass->getA11yCaretPosition(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetA11yCaretPosition returns: " << nPos);
+-    fprintf(stderr, "[LOK C++] lok_documentGetA11yCaretPosition returns: %d\n", nPos);
+-    fflush(stderr);
+-    return nPos;
+-}
++// ==========================================
++// Text Selection and Content shims
++// ==========================================
+ 
+-SAL_JNI_EXPORT
+-void lok_documentSetAccessibilityState(LibreOfficeKitDocument* pDoc, int nId, int bEnabled)
+-{
+-    SAL_INFO("lok.shim", "lok_documentSetAccessibilityState(" << pDoc
+-             << ", viewId=" << nId << ", enabled=" << bEnabled << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentSetAccessibilityState(%p, viewId=%d, enabled=%d)\n",
+-            (void*)pDoc, nId, bEnabled);
+-    fflush(stderr);
++// ==========================================
++// Mouse and Keyboard Event shims
++// ==========================================
+ 
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->setAccessibilityState)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentSetAccessibilityState: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentSetAccessibilityState: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
++// ==========================================
++// UNO Command shims
++// ==========================================
+ 
+-    pDoc->pClass->setAccessibilityState(pDoc, nId, bEnabled != 0);
+-    SAL_INFO("lok.shim", "lok_documentSetAccessibilityState done");
+-    fprintf(stderr, "[LOK C++] lok_documentSetAccessibilityState done\n");
+-    fflush(stderr);
+-}
++// ==========================================
++// Page/Part Information shims
++// ==========================================
+ 
+ // ==========================================
+-// Spreadsheet-specific shims
++// Clipboard shims
+ // ==========================================
+ 
+-SAL_JNI_EXPORT
+-void lok_documentGetDataArea(LibreOfficeKitDocument* pDoc, long nPart, long* pCol, long* pRow)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetDataArea(" << pDoc << ", part=" << nPart << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetDataArea(%p, part=%ld)\n", (void*)pDoc, nPart);
+-    fflush(stderr);
++// ==========================================
++// View and Zoom shims
++// ==========================================
+ 
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getDataArea)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetDataArea: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetDataArea: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        if (pCol) *pCol = 0;
+-        if (pRow) *pRow = 0;
+-        return;
+-    }
++// ==========================================
++// Accessibility shims
++// ==========================================
+ 
+-    pDoc->pClass->getDataArea(pDoc, nPart, pCol, pRow);
+-    SAL_INFO("lok.shim", "lok_documentGetDataArea returns: col=" << *pCol << ", row=" << *pRow);
+-    fprintf(stderr, "[LOK C++] lok_documentGetDataArea returns: col=%ld, row=%ld\n", *pCol, *pRow);
+-    fflush(stderr);
+-}
++// ==========================================
++// Spreadsheet-specific shims
++// ==========================================
+ 
+ // ==========================================
+ // Edit Mode shim
+ // ==========================================
+ 
+-SAL_JNI_EXPORT
+-int lok_documentGetEditMode(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetEditMode(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetEditMode(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getEditMode)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetEditMode: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetEditMode: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return 0;
+-    }
+-
+-    int nMode = pDoc->pClass->getEditMode(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetEditMode returns: " << nMode);
+-    fprintf(stderr, "[LOK C++] lok_documentGetEditMode returns: %d\n", nMode);
+-    fflush(stderr);
+-    return nMode;
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentSetEditMode(LibreOfficeKitDocument* pDoc, int nMode)
+-{
+-    SAL_INFO("lok.shim", "lok_documentSetEditMode(" << pDoc << ", mode=" << nMode << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentSetEditMode(%p, mode=%d)\n", (void*)pDoc, nMode);
+-    fflush(stderr);
+-
+-    // nMode: 0 = view mode, 1 = edit mode
+-    ITiledRenderable* pTiledRenderable = getTiledRenderable(pDoc);
+-    if (pTiledRenderable)
+-        pTiledRenderable->setEditMode(nMode);
+-    SAL_INFO("lok.shim", "lok_documentSetEditMode done");
+-    fprintf(stderr, "[LOK C++] lok_documentSetEditMode done\n");
+-    fflush(stderr);
+-}
+-
+ // ==========================================
+ // View Management shims
+ // ==========================================
+ 
+-SAL_JNI_EXPORT
+-int lok_documentCreateView(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentCreateView(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentCreateView(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->createView)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentCreateView: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentCreateView: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return -1;
+-    }
+-
+-    int nViewId = pDoc->pClass->createView(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentCreateView returns: " << nViewId);
+-    fprintf(stderr, "[LOK C++] lok_documentCreateView returns: %d\n", nViewId);
+-    fflush(stderr);
+-    return nViewId;
+-}
+-
+-SAL_JNI_EXPORT
+-int lok_documentCreateViewWithOptions(LibreOfficeKitDocument* pDoc, const char* pOptions)
+-{
+-    SAL_INFO("lok.shim", "lok_documentCreateViewWithOptions(" << pDoc << ", '"
+-             << (pOptions ? pOptions : "(null)") << "')");
+-    fprintf(stderr, "[LOK C++] lok_documentCreateViewWithOptions(%p, '%s')\n",
+-            (void*)pDoc, pOptions ? pOptions : "(null)");
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->createViewWithOptions)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentCreateViewWithOptions: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentCreateViewWithOptions: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return -1;
+-    }
+-
+-    int nViewId = pDoc->pClass->createViewWithOptions(pDoc, pOptions);
+-    SAL_INFO("lok.shim", "lok_documentCreateViewWithOptions returns: " << nViewId);
+-    fprintf(stderr, "[LOK C++] lok_documentCreateViewWithOptions returns: %d\n", nViewId);
+-    fflush(stderr);
+-    return nViewId;
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentDestroyView(LibreOfficeKitDocument* pDoc, int nViewId)
+-{
+-    SAL_INFO("lok.shim", "lok_documentDestroyView(" << pDoc << ", viewId=" << nViewId << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentDestroyView(%p, viewId=%d)\n", (void*)pDoc, nViewId);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->destroyView)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentDestroyView: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentDestroyView: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->destroyView(pDoc, nViewId);
+-    SAL_INFO("lok.shim", "lok_documentDestroyView done");
+-    fprintf(stderr, "[LOK C++] lok_documentDestroyView done\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentSetView(LibreOfficeKitDocument* pDoc, int nViewId)
+-{
+-    SAL_INFO("lok.shim", "lok_documentSetView(" << pDoc << ", viewId=" << nViewId << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentSetView(%p, viewId=%d)\n", (void*)pDoc, nViewId);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->setView)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentSetView: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentSetView: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    pDoc->pClass->setView(pDoc, nViewId);
+-    SAL_INFO("lok.shim", "lok_documentSetView done");
+-    fprintf(stderr, "[LOK C++] lok_documentSetView done\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-int lok_documentGetView(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetView(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetView(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getView)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetView: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetView: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return -1;
+-    }
+-
+-    int nViewId = pDoc->pClass->getView(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetView returns: " << nViewId);
+-    fprintf(stderr, "[LOK C++] lok_documentGetView returns: %d\n", nViewId);
+-    fflush(stderr);
+-    return nViewId;
+-}
+-
+-SAL_JNI_EXPORT
+-int lok_documentGetViewsCount(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentGetViewsCount(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentGetViewsCount(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->getViewsCount)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentGetViewsCount: invalid doc or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentGetViewsCount: invalid doc or function pointer\n");
+-        fflush(stderr);
+-        return 0;
+-    }
+-
+-    int nCount = pDoc->pClass->getViewsCount(pDoc);
+-    SAL_INFO("lok.shim", "lok_documentGetViewsCount returns: " << nCount);
+-    fprintf(stderr, "[LOK C++] lok_documentGetViewsCount returns: %d\n", nCount);
+-    fflush(stderr);
+-    return nCount;
+-}
+-
+ // ==========================================
+ // Event Loop and Callback shims
+ // ==========================================
+@@ -9440,63 +8651,6 @@ static void dummyWakeCallback(void* /*pData*/)
+ {
+ }
+ 
+-SAL_JNI_EXPORT
+-void lok_enableSyncEvents()
+-{
+-    SAL_INFO("lok.shim", "lok_enableSyncEvents: registering dummy poll callbacks to enable synchronous event dispatch");
+-    fprintf(stderr, "[LOK C++] lok_enableSyncEvents: enabling Unipoll mode for synchronous events\n");
+-    fflush(stderr);
+-
+-    // Register dummy callbacks to enable Unipoll mode
+-    // This makes isUnipoll() return true, causing events to be dispatched synchronously
+-    // instead of being queued via Application::PostUserEvent()
+-    vcl::lok::registerPollCallbacks(dummyPollCallback, dummyWakeCallback, nullptr);
+-
+-    fprintf(stderr, "[LOK C++] lok_enableSyncEvents: Unipoll mode enabled\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_disableSyncEvents()
+-{
+-    SAL_INFO("lok.shim", "lok_disableSyncEvents: unregistering poll callbacks");
+-    fprintf(stderr, "[LOK C++] lok_disableSyncEvents: disabling Unipoll mode\n");
+-    fflush(stderr);
+-
+-    vcl::lok::unregisterPollCallbacks();
+-
+-    fprintf(stderr, "[LOK C++] lok_disableSyncEvents: Unipoll mode disabled\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_runLoop(LibreOfficeKit* pKit,
+-                 LibreOfficeKitPollCallback pPollCallback,
+-                 LibreOfficeKitWakeCallback pWakeCallback,
+-                 void* pData)
+-{
+-    SAL_INFO("lok.shim", "lok_runLoop(" << pKit << ", pollCb=" << (void*)pPollCallback
+-             << ", wakeCb=" << (void*)pWakeCallback << ", data=" << pData << ")");
+-    fprintf(stderr, "[LOK C++] lok_runLoop(%p, pollCb=%p, wakeCb=%p, data=%p)\n",
+-            (void*)pKit, (void*)pPollCallback, (void*)pWakeCallback, pData);
+-    fflush(stderr);
+-
+-    if (!pKit || !pKit->pClass || !pKit->pClass->runLoop)
+-    {
+-        SAL_WARN("lok.shim", "lok_runLoop: invalid kit or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_runLoop: invalid kit or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    // Note: This will block and run the event loop!
+-    pKit->pClass->runLoop(pKit, pPollCallback, pWakeCallback, pData);
+-
+-    SAL_INFO("lok.shim", "lok_runLoop done");
+-    fprintf(stderr, "[LOK C++] lok_runLoop done\n");
+-    fflush(stderr);
+-}
+-
+ // ==========================================
+ // Callback Queue System for WASM
+ // ==========================================
+@@ -9537,176 +8691,14 @@ static void lokQueueingCallback(int nType, const char* pPayload, void* /*pData*/
+     fflush(stderr);
+ }
+ 
+-SAL_JNI_EXPORT
+-void lok_documentRegisterCallback(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentRegisterCallback(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentRegisterCallback(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->registerCallback)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentRegisterCallback: invalid document or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentRegisterCallback: invalid document or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    // Clear the queue before registering
+-    {
+-        std::lock_guard<std::mutex> lock(gCallbackQueueMutex);
+-        gCallbackQueue.clear();
+-    }
+-
+-    // Check current view before registering
+-    int nView = SfxLokHelper::getView();
+-    fprintf(stderr, "[LOK C++] lok_documentRegisterCallback: current view=%d\n", nView);
+-    fflush(stderr);
+-
+-    // Register our queueing callback
+-    pDoc->pClass->registerCallback(pDoc, lokQueueingCallback, nullptr);
+-
+-    // Check handlers after registration
+-    LibLODocument_Impl* pDocument = static_cast<LibLODocument_Impl*>(pDoc);
+-    fprintf(stderr, "[LOK C++] lok_documentRegisterCallback: after registration, mpCallbackFlushHandlers.size()=%zu\n",
+-            pDocument->mpCallbackFlushHandlers.size());
+-    fflush(stderr);
+-
+-    fprintf(stderr, "[LOK C++] lok_documentRegisterCallback: callback registered\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-void lok_documentUnregisterCallback(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_documentUnregisterCallback(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_documentUnregisterCallback(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc || !pDoc->pClass || !pDoc->pClass->registerCallback)
+-    {
+-        SAL_WARN("lok.shim", "lok_documentUnregisterCallback: invalid document or function pointer");
+-        fprintf(stderr, "[LOK C++] lok_documentUnregisterCallback: invalid document or function pointer\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    // Unregister by passing nullptr
+-    pDoc->pClass->registerCallback(pDoc, nullptr, nullptr);
+-
+-    // Clear the queue
+-    {
+-        std::lock_guard<std::mutex> lock(gCallbackQueueMutex);
+-        gCallbackQueue.clear();
+-    }
+-
+-    fprintf(stderr, "[LOK C++] lok_documentUnregisterCallback: callback unregistered\n");
+-    fflush(stderr);
+-}
+-
+-SAL_JNI_EXPORT
+-int lok_hasCallbackEvents()
+-{
+-    std::lock_guard<std::mutex> lock(gCallbackQueueMutex);
+-    return gCallbackQueue.empty() ? 0 : 1;
+-}
+-
+-SAL_JNI_EXPORT
+-int lok_getCallbackEventCount()
+-{
+-    std::lock_guard<std::mutex> lock(gCallbackQueueMutex);
+-    return static_cast<int>(gCallbackQueue.size());
+-}
+-
+ // Poll and return the next callback event
+ // Returns: type of event, or -1 if queue is empty
+ // Payload is copied to pPayloadBuffer (must be at least nBufferSize bytes)
+ // Actual payload length is written to pPayloadLength
+-SAL_JNI_EXPORT
+-int lok_pollCallback(char* pPayloadBuffer, int nBufferSize, int* pPayloadLength)
+-{
+-    std::lock_guard<std::mutex> lock(gCallbackQueueMutex);
+-
+-    if (gCallbackQueue.empty())
+-    {
+-        if (pPayloadLength)
+-            *pPayloadLength = 0;
+-        return -1;
+-    }
+-
+-    LOKCallbackEvent event = std::move(gCallbackQueue.front());
+-    gCallbackQueue.pop_front();
+-
+-    int payloadLen = static_cast<int>(event.sPayload.length());
+-    if (pPayloadLength)
+-        *pPayloadLength = payloadLen;
+-
+-    if (pPayloadBuffer && nBufferSize > 0)
+-    {
+-        int copyLen = std::min(payloadLen, nBufferSize - 1);
+-        memcpy(pPayloadBuffer, event.sPayload.c_str(), copyLen);
+-        pPayloadBuffer[copyLen] = '\0';
+-    }
+-
+-    SAL_INFO("lok.shim", "lok_pollCallback: returning type=" << event.nType << " payloadLen=" << payloadLen);
+-    return event.nType;
+-}
+-
+ // Clear all queued callback events
+-SAL_JNI_EXPORT
+-void lok_clearCallbackQueue()
+-{
+-    std::lock_guard<std::mutex> lock(gCallbackQueueMutex);
+-    gCallbackQueue.clear();
+-    SAL_INFO("lok.shim", "lok_clearCallbackQueue: queue cleared");
+-    fprintf(stderr, "[LOK C++] lok_clearCallbackQueue: queue cleared\n");
+-    fflush(stderr);
+-}
+-
+ // Force flush pending LOK callbacks for a document
+ // This is needed in WASM because callbacks are queued via PostUserEvent
+ // but the event loop doesn't run automatically
+-SAL_JNI_EXPORT
+-void lok_flushCallbacks(LibreOfficeKitDocument* pDoc)
+-{
+-    SAL_INFO("lok.shim", "lok_flushCallbacks(" << pDoc << ")");
+-    fprintf(stderr, "[LOK C++] lok_flushCallbacks(%p)\n", (void*)pDoc);
+-    fflush(stderr);
+-
+-    if (!pDoc)
+-    {
+-        SAL_WARN("lok.shim", "lok_flushCallbacks: invalid document");
+-        fprintf(stderr, "[LOK C++] lok_flushCallbacks: invalid document\n");
+-        fflush(stderr);
+-        return;
+-    }
+-
+-    SolarMutexGuard aGuard;
+-
+-    LibLODocument_Impl* pDocument = static_cast<LibLODocument_Impl*>(pDoc);
+-
+-    fprintf(stderr, "[LOK C++] lok_flushCallbacks: mpCallbackFlushHandlers.size()=%zu\n",
+-            pDocument->mpCallbackFlushHandlers.size());
+-    fflush(stderr);
+-
+-    // Flush all callback handlers for all views
+-    int flushedCount = 0;
+-    for (auto& pair : pDocument->mpCallbackFlushHandlers)
+-    {
+-        fprintf(stderr, "[LOK C++] lok_flushCallbacks: handler for view %zu exists=%d\n",
+-                pair.first, pair.second ? 1 : 0);
+-        fflush(stderr);
+-        if (pair.second)
+-        {
+-            pair.second->flush();
+-            flushedCount++;
+-        }
+-    }
+-
+-    fprintf(stderr, "[LOK C++] lok_flushCallbacks: flushed %d callback handlers\n", flushedCount);
+-    fflush(stderr);
+-}
+-
+ // Operation abort API for WASM
+ SAL_JNI_EXPORT
+ void lok_abortOperation()

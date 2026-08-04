@@ -3,11 +3,12 @@ name: Build WASM
 # Manual-only trigger. LibreOffice WASM builds take 2-4h+ on 4 cores and
 # must not run on every push/PR. Use workflow_dispatch and pick a mode.
 #
-#   baseline         — current untrimmed autogen.input + full patch.
+#   baseline         -- current untrimmed autogen.input + full patch.
 #                      Validates the build pipeline itself + gate test on GHA.
-#   conversion-only  — trimmed autogen.input + trimmed patch (conversion-only).
-#                      Validates that trimming keeps docx→pdf working and
-#                      produces a smaller soffice.wasm.
+#   conversion-only  -- two LOK trim atoms (exports, then shims) on top of the
+#                      full baseline patch. Keeps baseline autogen.input by
+#                      default so atoms are isolated from PENDING-VERIFY
+#                      autogen switches (see input use_conversion_autogen).
 #
 # Artifacts (soffice.wasm/data/cjs) are uploaded, NEVER auto-pushed to LFS
 # or auto-committed. Download, verify locally, then push manually.
@@ -27,6 +28,11 @@ on:
           - conversion-only
       clean_build:
         description: 'CLEAN_BUILD=1 (full rebuild, slower)'
+        required: false
+        type: boolean
+        default: false
+      use_conversion_autogen:
+        description: 'Swap in autogen.conversion-only.input (PENDING-VERIFY disables + LTO). Default false isolates LOK atoms on baseline autogen (4.2a).'
         required: false
         type: boolean
         default: false
@@ -78,16 +84,17 @@ jobs:
         id: mode
         run: |
           echo "mode=${{ inputs.mode }}" >> "$GITHUB_OUTPUT"
-          # Resolve which autogen.input + patch set to use.
-          # baseline: build/autogen.input + full build/patches/wasm-build-fixes.patch
-          # conversion-only: build/autogen.conversion-only.input + trimmed patch
-          # (conversion-only artifacts are produced in later steps; for now this
-          #  only switches the autogen.input path the build script copies in.)
-          if [ "${{ inputs.mode }}" = "conversion-only" ] && [ -f build/autogen.conversion-only.input ]; then
+          # Autogen and LOK atoms are independent levers (see CONVERSION-ONLY-TRIM.md).
+          # CONVERSION_ONLY (Build step) applies exports+shims atoms.
+          # use_conversion_autogen swaps PENDING-VERIFY autogen -- default false
+          # so 4.2a isolates atoms on baseline autogen.input.
+          if [ "${{ inputs.mode }}" = "conversion-only" ] \
+             && [ "${{ inputs.use_conversion_autogen }}" = "true" ] \
+             && [ -f build/autogen.conversion-only.input ]; then
             cp build/autogen.conversion-only.input build/autogen.input
-            echo "Using conversion-only autogen.input"
+            echo "Using conversion-only autogen.input (use_conversion_autogen=true)"
           else
-            echo "Using baseline (current) autogen.input"
+            echo "Using baseline autogen.input (atoms may still apply via CONVERSION_ONLY)"
           fi
 
       - name: Cache LibreOffice source + emsdk
@@ -99,9 +106,9 @@ jobs:
             ~/libreoffice-wasm-build/emsdk
           # Bump the prefix when patch/autogen changes invalidate the cache.
           # CLEAN_BUILD input also forces a miss via restore-keys exclusion.
-          key: ${{ runner.os }}-lo-24-8-emsdk-3.1.74-${{ inputs.mode }}-${{ hashFiles('build/patches/**', 'build/autogen.input') }}-${{ inputs.clean_build }}
+          key: ${{ runner.os }}-lo-24-8-emsdk-3.1.74-${{ inputs.mode }}-cag-${{ inputs.use_conversion_autogen }}-${{ hashFiles('build/patches/**', 'build/autogen.input', 'build/autogen.conversion-only.input') }}-${{ inputs.clean_build }}
           restore-keys: |
-            ${{ runner.os }}-lo-24-8-emsdk-3.1.74-${{ inputs.mode }}-
+            ${{ runner.os }}-lo-24-8-emsdk-3.1.74-${{ inputs.mode }}-cag-${{ inputs.use_conversion_autogen }}-
 
       - name: Free disk space
         run: |
@@ -116,6 +123,10 @@ jobs:
           BUILD_JOBS: '4'
           SKIP_DEPS: '0'
           CLEAN_BUILD: ${{ inputs.clean_build && '1' || '0' }}
+          # conversion-only mode applies the two LOK trim atoms on top of the
+          # consolidated baseline patch (exports, then shims). See
+          # build/patches/CONVERSION-ONLY-TRIM.md.
+          CONVERSION_ONLY: ${{ inputs.mode == 'conversion-only' && '1' || '0' }}
         run: bash build/build-wasm.sh
 
       - name: Show produced artifacts
