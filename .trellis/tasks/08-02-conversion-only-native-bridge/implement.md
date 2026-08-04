@@ -33,10 +33,17 @@
   - YAML 结构已验证(12 步,trigger/inputs/cache/upload/gate-test 齐全)。
 - [x] 3.2 workflow 语法已验证(pyyaml 解析结构 OK;`on`→True 是 YAML 1.1 特性,GHA 解析正确)。actionlint 待 GHA 首次触发时由平台校验。
 
-## Phase 4 — 构建验证(GHA,手动触发,本轮外)
+## Phase 4 — 构建验证(GHA,手动触发)
 
-- [ ] 4.1 触发 baseline 构建(mode=baseline)。验证:管道跑通、artifact 产出、门禁测试在 GHA 过。
-  - 回退:若超 6h,升级 larger runner(改 3.1 runner label),重跑。
+### Baseline ✅ 已完成
+- [x] 4.1 触发 baseline 构建(mode=baseline, clean_build=true)
+  - **Run 30832043019: success(3h33m)**,完整 H 组(EXT=.html + 无 EXPORT_ES6 + packaging aux js→cjs)
+  - artifact 全部新编(wasm/data/cjs hash ≠ LFS);cjs bootstrap **1 行**
+  - 本地 LOK init OK(`HOOK OK, lok=58826664`);门禁 `sample_large.docx→pdf` **3 tests passed**
+  - **baseline 体积**:wasm 148,067,113 B(~141.4 MiB)、data 99,735,790 B(~95.1 MiB)、cjs/js 各 444,500 B
+  - 仓库 wasm 已恢复 LFS,树干净;新编产物存 `/d/tmp/lo-artifacts-08-04/`(本地参考)
+
+### Conversion-only 裁剪(待做)
 - [ ] 4.2 触发 conversion-only 构建(mode=conversion-only)。验证:门禁测试过 + `soffice.wasm` 体积 < baseline。
   - 按 `CONVERSION-ONLY-TRIM.md` 二分裁剪 patch:先 revert 014 EXPORTED_FUNCTIONS,重跑(CLEAN_BUILD=0 增量),gate 绿则保,红则回退。
   - autogen `# PENDING-VERIFY` 项逐一确认。
