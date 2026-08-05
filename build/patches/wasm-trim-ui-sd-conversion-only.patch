@@ -381,28 +381,3 @@ index 01f3a1d59..891193ad6 100644
  ))
  
  $(eval $(call gb_Library_add_libs,sd,\
-diff --git a/sd/Module_sd.mk b/sd/Module_sd.mk
-index b606b8a56..d5870429a 100644
---- a/sd/Module_sd.mk
-+++ b/sd/Module_sd.mk
-@@ -15,15 +15,15 @@ $(eval $(call gb_Module_Module,sd))
- $(eval $(call gb_Module_add_targets,sd,\
-     Library_sd \
-     Library_sdd \
--    Library_sdui \
--    Package_opengl \
-+    $(if $(DISABLE_GUI),,Library_sdui) \
-+    $(if $(DISABLE_GUI),,Package_opengl) \
-     Package_xml \
--    UIConfig_sdraw \
--    UIConfig_simpress \
-+    $(if $(DISABLE_GUI),,UIConfig_sdraw) \
-+    $(if $(DISABLE_GUI),,UIConfig_simpress) \
- ))
- 
- $(eval $(call gb_Module_add_l10n_targets,sd,\
--    AllLangMoTarget_sd \
-+    $(if $(DISABLE_GUI),,AllLangMoTarget_sd) \
- ))
- 
- ifeq ($(filter DRAGONFLY FREEBSD,$(OS)),)
