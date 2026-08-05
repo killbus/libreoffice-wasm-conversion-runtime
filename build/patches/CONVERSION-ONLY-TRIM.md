@@ -22,28 +22,52 @@ That shape is wrong for three reasons:
 
 The replacement is two atoms, matching the archive boundary.
 
-## Atoms (apply order: exports → shims)
+## Atoms (apply order: exports → shims → ui-sc → ui-sd)
 
 | atom | file | touches | reversible alone? |
 |---|---|---|---|
 | **exports** | `wasm-trim-lok-exports-conversion-only.patch` | `desktop/Executable_soffice_bin.mk` only | yes |
 | **shims** | `wasm-trim-lok-shims-conversion-only.patch` | `desktop/source/lib/init.cxx` only | yes |
+| **ui-sc** | `wasm-trim-ui-sc-conversion-only.patch` | `sc/Library_sc.mk`, `sc/Module_sc.mk` | yes |
+| **ui-sd** | `wasm-trim-ui-sd-conversion-only.patch` | `sd/Library_sd.mk`, `sd/Module_sd.mk` | yes |
+
+Apply order is listed in `build/patches/series` (quilt-style). `build-wasm.sh`
+reads `series` and applies each atom in order when `CONVERSION_ONLY=1`.
+
+### exports + shims (LOK ABI surface)
 
 Generated from local LO tree:
 
 - A = `946c5d226` (full `wasm-build-fixes.patch` applied on tip `d1c9e0e4e`)
-- B = `f33576ec3` (A + both atoms)
+- B = `f33576ec3` (A + exports + shims)
 
 ```
 git diff A B -- desktop/Executable_soffice_bin.mk  > exports atom
 git diff A B -- desktop/source/lib/init.cxx        > shims atom
 ```
 
-Verified on A:
+Verified on A: atom1 alone / atom2 alone / both → align to B's files (git diff 0).
 
-- atom1 alone → mk == B, init still A
-- atom2 alone → init == c219eb02b, mk still A
-- atom1 then atom2 → both files == B (git diff 0)
+### ui-sc + ui-sd (.mk conditional compile, lever ②)
+
+Generated from local LO tree:
+
+- A = `946c5d226`
+- B = `077fed8f1` (A + ui-sc + ui-sd)
+
+```
+git diff A B -- sc/Library_sc.mk sc/Module_sc.mk   > ui-sc atom
+git diff A B -- sd/Library_sd.mk sd/Module_sd.mk   > ui-sd atom
+```
+
+Each CUT-safe `gb_Library_add_exception_objects` entry is wrapped in
+`$(if $(DISABLE_GUI),,entry)`. `Library_scui`/`Library_sdui`, `UIConfig_*`,
+`Package_res_xml`/`Package_opengl`/`Package_xml`, `AllLangMoTarget_*` are
+gated on `DISABLE_GUI` in `Module_*.mk`.
+
+Verified on A: each ui-* atom dry-runs and applies independently; both
+applied → align to B's 4 `.mk` files (git diff 0). See
+`research/ui-mk-boundary-survey-4.2c.md` for the KEEP/CUT forensics.
 
 ## KEEP (conversion + abort)
 
@@ -89,14 +113,14 @@ Per task first principles, the delivery target is the final
 
 1. `autogen.input` switches (`build/autogen.conversion-only.input`, all
    marked `# PENDING-VERIFY`)
-2. `.mk` / `.component` conditional compile (UI submodules never built)
+2. **`.mk` / `.component` conditional compile (UI submodules never built)** ← ui-sc/ui-sd atoms
 3. fs-image resource cut
-4. **LOK shim export/body trim** ← these atoms
+4. **LOK shim export/body trim** ← exports/shims atoms
 
-Cutting shim wrappers does **not** by itself drop `sd`/`sc` UI symbols from
-the wasm — those come from being compiled and linked. Do not expect a large
-wasm size win from atoms alone; use them to narrow the ABI surface and to
-bisect cleanly.
+The ui-sc/ui-sd atoms are the **actual size lever** (lever ②): they stop
+~327 UI `.cxx` from being compiled at all. The exports/shims atoms only
+narrow the ABI surface (lever ④) — 4.2a proved they alone shrink wasm by
+just 66 KB because UI module bodies still get compiled and linked.
 
 ## How the pipeline applies them
 

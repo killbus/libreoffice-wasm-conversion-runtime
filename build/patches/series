@@ -1,0 +1,12 @@
+# Conversion-only patch series (apply order)
+# Quilt-style ordered list. Each line: <patch-filename> [-b <N>] [--option]
+# Applied by build/build-wasm.sh AFTER wasm-build-fixes.patch when CONVERSION_ONLY=1.
+# See build/patches/CONVERSION-ONLY-TRIM.md for boundaries and rationale.
+#
+# Atoms are independently reversible for bisection. Order matters only where
+# one atom touches the same hunk as another (none currently do).
+
+wasm-trim-lok-exports-conversion-only.patch
+wasm-trim-lok-shims-conversion-only.patch
+wasm-trim-ui-sc-conversion-only.patch
+wasm-trim-ui-sd-conversion-only.patch

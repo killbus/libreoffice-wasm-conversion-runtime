@@ -1,0 +1,310 @@
+diff --git a/sc/Library_sc.mk b/sc/Library_sc.mk
+index eaa79cf10..1389384c8 100644
+--- a/sc/Library_sc.mk
++++ b/sc/Library_sc.mk
+@@ -391,45 +391,45 @@ $(eval $(call gb_Library_add_exception_objects,sc,\
+     sc/source/ui/app/transobj \
+     sc/source/ui/app/typemap \
+     sc/source/ui/app/uiitems \
+-    sc/source/ui/attrdlg/scabstdlg \
+-    sc/source/ui/cctrl/cbnumberformat \
+-    sc/source/ui/cctrl/cbuttonw \
+-    sc/source/ui/cctrl/checklistmenu \
+-    sc/source/ui/cctrl/dpcontrol \
+-    sc/source/ui/cctrl/tbzoomsliderctrl \
+-    sc/source/ui/condformat/condformatdlg \
+-    sc/source/ui/condformat/condformatdlgentry \
+-    sc/source/ui/condformat/condformatdlgdata \
+-    sc/source/ui/condformat/condformateasydlg \
+-    sc/source/ui/condformat/condformathelper \
+-    sc/source/ui/condformat/colorformat \
+-    sc/source/ui/dataprovider/csvdataprovider \
+-    sc/source/ui/dataprovider/dataprovider \
+-    sc/source/ui/dataprovider/datatransformation \
+-    sc/source/ui/dataprovider/htmldataprovider \
+-    sc/source/ui/dataprovider/xmldataprovider \
+-    sc/source/ui/dataprovider/sqldataprovider \
+-    sc/source/ui/dbgui/asciiopt \
+-    sc/source/ui/dbgui/consdlg \
+-    sc/source/ui/dbgui/csvcontrol \
+-    sc/source/ui/dbgui/csvgrid \
+-    sc/source/ui/dbgui/csvruler \
+-    sc/source/ui/dbgui/csvsplits \
+-    sc/source/ui/dbgui/csvtablebox \
+-    sc/source/ui/dbgui/dbnamdlg \
+-    sc/source/ui/dbgui/filtdlg \
+-    sc/source/ui/dbgui/foptmgr \
+-    sc/source/ui/dbgui/imoptdlg \
+-    sc/source/ui/dbgui/PivotLayoutDialog \
+-    sc/source/ui/dbgui/PivotLayoutTreeListBase \
+-    sc/source/ui/dbgui/PivotLayoutTreeListData \
+-    sc/source/ui/dbgui/PivotLayoutTreeListLabel \
+-    sc/source/ui/dbgui/PivotLayoutTreeList \
+-    sc/source/ui/dbgui/sfiltdlg \
+-    sc/source/ui/dbgui/validate \
+-    sc/source/ui/dialogs/searchresults \
+-    sc/source/ui/dialogs/SparklineDialog \
+-    sc/source/ui/dialogs/SparklineDataRangeDialog \
++    $(if $(DISABLE_GUI),,sc/source/ui/attrdlg/scabstdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/cctrl/cbnumberformat) \
++    $(if $(DISABLE_GUI),,sc/source/ui/cctrl/cbuttonw) \
++    $(if $(DISABLE_GUI),,sc/source/ui/cctrl/checklistmenu) \
++    $(if $(DISABLE_GUI),,sc/source/ui/cctrl/dpcontrol) \
++    $(if $(DISABLE_GUI),,sc/source/ui/cctrl/tbzoomsliderctrl) \
++    $(if $(DISABLE_GUI),,sc/source/ui/condformat/condformatdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/condformat/condformatdlgentry) \
++    $(if $(DISABLE_GUI),,sc/source/ui/condformat/condformatdlgdata) \
++    $(if $(DISABLE_GUI),,sc/source/ui/condformat/condformateasydlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/condformat/condformathelper) \
++    $(if $(DISABLE_GUI),,sc/source/ui/condformat/colorformat) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dataprovider/csvdataprovider) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dataprovider/dataprovider) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dataprovider/datatransformation) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dataprovider/htmldataprovider) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dataprovider/xmldataprovider) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dataprovider/sqldataprovider) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/asciiopt) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/consdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/csvcontrol) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/csvgrid) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/csvruler) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/csvsplits) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/csvtablebox) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/dbnamdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/filtdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/foptmgr) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/imoptdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/PivotLayoutDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/PivotLayoutTreeListBase) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/PivotLayoutTreeListData) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/PivotLayoutTreeListLabel) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/PivotLayoutTreeList) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/sfiltdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dbgui/validate) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dialogs/searchresults) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dialogs/SparklineDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/dialogs/SparklineDataRangeDialog) \
+     sc/source/ui/docshell/arealink \
+     sc/source/ui/docshell/autostyl \
+     sc/source/ui/docshell/datastream \
+@@ -483,97 +483,97 @@ $(eval $(call gb_Library_add_exception_objects,sc,\
+     sc/source/ui/drawfunc/graphsh \
+     sc/source/ui/drawfunc/mediash \
+     sc/source/ui/drawfunc/oleobjsh \
+-    sc/source/ui/formdlg/dwfunctr \
+-    sc/source/ui/formdlg/formdata \
+-    sc/source/ui/formdlg/formula \
+-    sc/source/ui/miscdlgs/acredlin \
+-    sc/source/ui/miscdlgs/anyrefdg \
+-    sc/source/ui/miscdlgs/autofmt \
+-    sc/source/ui/miscdlgs/conflictsdlg \
+-    sc/source/ui/miscdlgs/crnrdlg \
+-    sc/source/ui/miscdlgs/datastreamdlg \
+-    sc/source/ui/miscdlgs/dataproviderdlg \
+-    sc/source/ui/miscdlgs/datatableview \
+-    sc/source/ui/miscdlgs/highred \
+-    sc/source/ui/miscdlgs/mergecellsdialog \
+-    sc/source/ui/miscdlgs/optsolver \
+-    sc/source/ui/miscdlgs/protectiondlg \
+-    sc/source/ui/miscdlgs/redcom \
+-    sc/source/ui/miscdlgs/retypepassdlg \
+-    sc/source/ui/miscdlgs/sharedocdlg \
+-    sc/source/ui/miscdlgs/simpref \
+-    sc/source/ui/miscdlgs/solveroptions \
+-    sc/source/ui/miscdlgs/solverutil \
+-    sc/source/ui/miscdlgs/solvrdlg \
+-    sc/source/ui/miscdlgs/tabopdlg \
+-    sc/source/ui/miscdlgs/warnbox \
+-    sc/source/ui/namedlg/namedefdlg \
+-    sc/source/ui/namedlg/namedlg \
+-    sc/source/ui/namedlg/namemgrtable \
+-    sc/source/ui/navipi/content \
+-    sc/source/ui/navipi/navcitem \
+-    sc/source/ui/navipi/navipi \
+-    sc/source/ui/navipi/scenwnd \
+-    sc/source/ui/pagedlg/areasdlg \
+-    sc/source/ui/pagedlg/tphfedit \
+-    sc/source/ui/sidebar/AlignmentPropertyPanel \
+-    sc/source/ui/sidebar/CellLineStyleControl \
+-    sc/source/ui/sidebar/CellLineStyleValueSet \
+-    sc/source/ui/sidebar/CellAppearancePropertyPanel \
+-    sc/source/ui/sidebar/CellBorderStyleControl \
+-    sc/source/ui/sidebar/NumberFormatControl \
+-    sc/source/ui/sidebar/NumberFormatPropertyPanel \
+-    sc/source/ui/sidebar/ScPanelFactory \
+-    sc/source/ui/sparklines/SparklineAttributes \
+-    sc/source/ui/sparklines/SparklineData \
+-    sc/source/ui/sparklines/SparklineGroup \
+-    sc/source/ui/sparklines/SparklineList \
+-    sc/source/ui/StatisticsDialogs/AnalysisOfVarianceDialog \
+-    sc/source/ui/StatisticsDialogs/CorrelationDialog \
+-    sc/source/ui/StatisticsDialogs/CovarianceDialog \
+-    sc/source/ui/StatisticsDialogs/ChiSquareTestDialog \
+-    sc/source/ui/StatisticsDialogs/DescriptiveStatisticsDialog \
+-    sc/source/ui/StatisticsDialogs/ExponentialSmoothingDialog \
+-    sc/source/ui/StatisticsDialogs/FourierAnalysisDialog \
+-    sc/source/ui/StatisticsDialogs/FTestDialog \
+-    sc/source/ui/StatisticsDialogs/MatrixComparisonGenerator \
+-    sc/source/ui/StatisticsDialogs/MovingAverageDialog \
+-    sc/source/ui/StatisticsDialogs/RandomNumberGeneratorDialog \
+-    sc/source/ui/StatisticsDialogs/RegressionDialog \
+-    sc/source/ui/StatisticsDialogs/SamplingDialog \
+-    sc/source/ui/StatisticsDialogs/StatisticsInputOutputDialog \
+-    sc/source/ui/StatisticsDialogs/StatisticsTwoVariableDialog \
+-    sc/source/ui/StatisticsDialogs/TableFillingAndNavigationTools \
+-    sc/source/ui/StatisticsDialogs/TTestDialog \
+-    sc/source/ui/StatisticsDialogs/ZTestDialog \
+-    sc/source/ui/theme/ThemeColorChanger \
+-    sc/source/ui/uitest/uiobject \
+-    sc/source/ui/undo/areasave \
+-    sc/source/ui/undo/refundo \
+-    sc/source/ui/undo/target \
+-    sc/source/ui/undo/undobase \
+-    sc/source/ui/undo/undoblk \
+-    sc/source/ui/undo/undoblk2 \
+-    sc/source/ui/undo/undoblk3 \
+-    sc/source/ui/undo/undocell \
+-    sc/source/ui/undo/undocell2 \
+-    sc/source/ui/undo/undoconvert \
+-    sc/source/ui/undo/undodat \
+-    sc/source/ui/undo/undodraw \
+-    sc/source/ui/undo/undoolk \
+-    sc/source/ui/undo/undorangename \
+-    sc/source/ui/undo/undosort \
+-    sc/source/ui/undo/undostyl \
+-    sc/source/ui/undo/undotab \
+-    sc/source/ui/undo/undoutil \
+-    sc/source/ui/undo/UndoInsertSparkline \
+-    sc/source/ui/undo/UndoEditSparklineGroup \
+-    sc/source/ui/undo/UndoDeleteSparkline \
+-    sc/source/ui/undo/UndoDeleteSparklineGroup \
+-    sc/source/ui/undo/UndoUngroupSparklines \
+-    sc/source/ui/undo/UndoGroupSparklines \
+-    sc/source/ui/undo/UndoEditSparkline \
+-    sc/source/ui/undo/UndoThemeChange \
++    $(if $(DISABLE_GUI),,sc/source/ui/formdlg/dwfunctr) \
++    $(if $(DISABLE_GUI),,sc/source/ui/formdlg/formdata) \
++    $(if $(DISABLE_GUI),,sc/source/ui/formdlg/formula) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/acredlin) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/anyrefdg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/autofmt) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/conflictsdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/crnrdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/datastreamdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/dataproviderdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/datatableview) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/highred) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/mergecellsdialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/optsolver) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/protectiondlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/redcom) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/retypepassdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/sharedocdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/simpref) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/solveroptions) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/solverutil) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/solvrdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/tabopdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/miscdlgs/warnbox) \
++    $(if $(DISABLE_GUI),,sc/source/ui/namedlg/namedefdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/namedlg/namedlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/namedlg/namemgrtable) \
++    $(if $(DISABLE_GUI),,sc/source/ui/navipi/content) \
++    $(if $(DISABLE_GUI),,sc/source/ui/navipi/navcitem) \
++    $(if $(DISABLE_GUI),,sc/source/ui/navipi/navipi) \
++    $(if $(DISABLE_GUI),,sc/source/ui/navipi/scenwnd) \
++    $(if $(DISABLE_GUI),,sc/source/ui/pagedlg/areasdlg) \
++    $(if $(DISABLE_GUI),,sc/source/ui/pagedlg/tphfedit) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sidebar/AlignmentPropertyPanel) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sidebar/CellLineStyleControl) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sidebar/CellLineStyleValueSet) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sidebar/CellAppearancePropertyPanel) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sidebar/CellBorderStyleControl) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sidebar/NumberFormatControl) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sidebar/NumberFormatPropertyPanel) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sidebar/ScPanelFactory) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sparklines/SparklineAttributes) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sparklines/SparklineData) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sparklines/SparklineGroup) \
++    $(if $(DISABLE_GUI),,sc/source/ui/sparklines/SparklineList) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/AnalysisOfVarianceDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/CorrelationDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/CovarianceDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/ChiSquareTestDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/DescriptiveStatisticsDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/ExponentialSmoothingDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/FourierAnalysisDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/FTestDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/MatrixComparisonGenerator) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/MovingAverageDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/RandomNumberGeneratorDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/RegressionDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/SamplingDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/StatisticsInputOutputDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/StatisticsTwoVariableDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/TableFillingAndNavigationTools) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/TTestDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/StatisticsDialogs/ZTestDialog) \
++    $(if $(DISABLE_GUI),,sc/source/ui/theme/ThemeColorChanger) \
++    $(if $(DISABLE_GUI),,sc/source/ui/uitest/uiobject) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/areasave) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/refundo) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/target) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undobase) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undoblk) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undoblk2) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undoblk3) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undocell) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undocell2) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undoconvert) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undodat) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undodraw) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undoolk) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undorangename) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undosort) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undostyl) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undotab) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/undoutil) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/UndoInsertSparkline) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/UndoEditSparklineGroup) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/UndoDeleteSparkline) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/UndoDeleteSparklineGroup) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/UndoUngroupSparklines) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/UndoGroupSparklines) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/UndoEditSparkline) \
++    $(if $(DISABLE_GUI),,sc/source/ui/undo/UndoThemeChange) \
+     sc/source/ui/unoobj/ChartRangeSelectionListener \
+     sc/source/ui/unoobj/addruno \
+     sc/source/ui/unoobj/afmtuno \
+@@ -707,7 +707,7 @@ $(eval $(call gb_Library_add_exception_objects,sc,\
+     sc/source/ui/view/viewfunc \
+     sc/source/ui/view/viewutil \
+     sc/source/ui/view/waitoff \
+-    sc/source/ui/xmlsource/xmlsourcedlg \
++    $(if $(DISABLE_GUI),,sc/source/ui/xmlsource/xmlsourcedlg) \
+ ))
+ 
+ ifeq ($(ENABLE_FORMULA_LOGGER),TRUE)
+diff --git a/sc/Module_sc.mk b/sc/Module_sc.mk
+index ab9dada68..19bad68bc 100644
+--- a/sc/Module_sc.mk
++++ b/sc/Module_sc.mk
+@@ -19,14 +19,14 @@ $(eval $(call gb_Module_add_targets,sc,\
+ 	Library_sc \
+ 	Library_scd \
+ 	Library_scfilt \
+-	Library_scui \
++	$(if $(DISABLE_GUI),,Library_scui) \
+ 	$(call gb_Helper_optional,OPENCL,Package_opencl) \
+-	Package_res_xml \
+-	UIConfig_scalc \
++	$(if $(DISABLE_GUI),,Package_res_xml) \
++	$(if $(DISABLE_GUI),,UIConfig_scalc) \
+ ))
+ 
+ $(eval $(call gb_Module_add_l10n_targets,sc,\
+-	AllLangMoTarget_sc \
++	$(if $(DISABLE_GUI),,AllLangMoTarget_sc) \
+ ))
+ 
+ ifneq ($(filter SCRIPTING,$(BUILD_TYPE)),)

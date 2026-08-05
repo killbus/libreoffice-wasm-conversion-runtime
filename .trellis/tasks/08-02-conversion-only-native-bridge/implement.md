@@ -55,16 +55,29 @@
 - [x] `build-wasm.sh` 以 `apply_conversion_atom` 顺序应用 exports→shims(`CONVERSION_ONLY=1`)。
 - [x] workflow 传 `CONVERSION_ONLY`;`CONVERSION-ONLY-TRIM.md` 重写为原子策略。
 - [x] workflow 加 `use_conversion_autogen`(default false):conversion-only 默认只打原子、不叠 PENDING-VERIFY autogen(4.2a 隔离)。
-- [ ] commit + force-with-lease 替换 origin 上的 382ad12(需确认)。
-- [ ] 触发 GHA 4.2a。
+- [x] commit `7c1d42e` + force-with-lease 替换 origin 382ad12。
+- [x] 触发 GHA 4.2a:`30902972344`(mode=conversion-only, clean_build=true, use_conversion_autogen=false)。
 
 #### 4.2 隔离构建(一次一杠杆)
-- [ ] 4.2a **exports+shims + baseline autogen**  
-  `mode=conversion-only` + `use_conversion_autogen=false`(默认)+ `clean_build=true`。  
-  验证:LOK init + gate + 体积(不期望大幅小于 baseline;shim 裁的是 ABI 不是 UI 模块)。
-- [ ] 4.2b 若 4.2a 绿:同 mode + `use_conversion_autogen=true`,再引入 autogen `# PENDING-VERIFY`(LTO 可再单独)。
-- [ ] 4.2c 若需更小体积:`.mk` 条件编译挡 UI 子模块(design §3.1 杠杆 ②),与 shim 原子无关。
-- 回退:门禁挂→只回退上一个原子/开关。
+- [x] 4.2a **exports+shims + baseline autogen** — run `30902972344` **success(3h5m)**
+  - `mode=conversion-only` + `use_conversion_autogen=false` + `clean_build=true`。
+  - GHA gate:**3 tests passed**(`test.docx→pdf`),LOK init OK,无 `unwind`/`signature mismatch`。
+  - 体积:wasm 148,000,971 B(baseline 148,067,113,**-66,142 B ≈ -0.045%**);data/cjs 同形。
+  - 符号取证(wasm 原始字节扫描):
+    - CUT shim(`lok_documentGetParts`/`PaintTile`/`RegisterCallback`/`enableSyncEvents`/`runLoop`/`PostMouseEvent`/`flushCallbacks`/`CreateView`)在 4.2a **全 0**,baseline 有 → 原子确实裁掉导出与实现。
+    - KEEP shim(`documentSaveAs`/`documentLoad`/`libreofficekit_hook`/`abortOperation`/`resetAbort`)4.2a == baseline → 转换+abort 链路完好。
+    - UI 符号(`SlsInsertAnimator`/`SlideSorterViewShell`/`com.sun.star.comp.sd`/`slideshow`/`sc/source/ui`/`sd/source/ui`)4.2a == baseline → `.mk` 未动,UI 子模块仍编进 wasm(符合预期:shim 裁的是 ABI,不是 UI 模块)。
+  - 编译 warning:`lokQueueingCallback` unused function(init.cxx:8672)— 裁掉 `RegisterCallback` 后该 static helper 成死代码,无害,Phase 4c `.mk` 挡 UI 时一并消。
+  - **结论**:两原子 + baseline autogen 是干净隔离档;体积几乎不动是预期的,真正缩 wasm 要靠 `.mk` 条件编译挡 UI 子模块(4.2c)。
+- [ ] 4.2c **+ ui-sc/ui-sd 原子(baseline autogen)** — 待触发
+  - 勘察:`research/ui-mk-boundary-survey-4.2c.md`(KEEP/CUT forensics + 链接耦合分析)。
+  - v1 保守裁剪:sc CUT-safe 17 子目录(~155 cxx)+ sd CUT-safe 12 子目录(~172 cxx),`DISABLE_GUI` 闸门;`view`/`drawfunc`/`framework`/`app`/`docshell`/`unoobj`/`unoidl`/`tools` 留。
+  - atoms:`wasm-trim-ui-sc-conversion-only.patch` / `wasm-trim-ui-sd-conversion-only.patch`;`series` 文件驱动 apply。
+  - 本地全验:4 atom 独立 dry-run + 顺序 apply → 对齐 B(`077fed8f1`)+ f33576。
+  - 预期:link 风险(shell 注册链 grep 可能漏);若红,漏的在 KEEP 子目录里,二分回退。
+- [ ] 4.2d 若 4.2c 绿 + 需更小体积:`view` 最小子集切分(v2,留 5 cxx 裁 79)。
+- [ ] 4.2e autogen PENDING-VERIFY(`use_conversion_autogen=true`,LTO 单独)。
+- 回退:门禁挂→按 series 只回退最后一个 atom。
 
 - [ ] 4.3 裁剪 wasm 验证 OK 后,执行 JS 侧 src 裁剪(design §3.2),用门禁测试立即验证。
 - [ ] 4.4 (人工)下载 artifact,复核 `test.docx → pdf` 产物可正常打开。验证 OK 后人工回推 LFS。

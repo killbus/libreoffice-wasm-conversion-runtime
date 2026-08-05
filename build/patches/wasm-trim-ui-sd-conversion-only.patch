@@ -1,0 +1,409 @@
+diff --git a/sd/Library_sd.mk b/sd/Library_sd.mk
+index 01f3a1d59..891193ad6 100644
+--- a/sd/Library_sd.mk
++++ b/sd/Library_sd.mk
+@@ -133,18 +133,18 @@ $(eval $(call gb_Library_set_componentfile,sd,sd/util/sd,services))
+ 
+ ifneq ($(ENABLE_WASM_STRIP_ACCESSIBILITY),TRUE)
+ $(eval $(call gb_Library_add_exception_objects,sd,\
+-	sd/source/ui/accessibility/AccessibleDocumentViewBase \
+-	sd/source/ui/accessibility/AccessibleDrawDocumentView \
+-	sd/source/ui/accessibility/AccessibleOutlineEditSource \
+-	sd/source/ui/accessibility/AccessibleOutlineView \
+-	sd/source/ui/accessibility/AccessiblePageShape \
+-	sd/source/ui/accessibility/AccessiblePresentationGraphicShape \
+-	sd/source/ui/accessibility/AccessiblePresentationOLEShape \
+-	sd/source/ui/accessibility/AccessiblePresentationShape \
+-	sd/source/ui/accessibility/AccessibleSlideSorterObject \
+-	sd/source/ui/accessibility/AccessibleSlideSorterView \
+-	sd/source/ui/accessibility/AccessibleViewForwarder \
+-	sd/source/ui/accessibility/SdShapeTypes \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessibleDocumentViewBase) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessibleDrawDocumentView) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessibleOutlineEditSource) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessibleOutlineView) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessiblePageShape) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessiblePresentationGraphicShape) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessiblePresentationOLEShape) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessiblePresentationShape) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessibleSlideSorterObject) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessibleSlideSorterView) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/AccessibleViewForwarder) \
++	$(if $(DISABLE_GUI),,sd/source/ui/accessibility/SdShapeTypes) \
+ ))
+ endif
+ 
+@@ -205,15 +205,15 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
+ 	sd/source/filter/xml/sdtransform \
+ 	sd/source/filter/xml/sdxmlwrp \
+ 	sd/source/helper/simplereferencecomponent \
+-	sd/source/ui/animations/CustomAnimationDialog \
+-	sd/source/ui/animations/CustomAnimationList \
+-	sd/source/ui/animations/CustomAnimationPane \
+-	sd/source/ui/animations/STLPropertySet \
+-	sd/source/ui/animations/SlideTransitionPane \
+-	sd/source/ui/animations/motionpathtag \
+-	sd/source/ui/annotations/annotationmanager \
+-	sd/source/ui/annotations/annotationtag \
+-	sd/source/ui/annotations/annotationwindow \
++	$(if $(DISABLE_GUI),,sd/source/ui/animations/CustomAnimationDialog) \
++	$(if $(DISABLE_GUI),,sd/source/ui/animations/CustomAnimationList) \
++	$(if $(DISABLE_GUI),,sd/source/ui/animations/CustomAnimationPane) \
++	$(if $(DISABLE_GUI),,sd/source/ui/animations/STLPropertySet) \
++	$(if $(DISABLE_GUI),,sd/source/ui/animations/SlideTransitionPane) \
++	$(if $(DISABLE_GUI),,sd/source/ui/animations/motionpathtag) \
++	$(if $(DISABLE_GUI),,sd/source/ui/annotations/annotationmanager) \
++	$(if $(DISABLE_GUI),,sd/source/ui/annotations/annotationtag) \
++	$(if $(DISABLE_GUI),,sd/source/ui/annotations/annotationwindow) \
+ 	sd/source/ui/app/optsitem \
+ 	sd/source/ui/app/sddll \
+ 	sd/source/ui/app/sdmod \
+@@ -223,28 +223,28 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
+ 	sd/source/ui/app/sdxfer \
+ 	sd/source/ui/app/tmplctrl \
+ 	sd/source/ui/app/scalectrl \
+-	sd/source/ui/controller/slidelayoutcontroller \
+-	sd/source/ui/controller/displaymodecontroller \
+-	sd/source/ui/dlg/AnimationChildWindow \
+-	sd/source/ui/dlg/LayerTabBar \
+-	sd/source/ui/dlg/NavigatorChildWindow \
+-	sd/source/ui/dlg/PaneChildWindows \
+-	sd/source/ui/dlg/PaneShells \
+-	sd/source/ui/dlg/SpellDialogChildWindow \
+-	sd/source/ui/dlg/TemplateScanner \
+-	sd/source/ui/dlg/animobjs \
+-	sd/source/ui/dlg/diactrl \
+-	sd/source/ui/dlg/filedlg \
+-	sd/source/ui/dlg/gluectrl \
+-	sd/source/ui/dlg/ins_paste \
+-	sd/source/ui/dlg/layeroptionsdlg \
+-	sd/source/ui/dlg/navigatr \
+-	sd/source/ui/dlg/sdabstdlg \
+-	sd/source/ui/dlg/sdtreelb \
+-	sd/source/ui/dlg/SelectLayerDlg \
+-	sd/source/ui/dlg/titledockwin \
+-	sd/source/ui/dlg/unchss \
+-	sd/source/ui/dlg/UndoThemeChange \
++	$(if $(DISABLE_GUI),,sd/source/ui/controller/slidelayoutcontroller) \
++	$(if $(DISABLE_GUI),,sd/source/ui/controller/displaymodecontroller) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/AnimationChildWindow) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/LayerTabBar) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/NavigatorChildWindow) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/PaneChildWindows) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/PaneShells) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/SpellDialogChildWindow) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/TemplateScanner) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/animobjs) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/diactrl) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/filedlg) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/gluectrl) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/ins_paste) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/layeroptionsdlg) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/navigatr) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/sdabstdlg) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/sdtreelb) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/SelectLayerDlg) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/titledockwin) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/unchss) \
++	$(if $(DISABLE_GUI),,sd/source/ui/dlg/UndoThemeChange) \
+ 	sd/source/ui/docshell/docshel2 \
+ 	sd/source/ui/docshell/docshel3 \
+ 	sd/source/ui/docshell/docshel4 \
+@@ -284,93 +284,93 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
+ 	sd/source/ui/framework/module/ToolBarModule \
+ 	sd/source/ui/framework/module/ViewTabBarModule \
+ 	sd/source/ui/framework/tools/FrameworkHelper \
+-	sd/source/ui/func/bulmaper \
+-	sd/source/ui/func/fuarea \
+-	sd/source/ui/func/fubullet \
+-	sd/source/ui/func/fuchar \
+-	sd/source/ui/func/fucon3d \
+-	sd/source/ui/func/fuconarc \
+-	sd/source/ui/func/fuconbez \
+-	sd/source/ui/func/fuconcs \
+-	sd/source/ui/func/fuconnct \
+-	sd/source/ui/func/fuconrec \
+-	sd/source/ui/func/fuconstr \
+-	sd/source/ui/func/fuconuno \
+-	sd/source/ui/func/fucopy \
+-	sd/source/ui/func/fucushow \
+-	sd/source/ui/func/fudraw \
+-	sd/source/ui/func/fudspord \
+-	sd/source/ui/func/fuediglu \
+-	sd/source/ui/func/fuexecuteinteraction \
+-	sd/source/ui/func/fuexpand \
+-	sd/source/ui/func/fuformatpaintbrush \
+-	sd/source/ui/func/fuhhconv \
+-	sd/source/ui/func/fuinsert \
+-	sd/source/ui/func/fuinsfil \
+-	sd/source/ui/func/fuline \
+-	sd/source/ui/func/fulinend \
+-	sd/source/ui/func/fulink \
+-	sd/source/ui/func/fumeasur \
+-	sd/source/ui/func/fumorph \
+-	sd/source/ui/func/funavig \
+-	sd/source/ui/func/fuoaprms \
+-	sd/source/ui/func/fuolbull \
+-	sd/source/ui/func/fuoltext \
+-	sd/source/ui/func/fupage \
+-	sd/source/ui/func/fuparagr \
+-	sd/source/ui/func/fupoor \
+-	sd/source/ui/func/fuprlout \
+-	sd/source/ui/func/fuprobjs \
+-	sd/source/ui/func/fuscale \
+-	sd/source/ui/func/fusearch \
+-	sd/source/ui/func/fusel \
+-	sd/source/ui/func/fusldlg \
+-	sd/source/ui/func/fusnapln \
+-	sd/source/ui/func/fusumry \
+-	sd/source/ui/func/futempl \
+-	sd/source/ui/func/futext \
+-	sd/source/ui/func/futhes \
+-	sd/source/ui/func/futransf \
+-	sd/source/ui/func/futxtatt \
+-	sd/source/ui/func/fuvect \
+-	sd/source/ui/func/fuzoom \
+-	sd/source/ui/func/sdundogr \
+-	sd/source/ui/func/smarttag \
+-	sd/source/ui/func/undoback \
+-	sd/source/ui/func/undoheaderfooter \
+-	sd/source/ui/func/undolayer \
+-	sd/source/ui/func/undopage \
+-	sd/source/ui/func/unmovss \
+-	sd/source/ui/func/unoaprms \
+-	sd/source/ui/func/unprlout \
+-	sd/source/ui/presenter/CanvasUpdateRequester \
+-	sd/source/ui/presenter/PresenterCanvas \
+-	sd/source/ui/presenter/PresenterHelper \
+-	sd/source/ui/presenter/PresenterPreviewCache \
+-	sd/source/ui/presenter/SlideRenderer \
+-	sd/source/ui/sidebar/AllMasterPagesSelector \
+-	sd/source/ui/sidebar/CurrentMasterPagesSelector \
+-	sd/source/ui/sidebar/DocumentHelper \
+-	sd/source/ui/sidebar/LayoutMenu \
+-	sd/source/ui/sidebar/MasterPageContainer \
+-	sd/source/ui/sidebar/MasterPageContainerFiller \
+-	sd/source/ui/sidebar/MasterPageContainerProviders \
+-	sd/source/ui/sidebar/MasterPageContainerQueue \
+-	sd/source/ui/sidebar/MasterPageDescriptor \
+-	sd/source/ui/sidebar/MasterPageObserver \
+-	sd/source/ui/sidebar/MasterPagesSelector \
+-	sd/source/ui/sidebar/NavigatorWrapper \
+-	sd/source/ui/sidebar/PanelFactory \
+-	sd/source/ui/sidebar/PreviewValueSet \
+-	sd/source/ui/sidebar/RecentlyUsedMasterPages \
+-	sd/source/ui/sidebar/RecentMasterPagesSelector \
+-	sd/source/ui/sidebar/SlideBackground \
+-	sd/source/ui/slideshow/PaneHider \
+-	sd/source/ui/slideshow/SlideShowRestarter \
+-	sd/source/ui/slideshow/showwin \
+-	sd/source/ui/slideshow/slideshow \
+-	sd/source/ui/slideshow/slideshowimpl \
+-	sd/source/ui/slideshow/slideshowviewimpl \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/bulmaper) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuarea) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fubullet) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuchar) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fucon3d) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuconarc) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuconbez) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuconcs) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuconnct) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuconrec) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuconstr) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuconuno) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fucopy) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fucushow) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fudraw) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fudspord) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuediglu) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuexecuteinteraction) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuexpand) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuformatpaintbrush) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuhhconv) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuinsert) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuinsfil) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuline) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fulinend) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fulink) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fumeasur) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fumorph) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/funavig) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuoaprms) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuolbull) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuoltext) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fupage) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuparagr) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fupoor) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuprlout) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuprobjs) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuscale) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fusearch) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fusel) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fusldlg) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fusnapln) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fusumry) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/futempl) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/futext) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/futhes) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/futransf) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/futxtatt) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuvect) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/fuzoom) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/sdundogr) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/smarttag) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/undoback) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/undoheaderfooter) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/undolayer) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/undopage) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/unmovss) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/unoaprms) \
++	$(if $(DISABLE_GUI),,sd/source/ui/func/unprlout) \
++	$(if $(DISABLE_GUI),,sd/source/ui/presenter/CanvasUpdateRequester) \
++	$(if $(DISABLE_GUI),,sd/source/ui/presenter/PresenterCanvas) \
++	$(if $(DISABLE_GUI),,sd/source/ui/presenter/PresenterHelper) \
++	$(if $(DISABLE_GUI),,sd/source/ui/presenter/PresenterPreviewCache) \
++	$(if $(DISABLE_GUI),,sd/source/ui/presenter/SlideRenderer) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/AllMasterPagesSelector) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/CurrentMasterPagesSelector) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/DocumentHelper) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/LayoutMenu) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageContainer) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageContainerFiller) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageContainerProviders) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageContainerQueue) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageDescriptor) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageObserver) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPagesSelector) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/NavigatorWrapper) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/PanelFactory) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/PreviewValueSet) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/RecentlyUsedMasterPages) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/RecentMasterPagesSelector) \
++	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/SlideBackground) \
++	$(if $(DISABLE_GUI),,sd/source/ui/slideshow/PaneHider) \
++	$(if $(DISABLE_GUI),,sd/source/ui/slideshow/SlideShowRestarter) \
++	$(if $(DISABLE_GUI),,sd/source/ui/slideshow/showwin) \
++	$(if $(DISABLE_GUI),,sd/source/ui/slideshow/slideshow) \
++	$(if $(DISABLE_GUI),,sd/source/ui/slideshow/slideshowimpl) \
++	$(if $(DISABLE_GUI),,sd/source/ui/slideshow/slideshowviewimpl) \
+ 	sd/source/ui/slidesorter/cache/SlsBitmapCache \
+ 	sd/source/ui/slidesorter/cache/SlsBitmapCompressor \
+ 	sd/source/ui/slidesorter/cache/SlsBitmapFactory \
+@@ -417,9 +417,9 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
+ 	sd/source/ui/slidesorter/view/SlsTheme \
+ 	sd/source/ui/slidesorter/view/SlsToolTip \
+ 	sd/source/ui/slidesorter/view/SlsViewCacheContext \
+-	sd/source/ui/table/TableDesignPane \
+-	sd/source/ui/table/tablefunction \
+-	sd/source/ui/table/tableobjectbar \
++	$(if $(DISABLE_GUI),,sd/source/ui/table/TableDesignPane) \
++	$(if $(DISABLE_GUI),,sd/source/ui/table/tablefunction) \
++	$(if $(DISABLE_GUI),,sd/source/ui/table/tableobjectbar) \
+ 	sd/source/ui/tools/AsynchronousCall \
+ 	sd/source/ui/tools/ConfigurationAccess \
+ 	sd/source/ui/tools/EventMultiplexer \
+@@ -430,7 +430,7 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
+ 	sd/source/ui/tools/SdGlobalResourceContainer \
+ 	sd/source/ui/tools/SlotStateListener \
+ 	sd/source/ui/tools/TimerBasedTaskExecution \
+-	sd/source/ui/uitest/uiobject \
++	$(if $(DISABLE_GUI),,sd/source/ui/uitest/uiobject) \
+ 	sd/source/ui/unoidl/DrawController \
+ 	sd/source/ui/unoidl/SdUnoDrawView \
+ 	sd/source/ui/unoidl/SdUnoOutlineView \
+@@ -519,19 +519,19 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
+ 
+ ifeq ($(ENABLE_SDREMOTE),TRUE)
+ $(eval $(call gb_Library_add_exception_objects,sd,\
+-	sd/source/ui/remotecontrol/BufferedStreamSocket \
+-	sd/source/ui/remotecontrol/Communicator \
+-	sd/source/ui/remotecontrol/ImagePreparer \
+-	sd/source/ui/remotecontrol/Server \
+-	sd/source/ui/remotecontrol/Receiver \
+-	sd/source/ui/remotecontrol/Listener \
+-	sd/source/ui/remotecontrol/Transmitter \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/BufferedStreamSocket) \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/Communicator) \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/ImagePreparer) \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/Server) \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/Receiver) \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/Listener) \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/Transmitter) \
+ ))
+ 
+ ifeq ($(OS),MACOSX)
+ $(eval $(call gb_Library_add_objcxxobjects,sd,\
+-	sd/source/ui/remotecontrol/DiscoveryService \
+-	sd/source/ui/remotecontrol/OSXNetworkService \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/DiscoveryService) \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/OSXNetworkService) \
+ ))
+ 
+ $(eval $(call gb_Library_use_system_darwin_frameworks,sd,\
+@@ -542,18 +542,18 @@ else # OS!=MACSOX
+ 
+ ifeq ($(ENABLE_AVAHI),TRUE)
+ $(eval $(call gb_Library_add_exception_objects,sd,\
+-	sd/source/ui/remotecontrol/AvahiNetworkService \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/AvahiNetworkService) \
+ ))
+ endif # ENABLE_AVAHI=TRUE
+ 
+ $(eval $(call gb_Library_add_exception_objects,sd,\
+-	sd/source/ui/remotecontrol/DiscoveryService \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/DiscoveryService) \
+ ))
+ 
+ ifeq ($(OS),WNT)
+ 
+ $(eval $(call gb_Library_add_exception_objects,sd,\
+-	sd/source/ui/remotecontrol/WINNetworkService \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/WINNetworkService) \
+ ))
+ 
+ $(eval $(call gb_Library_use_external,sd,mDNSResponder))
+@@ -571,14 +571,14 @@ ifeq ($(ENABLE_SDREMOTE_BLUETOOTH),TRUE)
+ ifneq ($(OS),MACOSX)
+ 
+ $(eval $(call gb_Library_add_exception_objects,sd,\
+-	sd/source/ui/remotecontrol/BluetoothServer \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/BluetoothServer) \
+ ))
+ 
+ else # OS!=MACOSX
+ 
+ $(eval $(call gb_Library_add_objcxxobjects,sd,\
+-	sd/source/ui/remotecontrol/BluetoothServer \
+-	sd/source/ui/remotecontrol/OSXBluetooth \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/BluetoothServer) \
++	$(if $(DISABLE_GUI),,sd/source/ui/remotecontrol/OSXBluetooth) \
+ ))
+ 
+ $(eval $(call gb_Library_add_libs,sd,\
+diff --git a/sd/Module_sd.mk b/sd/Module_sd.mk
+index b606b8a56..c3baaac99 100644
+--- a/sd/Module_sd.mk
++++ b/sd/Module_sd.mk
+@@ -15,15 +15,15 @@ $(eval $(call gb_Module_Module,sd))
+ $(eval $(call gb_Module_add_targets,sd,\
+     Library_sd \
+     Library_sdd \
+-    Library_sdui \
+-    Package_opengl \
+-    Package_xml \
+-    UIConfig_sdraw \
+-    UIConfig_simpress \
++    $(if $(DISABLE_GUI),,Library_sdui) \
++    $(if $(DISABLE_GUI),,Package_opengl) \
++    $(if $(DISABLE_GUI),,Package_xml) \
++    $(if $(DISABLE_GUI),,UIConfig_sdraw) \
++    $(if $(DISABLE_GUI),,UIConfig_simpress) \
+ ))
+ 
+ $(eval $(call gb_Module_add_l10n_targets,sd,\
+-    AllLangMoTarget_sd \
++    $(if $(DISABLE_GUI),,AllLangMoTarget_sd) \
+ ))
+ 
+ ifeq ($(filter DRAGONFLY FREEBSD,$(OS)),)

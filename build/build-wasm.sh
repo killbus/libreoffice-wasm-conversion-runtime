@@ -209,14 +209,14 @@ else
 fi
 
 # Conversion-only atoms -- applied ON TOP of the consolidated baseline patch
-# when CONVERSION_ONLY=1. Two independent atoms (archive 014/015 style), NOT
-# one giant reverse-diff:
+# when CONVERSION_ONLY=1. Read from build/patches/series (quilt-style).
+# Current atoms (see CONVERSION-ONLY-TRIM.md):
 #   1. exports -- EXPORTED_FUNCTIONS link contract only (Executable_soffice_bin.mk)
 #   2. shims   -- non-conversion LOK shim bodies only (desktop/source/lib/init.cxx)
-# Each atom is independently reversible for bisection. Order: exports then shims.
-# KEEP: conversion group (hook/preinit/load/saveAs/destroy/getError/malloc/free)
-#       + abort group (abortOperation/setOperationTimeout/getOperationState/resetAbort).
-# See build/patches/CONVERSION-ONLY-TRIM.md.
+#   3. ui-sc   -- gate sc/source/ui CUT-safe subdirs + Library_scui/UIConfig on DISABLE_GUI
+#   4. ui-sd   -- gate sd/source/ui CUT-safe subdirs + Library_sdui/UIConfig on DISABLE_GUI
+# Each atom is independently reversible for bisection. Order: exports -> shims -> ui-sc -> ui-sd.
+# KEEP: sc/sd filter+core, docshell, unoobj/unoidl, app(ScModule/SdModule), view/drawfunc/framework.
 apply_conversion_atom() {
     local atom_name="$1"
     local atom_path="$2"
@@ -238,13 +238,17 @@ apply_conversion_atom() {
 }
 
 if [ "${CONVERSION_ONLY:-0}" = "1" ]; then
-    log_info "CONVERSION_ONLY=1 -- applying conversion-only atoms (exports, then shims)..."
-    apply_conversion_atom \
-        "wasm-trim-lok-exports-conversion-only.patch" \
-        "${SCRIPT_DIR}/patches/wasm-trim-lok-exports-conversion-only.patch"
-    apply_conversion_atom \
-        "wasm-trim-lok-shims-conversion-only.patch" \
-        "${SCRIPT_DIR}/patches/wasm-trim-lok-shims-conversion-only.patch"
+    log_info "CONVERSION_ONLY=1 -- applying conversion-only atoms from series..."
+    SERIES="${SCRIPT_DIR}/patches/series"
+    if [ ! -f "$SERIES" ]; then
+        log_error "Conversion-only series not found: $SERIES"
+        exit 1
+    fi
+    while IFS= read -r atom; do
+        [ -z "$atom" ] && continue
+        case "$atom" in '#'\ *) continue ;; esac
+        apply_conversion_atom "$atom" "${SCRIPT_DIR}/patches/$atom"
+    done < "$SERIES"
 fi
 
 # Create autotext files (handled in Step 6 background process)
