@@ -167,9 +167,18 @@ fi
 
 cd "${LO_DIR}"
 
-# Clean if requested
+# Clean if requested. CLEAN_BUILD=1 means a fresh SOURCE TREE as well as
+# a clean build dir: cached LO trees may already have consolidated + atoms
+# applied (e.g. a prior conversion-only run). make clean alone does not
+# reverse patches, so reverse dry-run of the consolidated patch fails and
+# the forward apply then fails on already-patched files. Reset to tip first.
 if [ "$CLEAN_BUILD" = "1" ]; then
-    log_warn "Cleaning previous build..."
+    log_warn "CLEAN_BUILD=1 -- resetting LO source tree to tip and cleaning build..."
+    if [ -d .git ]; then
+        git clean -fdx
+        git checkout -f HEAD
+        git reset --hard HEAD
+    fi
     make clean 2>/dev/null || true
 fi
 
@@ -200,12 +209,13 @@ if [ -f "$CONSOLIDATED_PATCH" ]; then
             log_success "Applied wasm-build-fixes.patch"
         else
             log_error "Failed to apply wasm-build-fixes.patch"
-            log_warn "Build may fail without these patches"
+            # Fail hard: building without the consolidated patch is not useful.
+            exit 1
         fi
     fi
 else
     log_error "Consolidated patch not found: $CONSOLIDATED_PATCH"
-    log_warn "Please ensure build/patches/wasm-build-fixes.patch exists"
+    exit 1
 fi
 
 # Conversion-only atoms -- applied ON TOP of the consolidated baseline patch
@@ -244,9 +254,12 @@ if [ "${CONVERSION_ONLY:-0}" = "1" ]; then
         log_error "Conversion-only series not found: $SERIES"
         exit 1
     fi
-    while IFS= read -r atom; do
+    # Skip blank lines and any line whose first non-whitespace char is '#'.
+    while IFS= read -r atom || [ -n "$atom" ]; do
+        atom="${atom%%$''}"                 # strip CR if present
+        atom="${atom%%#*}"                    # drop inline comments
+        atom="$(printf '%s' "$atom" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
         [ -z "$atom" ] && continue
-        case "$atom" in '#'\ *) continue ;; esac
         apply_conversion_atom "$atom" "${SCRIPT_DIR}/patches/$atom"
     done < "$SERIES"
 fi
