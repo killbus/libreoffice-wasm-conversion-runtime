@@ -1,5 +1,5 @@
 diff --git a/sd/Library_sd.mk b/sd/Library_sd.mk
-index 01f3a1d59..891193ad6 100644
+index 01f3a1d59..1da46dc56 100644
 --- a/sd/Library_sd.mk
 +++ b/sd/Library_sd.mk
 @@ -133,18 +133,18 @@ $(eval $(call gb_Library_set_componentfile,sd,sd/util/sd,services))
@@ -58,12 +58,10 @@ index 01f3a1d59..891193ad6 100644
  	sd/source/ui/app/optsitem \
  	sd/source/ui/app/sddll \
  	sd/source/ui/app/sdmod \
-@@ -223,28 +223,28 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
- 	sd/source/ui/app/sdxfer \
- 	sd/source/ui/app/tmplctrl \
+@@ -225,26 +225,26 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
  	sd/source/ui/app/scalectrl \
--	sd/source/ui/controller/slidelayoutcontroller \
--	sd/source/ui/controller/displaymodecontroller \
+ 	sd/source/ui/controller/slidelayoutcontroller \
+ 	sd/source/ui/controller/displaymodecontroller \
 -	sd/source/ui/dlg/AnimationChildWindow \
 -	sd/source/ui/dlg/LayerTabBar \
 -	sd/source/ui/dlg/NavigatorChildWindow \
@@ -84,8 +82,6 @@ index 01f3a1d59..891193ad6 100644
 -	sd/source/ui/dlg/titledockwin \
 -	sd/source/ui/dlg/unchss \
 -	sd/source/ui/dlg/UndoThemeChange \
-+	$(if $(DISABLE_GUI),,sd/source/ui/controller/slidelayoutcontroller) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/controller/displaymodecontroller) \
 +	$(if $(DISABLE_GUI),,sd/source/ui/dlg/AnimationChildWindow) \
 +	$(if $(DISABLE_GUI),,sd/source/ui/dlg/LayerTabBar) \
 +	$(if $(DISABLE_GUI),,sd/source/ui/dlg/NavigatorChildWindow) \
@@ -109,7 +105,7 @@ index 01f3a1d59..891193ad6 100644
  	sd/source/ui/docshell/docshel2 \
  	sd/source/ui/docshell/docshel3 \
  	sd/source/ui/docshell/docshel4 \
-@@ -284,93 +284,93 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
+@@ -284,65 +284,65 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
  	sd/source/ui/framework/module/ToolBarModule \
  	sd/source/ui/framework/module/ViewTabBarModule \
  	sd/source/ui/framework/tools/FrameworkHelper \
@@ -172,34 +168,6 @@ index 01f3a1d59..891193ad6 100644
 -	sd/source/ui/func/unmovss \
 -	sd/source/ui/func/unoaprms \
 -	sd/source/ui/func/unprlout \
--	sd/source/ui/presenter/CanvasUpdateRequester \
--	sd/source/ui/presenter/PresenterCanvas \
--	sd/source/ui/presenter/PresenterHelper \
--	sd/source/ui/presenter/PresenterPreviewCache \
--	sd/source/ui/presenter/SlideRenderer \
--	sd/source/ui/sidebar/AllMasterPagesSelector \
--	sd/source/ui/sidebar/CurrentMasterPagesSelector \
--	sd/source/ui/sidebar/DocumentHelper \
--	sd/source/ui/sidebar/LayoutMenu \
--	sd/source/ui/sidebar/MasterPageContainer \
--	sd/source/ui/sidebar/MasterPageContainerFiller \
--	sd/source/ui/sidebar/MasterPageContainerProviders \
--	sd/source/ui/sidebar/MasterPageContainerQueue \
--	sd/source/ui/sidebar/MasterPageDescriptor \
--	sd/source/ui/sidebar/MasterPageObserver \
--	sd/source/ui/sidebar/MasterPagesSelector \
--	sd/source/ui/sidebar/NavigatorWrapper \
--	sd/source/ui/sidebar/PanelFactory \
--	sd/source/ui/sidebar/PreviewValueSet \
--	sd/source/ui/sidebar/RecentlyUsedMasterPages \
--	sd/source/ui/sidebar/RecentMasterPagesSelector \
--	sd/source/ui/sidebar/SlideBackground \
--	sd/source/ui/slideshow/PaneHider \
--	sd/source/ui/slideshow/SlideShowRestarter \
--	sd/source/ui/slideshow/showwin \
--	sd/source/ui/slideshow/slideshow \
--	sd/source/ui/slideshow/slideshowimpl \
--	sd/source/ui/slideshow/slideshowviewimpl \
 +	$(if $(DISABLE_GUI),,sd/source/ui/func/bulmaper) \
 +	$(if $(DISABLE_GUI),,sd/source/ui/func/fuarea) \
 +	$(if $(DISABLE_GUI),,sd/source/ui/func/fubullet) \
@@ -259,28 +227,19 @@ index 01f3a1d59..891193ad6 100644
 +	$(if $(DISABLE_GUI),,sd/source/ui/func/unmovss) \
 +	$(if $(DISABLE_GUI),,sd/source/ui/func/unoaprms) \
 +	$(if $(DISABLE_GUI),,sd/source/ui/func/unprlout) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/presenter/CanvasUpdateRequester) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/presenter/PresenterCanvas) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/presenter/PresenterHelper) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/presenter/PresenterPreviewCache) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/presenter/SlideRenderer) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/AllMasterPagesSelector) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/CurrentMasterPagesSelector) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/DocumentHelper) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/LayoutMenu) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageContainer) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageContainerFiller) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageContainerProviders) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageContainerQueue) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageDescriptor) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPageObserver) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/MasterPagesSelector) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/NavigatorWrapper) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/PanelFactory) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/PreviewValueSet) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/RecentlyUsedMasterPages) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/RecentMasterPagesSelector) \
-+	$(if $(DISABLE_GUI),,sd/source/ui/sidebar/SlideBackground) \
+ 	sd/source/ui/presenter/CanvasUpdateRequester \
+ 	sd/source/ui/presenter/PresenterCanvas \
+ 	sd/source/ui/presenter/PresenterHelper \
+@@ -365,12 +365,12 @@ $(eval $(call gb_Library_add_exception_objects,sd,\
+ 	sd/source/ui/sidebar/RecentlyUsedMasterPages \
+ 	sd/source/ui/sidebar/RecentMasterPagesSelector \
+ 	sd/source/ui/sidebar/SlideBackground \
+-	sd/source/ui/slideshow/PaneHider \
+-	sd/source/ui/slideshow/SlideShowRestarter \
+-	sd/source/ui/slideshow/showwin \
+-	sd/source/ui/slideshow/slideshow \
+-	sd/source/ui/slideshow/slideshowimpl \
+-	sd/source/ui/slideshow/slideshowviewimpl \
 +	$(if $(DISABLE_GUI),,sd/source/ui/slideshow/PaneHider) \
 +	$(if $(DISABLE_GUI),,sd/source/ui/slideshow/SlideShowRestarter) \
 +	$(if $(DISABLE_GUI),,sd/source/ui/slideshow/showwin) \
