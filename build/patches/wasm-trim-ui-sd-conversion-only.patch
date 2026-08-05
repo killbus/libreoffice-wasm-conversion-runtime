@@ -382,7 +382,7 @@ index 01f3a1d59..891193ad6 100644
  
  $(eval $(call gb_Library_add_libs,sd,\
 diff --git a/sd/Module_sd.mk b/sd/Module_sd.mk
-index b606b8a56..c3baaac99 100644
+index b606b8a56..d5870429a 100644
 --- a/sd/Module_sd.mk
 +++ b/sd/Module_sd.mk
 @@ -15,15 +15,15 @@ $(eval $(call gb_Module_Module,sd))
@@ -391,12 +391,11 @@ index b606b8a56..c3baaac99 100644
      Library_sdd \
 -    Library_sdui \
 -    Package_opengl \
--    Package_xml \
--    UIConfig_sdraw \
--    UIConfig_simpress \
 +    $(if $(DISABLE_GUI),,Library_sdui) \
 +    $(if $(DISABLE_GUI),,Package_opengl) \
-+    $(if $(DISABLE_GUI),,Package_xml) \
+     Package_xml \
+-    UIConfig_sdraw \
+-    UIConfig_simpress \
 +    $(if $(DISABLE_GUI),,UIConfig_sdraw) \
 +    $(if $(DISABLE_GUI),,UIConfig_simpress) \
  ))
