@@ -128,7 +128,7 @@ Patch verification will use `git apply --check` and
 - Inputs: `mode=conversion-only`, `clean_build=false`,
   `use_conversion_autogen=false`.
 - Final status: `failure`; diagnosis and failed-artifact evidence are recorded
-  below. A corrected retry remains necessary.
+  below. The corrected retry is recorded in the second-build diagnosis.
 
 ## Patch-stack replay and first-build diagnosis (2026-08-07)
 
@@ -153,6 +153,29 @@ Patch verification will use `git apply --check` and
   passed while preserving ignored `workdir/`.
 - Reusable replay rules were captured in
   `.trellis/spec/backend/wasm-patch-stack.md`.
+
+## Second expensive build diagnosis and bridge-header repair (2026-08-08)
+
+- The corrected retry, GHA `31187837196`, replayed the normalized patch stack
+  and reached compilation of the native bridge at runtime commit
+  `b761aef5558469a47d5ca89d03e879e1dd16a41c`.
+- Compilation failed in `desktop/source/lib/init.cxx` because the bridge used
+  `comphelper::NamedValueCollection` without directly including its declaring
+  header. This is a bridge patch dependency omission, not a conversion-runtime
+  semantic failure or another patch-stack replay failure.
+- `wasm-native-conversion-bridge.patch` now adds
+  `<comphelper/namedvaluecollection.hxx>`, and the source-structure suite has a
+  regression assertion for that direct include.
+- Updated bridge patch SHA-256:
+  `F4884155F7CE2242FFC3E56E19237DEEB8308A2BF0E60061E49C110536FB4F9F`.
+- Directed native-bridge and patch-stack tests passed: 12 tests.
+- CI-equivalent non-artifact suite passed: 16 files, 144 tests, 1 skipped.
+- `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint`, and
+  `pnpm build` passed; lint retained the 22 existing warnings and no errors.
+- The complete four-patch apply/reset/strict-replay gate passed again against
+  pinned LibreOffice `d1c9e0e4e1ddeb24fe8f93e56860b3765043f8b1`, preserving
+  ignored `workdir/` outputs.
+- A fresh expensive build remains required for artifact-level acceptance.
 
 ## Risk and rollback points
 

@@ -26,6 +26,14 @@ index d00594174..38db70599 100644
  #include <string_view>
 
  #include <boost/property_tree/json_parser.hpp>
+@@ -81,6 +83,7 @@
+ #include <comphelper/base64.hxx>
+ #include <comphelper/dispatchcommand.hxx>
+ #include <comphelper/lok.hxx>
++#include <comphelper/namedvaluecollection.hxx>
+ #include <comphelper/processfactory.hxx>
+ #include <comphelper/string.hxx>
+ #include <comphelper/profilezone.hxx>
 @@ -100,6 +102,7 @@
  #include <com/sun/star/frame/DispatchResultState.hpp>
  #include <com/sun/star/frame/XDispatchProvider.hpp>

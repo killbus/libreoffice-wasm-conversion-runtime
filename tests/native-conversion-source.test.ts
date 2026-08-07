@@ -57,6 +57,9 @@ describe('native conversion source and build gates', () => {
   });
 
   it('matches the official hidden load and explicit export property sets', () => {
+    expect(patch).toContain(
+      '+#include <comphelper/namedvaluecollection.hxx>'
+    );
     for (const property of ['ReadOnly', 'OpenNewView', 'Hidden', 'Silent']) {
       expect(patch).toContain(
         `comphelper::makePropertyValue(u"${property}"_ustr, true)`
