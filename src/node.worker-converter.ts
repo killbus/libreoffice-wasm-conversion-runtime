@@ -31,16 +31,12 @@ import {
   RenderOptions,
   buildPdfFilterOptions,
 } from './types.js';
+import type { NodeWorkerOperationResponse } from './node-worker-protocol.js';
 
 // Re-export types used by consumers
 export type { LOKDocumentType, OutputFormat, PagePreview, DocumentInfo, EditorSession, RenderOptions };
 
-interface WorkerResponse {
-  id: string;
-  success: boolean;
-  error?: string;
-  data?: unknown;
-}
+type WorkerResponse = NodeWorkerOperationResponse;
 
 /** Worker message for ready/error notifications */
 interface WorkerMessage {
@@ -66,6 +62,7 @@ export class WorkerConverter implements ILibreOfficeConverter {
   private options: LibreOfficeWasmOptions;
   private initialized = false;
   private initializing = false;
+  private restartOnNextConvert = false;
 
   constructor(options: LibreOfficeWasmOptions = {}) {
     this.options = {
@@ -73,6 +70,31 @@ export class WorkerConverter implements ILibreOfficeConverter {
       verbose: false,
       ...options,
     };
+  }
+
+  private discardWorker(
+    error: Error,
+    restartOnNextConvert: boolean,
+    targetWorker: Worker | null = this.worker
+  ): void {
+    if (targetWorker && this.worker !== targetWorker) return;
+
+    const worker = this.worker;
+    this.worker = null;
+    this.initialized = false;
+    this.restartOnNextConvert = restartOnNextConvert;
+
+    if (worker) {
+      worker.removeAllListeners();
+      void worker.terminate().catch(() => undefined);
+    }
+
+    const pendingRequests = [...this.pending.values()];
+    this.pending.clear();
+    for (const pending of pendingRequests) {
+      clearTimeout(pending.timeout);
+      pending.reject(error);
+    }
   }
 
   /**
@@ -86,6 +108,12 @@ export class WorkerConverter implements ILibreOfficeConverter {
     if (this.initializing) {
       while (this.initializing) {
         await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      if (!this.initialized) {
+        throw new ConversionError(
+          ConversionErrorCode.WASM_NOT_INITIALIZED,
+          'Worker initialization failed'
+        );
       }
       return;
     }
@@ -119,49 +147,63 @@ export class WorkerConverter implements ILibreOfficeConverter {
       }
 
       // Create the worker
-      this.worker = new Worker(workerPath);
+      const worker = new Worker(workerPath);
+      this.worker = worker;
 
-      // Set up message handling
-      this.worker.on('message', (response: WorkerResponse | { type: string }) => {
-        if ('type' in response && response.type === 'ready') {
-          return; // Worker ready signal
-        }
-
-        const res = response as WorkerResponse;
-        const pending = this.pending.get(res.id);
-        if (pending) {
-          // Clear the timeout to prevent it from keeping the process alive
-          clearTimeout(pending.timeout);
-          this.pending.delete(res.id);
-          if (res.success) {
-            pending.resolve(res.data);
-          } else {
-            pending.reject(new ConversionError(
-              ConversionErrorCode.CONVERSION_FAILED,
-              res.error || 'Unknown worker error'
-            ));
-          }
-        }
-      });
-
-      this.worker.on('error', (error) => {
-        // Reject all pending operations and clear their timeouts
-        for (const [, pending] of this.pending) {
-          clearTimeout(pending.timeout);
-          pending.reject(error);
-        }
-        this.pending.clear();
-      });
-
-      // Wait for ready signal
-      await new Promise<void>((resolve) => {
-        const handler = (msg: WorkerMessage) => {
-          if (msg.type === 'ready') {
-            this.worker?.off('message', handler);
+      // Wait for the worker script to load before sending init.
+      await new Promise<void>((resolve, reject) => {
+        const cleanup = () => {
+          worker.off('message', messageHandler);
+          worker.off('error', errorHandler);
+        };
+        const messageHandler = (message: WorkerMessage) => {
+          if (message.type === 'ready') {
+            cleanup();
             resolve();
           }
         };
-        this.worker?.on('message', handler);
+        const errorHandler = (error: Error) => {
+          cleanup();
+          reject(error);
+        };
+        worker.on('message', messageHandler);
+        worker.on('error', errorHandler);
+      });
+
+      if (this.worker !== worker) {
+        throw new Error('Worker became unavailable during initialization');
+      }
+
+      // Set up operation response handling after the one-time ready signal.
+      worker.on('message', (response: WorkerResponse | { type: string }) => {
+        if (this.worker !== worker) return;
+        if ('type' in response && response.type === 'ready') return;
+
+        const result = response as WorkerResponse;
+        const pending = this.pending.get(result.id);
+        if (!pending) return;
+
+        clearTimeout(pending.timeout);
+        this.pending.delete(result.id);
+
+        if (result.success) {
+          pending.resolve(result.data);
+          return;
+        }
+
+        const error = new ConversionError(
+          ConversionErrorCode.CONVERSION_FAILED,
+          result.error || 'Unknown worker error'
+        );
+        pending.reject(error);
+        if (result.quarantine) {
+          this.discardWorker(error, true, worker);
+        }
+      });
+
+      worker.on('error', (error) => {
+        if (this.worker !== worker) return;
+        this.discardWorker(error, this.initialized, worker);
       });
 
       // Initialize the WASM module in the worker
@@ -171,6 +213,7 @@ export class WorkerConverter implements ILibreOfficeConverter {
       });
 
       this.initialized = true;
+      this.restartOnNextConvert = false;
       this.options.onReady?.();
     } catch (error) {
       const convError = error instanceof ConversionError
@@ -179,6 +222,7 @@ export class WorkerConverter implements ILibreOfficeConverter {
             ConversionErrorCode.WASM_NOT_INITIALIZED,
             `Failed to initialize worker: ${String(error)}`
           );
+      this.discardWorker(convError, false);
       this.options.onError?.(convError);
       throw convError;
     } finally {
@@ -214,7 +258,13 @@ export class WorkerConverter implements ILibreOfficeConverter {
       }, 300000);
 
       this.pending.set(id, { resolve, reject, timeout });
-      this.worker.postMessage({ type, id, payload });
+      try {
+        this.worker.postMessage({ type, id, payload });
+      } catch (error) {
+        clearTimeout(timeout);
+        this.pending.delete(id);
+        reject(error instanceof Error ? error : new Error(String(error)));
+      }
     });
   }
 
@@ -226,6 +276,9 @@ export class WorkerConverter implements ILibreOfficeConverter {
     options: ConversionOptions,
     filename = 'document'
   ): Promise<ConversionResult> {
+    if ((!this.initialized || !this.worker) && this.restartOnNextConvert) {
+      await this.initialize();
+    }
     if (!this.initialized || !this.worker) {
       throw new ConversionError(
         ConversionErrorCode.WASM_NOT_INITIALIZED,
@@ -256,6 +309,7 @@ export class WorkerConverter implements ILibreOfficeConverter {
       inputFormat,
       outputFormat,
       filterOptions,
+      password: options.password,
       filename,
     });
 
@@ -520,32 +574,20 @@ export class WorkerConverter implements ILibreOfficeConverter {
    * Destroy the converter and terminate the worker
    */
   async destroy(): Promise<void> {
-    // Clear all pending timeouts first to allow process to exit
-    for (const [, pending] of this.pending) {
-      clearTimeout(pending.timeout);
-    }
-
-    if (this.worker) {
+    const worker = this.worker;
+    if (worker) {
       try {
         await this.sendMessage('destroy');
       } catch {
         // Ignore errors during cleanup
       }
-
-      // Clear any new timeouts from the destroy message
-      for (const [, pending] of this.pending) {
-        clearTimeout(pending.timeout);
-      }
-
-      // Remove all event listeners to prevent memory leaks
-      this.worker.removeAllListeners();
-
-      // Terminate the worker thread
-      await this.worker.terminate();
-      this.worker = null;
     }
-    this.initialized = false;
-    this.pending.clear();
+
+    this.discardWorker(
+      new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, 'Converter destroyed'),
+      false,
+      worker
+    );
   }
 
   /**
@@ -592,4 +634,3 @@ export async function createWorkerConverter(
   await converter.initialize();
   return converter;
 }
-

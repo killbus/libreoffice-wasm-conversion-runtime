@@ -1,0 +1,1088 @@
+diff --git a/desktop/Executable_soffice_bin.mk b/desktop/Executable_soffice_bin.mk
+index 11e2d84a2..489f16694 100644
+--- a/desktop/Executable_soffice_bin.mk
++++ b/desktop/Executable_soffice_bin.mk
+@@ -62,7 +62,7 @@ $(call gb_LinkTarget_get_headers_target,$(call gb_Executable_get_linktarget,soff
+ $(call gb_LinkTarget__static_lib_dummy_depend,unoembind)
+
+ $(eval $(call gb_Executable_add_ldflags,soffice_bin,\
+-	-s EXPORTED_FUNCTIONS=["_main"$(COMMA)"_libreofficekit_hook"$(COMMA)"_libreofficekit_hook_2"$(COMMA)"_lok_preinit"$(COMMA)"_lok_preinit_2"$(COMMA)"_lok_documentLoad"$(COMMA)"_lok_documentLoadWithOptions"$(COMMA)"_lok_documentSaveAs"$(COMMA)"_lok_documentDestroy"$(COMMA)"_lok_destroy"$(COMMA)"_lok_getError"$(COMMA)"_lok_abortOperation"$(COMMA)"_lok_setOperationTimeout"$(COMMA)"_lok_getOperationState"$(COMMA)"_lok_resetAbort"$(COMMA)"_malloc"$(COMMA)"_free"] -Wl$(COMMA)--whole-archive $(call gb_StaticLibrary_get_target,unoembind) -Wl$(COMMA)--no-whole-archive \
++	-s EXPORTED_FUNCTIONS=["_main"$(COMMA)"_libreofficekit_hook"$(COMMA)"_libreofficekit_hook_2"$(COMMA)"_lok_preinit"$(COMMA)"_lok_preinit_2"$(COMMA)"_lok_convertDocument"$(COMMA)"_lok_convertFree"$(COMMA)"_lok_documentLoad"$(COMMA)"_lok_documentLoadWithOptions"$(COMMA)"_lok_documentSaveAs"$(COMMA)"_lok_documentDestroy"$(COMMA)"_lok_destroy"$(COMMA)"_lok_getError"$(COMMA)"_lok_abortOperation"$(COMMA)"_lok_setOperationTimeout"$(COMMA)"_lok_getOperationState"$(COMMA)"_lok_resetAbort"$(COMMA)"_malloc"$(COMMA)"_free"] -Wl$(COMMA)--whole-archive $(call gb_StaticLibrary_get_target,unoembind) -Wl$(COMMA)--no-whole-archive \
+ ))
+ ifeq ($(ENABLE_QT6),TRUE)
+ $(eval $(call gb_Executable_add_ldflags,soffice_bin, \
+diff --git a/desktop/source/lib/init.cxx b/desktop/source/lib/init.cxx
+index d00594174..38db70599 100644
+--- a/desktop/source/lib/init.cxx
++++ b/desktop/source/lib/init.cxx
+@@ -52,8 +52,10 @@
+
+ #include <algorithm>
+ #include <cstring>
++#include <cstdlib>
+ #include <memory>
+ #include <iostream>
++#include <sstream>
+ #include <string_view>
+
+ #include <boost/property_tree/json_parser.hpp>
+@@ -100,6 +102,7 @@
+ #include <com/sun/star/frame/DispatchResultState.hpp>
+ #include <com/sun/star/frame/XDispatchProvider.hpp>
+ #include <com/sun/star/frame/XDispatchResultListener.hpp>
++#include <com/sun/star/frame/XModel.hpp>
+ #include <com/sun/star/frame/XSynchronousDispatch.hpp>
+ #include <com/sun/star/frame/XStorable.hpp>
+ #include <com/sun/star/lang/Locale.hpp>
+@@ -107,6 +110,7 @@
+ #include <com/sun/star/lang/XMultiServiceFactory.hpp>
+ #include <com/sun/star/style/XStyleFamiliesSupplier.hpp>
+ #include <com/sun/star/util/CloseVetoException.hpp>
++#include <com/sun/star/util/XCloseable.hpp>
+ #include <com/sun/star/util/URLTransformer.hpp>
+ #include <com/sun/star/datatransfer/clipboard/XClipboard.hpp>
+ #include <com/sun/star/datatransfer/UnsupportedFlavorException.hpp>
+@@ -140,6 +144,7 @@
+ #include <sfx2/app.hxx>
+ #endif
+ #include <sfx2/objsh.hxx>
++#include <sfx2/sfxbasecontroller.hxx>
+ #include <sfx2/docfilt.hxx>
+ #include <sfx2/docfile.hxx>
+ #include <sfx2/viewsh.hxx>
+@@ -2646,6 +2651,924 @@ static uno::Reference<css::uno::XComponentContext> xContext;
+ static uno::Reference<css::lang::XMultiServiceFactory> xSFactory;
+ static uno::Reference<css::lang::XMultiComponentFactory> xFactory;
+
++#if defined(__EMSCRIPTEN__)
++namespace
++{
++
++constexpr sal_Int32 NATIVE_CONVERSION_SCHEMA_VERSION = 1;
++
++struct NativeConversionRequest
++{
++    OUString maInputURL;
++    OUString maOutputURL;
++    OUString maInputFilter;
++    OUString maInputFilterOptions;
++    OUString maPassword;
++    OUString maOutputFilter;
++    OUString maOutputFilterOptions;
++    uno::Sequence<beans::PropertyValue> maFilterData;
++};
++
++struct NativeConversionResult
++{
++    bool mbOk = false;
++    const char* mpStage = "validate";
++    const char* mpCleanup = "not-needed";
++    bool mbHiddenLoad = false;
++    bool mbVisibleFrameSetupEntered = false;
++    OUString maMessage;
++};
++
++bool nativeConversionHasAbsoluteURL(const OUString& rURL)
++{
++    const sal_Int32 nColon = rURL.indexOf(':');
++    if (nColon <= 0)
++        return false;
++
++    const sal_Unicode cFirst = rURL[0];
++    if (!((cFirst >= 'A' && cFirst <= 'Z') || (cFirst >= 'a' && cFirst <= 'z')))
++        return false;
++
++    for (sal_Int32 nIndex = 1; nIndex < nColon; ++nIndex)
++    {
++        const sal_Unicode c = rURL[nIndex];
++        if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
++              || (c >= '0' && c <= '9') || c == '+' || c == '-' || c == '.'))
++        {
++            return false;
++        }
++    }
++    return true;
++}
++
++bool nativeConversionFilterDataTypeSupported(std::string_view aType)
++{
++    return aType == "string" || aType == "boolean" || aType == "float"
++           || aType == "long" || aType == "short" || aType == "unsigned short"
++           || aType == "int64" || aType == "int32" || aType == "int16"
++           || aType == "uint64" || aType == "uint32" || aType == "uint16";
++}
++
++class NativeConversionJSONParser
++{
++public:
++    NativeConversionJSONParser(std::string_view aJSON, OUString& rError)
++        : maJSON(aJSON)
++        , mrError(rError)
++    {
++    }
++
++    bool parse(NativeConversionRequest& rRequest)
++    {
++        if (!consume('{'))
++            return fail(u"requestJson must be a JSON object"_ustr);
++
++        unsigned nSeenFields = 0;
++        skipWhitespace();
++        if (consumeWithoutWhitespace('}'))
++            return fail(u"Missing required request fields"_ustr);
++
++        while (true)
++        {
++            std::string aName;
++            if (!parseString(aName))
++                return false;
++            if (!consume(':'))
++                return fail(u"Expected ':' after request field name"_ustr);
++
++            const unsigned nField = requestField(aName);
++            if (nField == 0)
++                return fail(u"Unknown request field"_ustr);
++            if ((nSeenFields & nField) != 0)
++                return fail(u"Duplicate request field"_ustr);
++            nSeenFields |= nField;
++
++            if (!parseRequestField(nField, rRequest))
++                return false;
++
++            skipWhitespace();
++            if (consumeWithoutWhitespace('}'))
++                break;
++            if (!consumeWithoutWhitespace(','))
++                return fail(u"Expected ',' or '}' after request field"_ustr);
++        }
++
++        skipWhitespace();
++        if (mnPosition != maJSON.size())
++            return fail(u"Unexpected data after request object"_ustr);
++
++        constexpr unsigned nRequiredFields
++            = FIELD_SCHEMA_VERSION | FIELD_INPUT_URL | FIELD_OUTPUT_URL | FIELD_OUTPUT_FILTER;
++        if ((nSeenFields & nRequiredFields) != nRequiredFields)
++            return fail(u"Missing required request fields"_ustr);
++
++        if (!nativeConversionHasAbsoluteURL(rRequest.maInputURL)
++            || !nativeConversionHasAbsoluteURL(rRequest.maOutputURL))
++        {
++            return fail(u"inputUrl and outputUrl must be absolute URLs"_ustr);
++        }
++
++        return true;
++    }
++
++private:
++    static constexpr unsigned FIELD_SCHEMA_VERSION = 1U << 0;
++    static constexpr unsigned FIELD_INPUT_URL = 1U << 1;
++    static constexpr unsigned FIELD_OUTPUT_URL = 1U << 2;
++    static constexpr unsigned FIELD_INPUT_FILTER = 1U << 3;
++    static constexpr unsigned FIELD_INPUT_FILTER_OPTIONS = 1U << 4;
++    static constexpr unsigned FIELD_PASSWORD = 1U << 5;
++    static constexpr unsigned FIELD_OUTPUT_FILTER = 1U << 6;
++    static constexpr unsigned FIELD_OUTPUT_FILTER_OPTIONS = 1U << 7;
++    static constexpr unsigned FIELD_FILTER_DATA = 1U << 8;
++
++    std::string_view maJSON;
++    std::size_t mnPosition = 0;
++    OUString& mrError;
++
++    bool fail(const OUString& rMessage)
++    {
++        mrError = rMessage;
++        return false;
++    }
++
++    void skipWhitespace()
++    {
++        while (mnPosition < maJSON.size())
++        {
++            const char c = maJSON[mnPosition];
++            if (c != ' ' && c != '\t' && c != '\r' && c != '\n')
++                break;
++            ++mnPosition;
++        }
++    }
++
++    bool consumeWithoutWhitespace(char c)
++    {
++        if (mnPosition >= maJSON.size() || maJSON[mnPosition] != c)
++            return false;
++        ++mnPosition;
++        return true;
++    }
++
++    bool consume(char c)
++    {
++        skipWhitespace();
++        return consumeWithoutWhitespace(c);
++    }
++
++    bool consumeNull()
++    {
++        skipWhitespace();
++        if (maJSON.substr(mnPosition, 4) != "null")
++            return false;
++        mnPosition += 4;
++        return true;
++    }
++
++    static int hexValue(char c)
++    {
++        if (c >= '0' && c <= '9')
++            return c - '0';
++        if (c >= 'a' && c <= 'f')
++            return c - 'a' + 10;
++        if (c >= 'A' && c <= 'F')
++            return c - 'A' + 10;
++        return -1;
++    }
++
++    bool parseHexCodeUnit(sal_uInt32& rCodeUnit)
++    {
++        if (mnPosition + 4 > maJSON.size())
++            return fail(u"Incomplete JSON unicode escape"_ustr);
++
++        rCodeUnit = 0;
++        for (unsigned nIndex = 0; nIndex < 4; ++nIndex)
++        {
++            const int nValue = hexValue(maJSON[mnPosition++]);
++            if (nValue < 0)
++                return fail(u"Invalid JSON unicode escape"_ustr);
++            rCodeUnit = (rCodeUnit << 4) | static_cast<unsigned>(nValue);
++        }
++        return true;
++    }
++
++    static void appendUTF8(std::string& rValue, sal_uInt32 nCodePoint)
++    {
++        if (nCodePoint <= 0x7f)
++        {
++            rValue.push_back(static_cast<char>(nCodePoint));
++        }
++        else if (nCodePoint <= 0x7ff)
++        {
++            rValue.push_back(static_cast<char>(0xc0 | (nCodePoint >> 6)));
++            rValue.push_back(static_cast<char>(0x80 | (nCodePoint & 0x3f)));
++        }
++        else if (nCodePoint <= 0xffff)
++        {
++            rValue.push_back(static_cast<char>(0xe0 | (nCodePoint >> 12)));
++            rValue.push_back(static_cast<char>(0x80 | ((nCodePoint >> 6) & 0x3f)));
++            rValue.push_back(static_cast<char>(0x80 | (nCodePoint & 0x3f)));
++        }
++        else
++        {
++            rValue.push_back(static_cast<char>(0xf0 | (nCodePoint >> 18)));
++            rValue.push_back(static_cast<char>(0x80 | ((nCodePoint >> 12) & 0x3f)));
++            rValue.push_back(static_cast<char>(0x80 | ((nCodePoint >> 6) & 0x3f)));
++            rValue.push_back(static_cast<char>(0x80 | (nCodePoint & 0x3f)));
++        }
++    }
++
++    bool copyUTF8Sequence(unsigned char nFirst, std::size_t nStart, std::string& rValue)
++    {
++        unsigned nContinuationCount;
++        sal_uInt32 nCodePoint;
++        sal_uInt32 nMinimum;
++        if ((nFirst & 0xe0) == 0xc0)
++        {
++            nContinuationCount = 1;
++            nCodePoint = nFirst & 0x1f;
++            nMinimum = 0x80;
++        }
++        else if ((nFirst & 0xf0) == 0xe0)
++        {
++            nContinuationCount = 2;
++            nCodePoint = nFirst & 0x0f;
++            nMinimum = 0x800;
++        }
++        else if ((nFirst & 0xf8) == 0xf0)
++        {
++            nContinuationCount = 3;
++            nCodePoint = nFirst & 0x07;
++            nMinimum = 0x10000;
++        }
++        else
++        {
++            return fail(u"Invalid UTF-8 in JSON string"_ustr);
++        }
++
++        if (mnPosition + nContinuationCount > maJSON.size())
++            return fail(u"Incomplete UTF-8 in JSON string"_ustr);
++
++        for (unsigned nIndex = 0; nIndex < nContinuationCount; ++nIndex)
++        {
++            const unsigned char nNext = static_cast<unsigned char>(maJSON[mnPosition++]);
++            if ((nNext & 0xc0) != 0x80)
++                return fail(u"Invalid UTF-8 in JSON string"_ustr);
++            nCodePoint = (nCodePoint << 6) | (nNext & 0x3f);
++        }
++
++        if (nCodePoint < nMinimum || nCodePoint > 0x10ffff
++            || (nCodePoint >= 0xd800 && nCodePoint <= 0xdfff))
++        {
++            return fail(u"Invalid UTF-8 code point in JSON string"_ustr);
++        }
++
++        rValue.append(maJSON.substr(nStart, nContinuationCount + 1));
++        return true;
++    }
++
++    bool parseEscapedCharacter(std::string& rValue)
++    {
++        if (mnPosition >= maJSON.size())
++            return fail(u"Incomplete JSON string escape"_ustr);
++
++        const char c = maJSON[mnPosition++];
++        switch (c)
++        {
++            case '"': rValue.push_back('"'); return true;
++            case '\\': rValue.push_back('\\'); return true;
++            case '/': rValue.push_back('/'); return true;
++            case 'b': rValue.push_back('\b'); return true;
++            case 'f': rValue.push_back('\f'); return true;
++            case 'n': rValue.push_back('\n'); return true;
++            case 'r': rValue.push_back('\r'); return true;
++            case 't': rValue.push_back('\t'); return true;
++            case 'u': break;
++            default: return fail(u"Invalid JSON string escape"_ustr);
++        }
++
++        sal_uInt32 nCodePoint;
++        if (!parseHexCodeUnit(nCodePoint))
++            return false;
++
++        if (nCodePoint >= 0xd800 && nCodePoint <= 0xdbff)
++        {
++            if (mnPosition + 2 > maJSON.size() || maJSON[mnPosition] != '\\'
++                || maJSON[mnPosition + 1] != 'u')
++            {
++                return fail(u"Missing low surrogate in JSON string"_ustr);
++            }
++            mnPosition += 2;
++            sal_uInt32 nLowSurrogate;
++            if (!parseHexCodeUnit(nLowSurrogate))
++                return false;
++            if (nLowSurrogate < 0xdc00 || nLowSurrogate > 0xdfff)
++                return fail(u"Invalid low surrogate in JSON string"_ustr);
++            nCodePoint = 0x10000 + ((nCodePoint - 0xd800) << 10)
++                         + (nLowSurrogate - 0xdc00);
++        }
++        else if (nCodePoint >= 0xdc00 && nCodePoint <= 0xdfff)
++        {
++            return fail(u"Unexpected low surrogate in JSON string"_ustr);
++        }
++
++        appendUTF8(rValue, nCodePoint);
++        return true;
++    }
++
++    bool parseString(std::string& rValue)
++    {
++        skipWhitespace();
++        if (!consumeWithoutWhitespace('"'))
++            return fail(u"Expected JSON string"_ustr);
++
++        rValue.clear();
++        while (mnPosition < maJSON.size())
++        {
++            const std::size_t nStart = mnPosition;
++            const unsigned char c = static_cast<unsigned char>(maJSON[mnPosition++]);
++            if (c == '"')
++                return true;
++            if (c == '\\')
++            {
++                if (!parseEscapedCharacter(rValue))
++                    return false;
++            }
++            else if (c < 0x20)
++            {
++                return fail(u"Unescaped control character in JSON string"_ustr);
++            }
++            else if (c < 0x80)
++            {
++                rValue.push_back(static_cast<char>(c));
++            }
++            else if (!copyUTF8Sequence(c, nStart, rValue))
++            {
++                return false;
++            }
++        }
++
++        return fail(u"Unterminated JSON string"_ustr);
++    }
++
++    bool parseNumber(std::string_view& rNumber)
++    {
++        skipWhitespace();
++        const std::size_t nStart = mnPosition;
++        if (mnPosition < maJSON.size() && maJSON[mnPosition] == '-')
++            ++mnPosition;
++        if (mnPosition >= maJSON.size())
++            return false;
++
++        if (maJSON[mnPosition] == '0')
++        {
++            ++mnPosition;
++            if (mnPosition < maJSON.size() && maJSON[mnPosition] >= '0'
++                && maJSON[mnPosition] <= '9')
++            {
++                return false;
++            }
++        }
++        else if (maJSON[mnPosition] >= '1' && maJSON[mnPosition] <= '9')
++        {
++            while (mnPosition < maJSON.size() && maJSON[mnPosition] >= '0'
++                   && maJSON[mnPosition] <= '9')
++            {
++                ++mnPosition;
++            }
++        }
++        else
++        {
++            return false;
++        }
++
++        if (mnPosition < maJSON.size() && maJSON[mnPosition] == '.')
++        {
++            ++mnPosition;
++            const std::size_t nFractionStart = mnPosition;
++            while (mnPosition < maJSON.size() && maJSON[mnPosition] >= '0'
++                   && maJSON[mnPosition] <= '9')
++            {
++                ++mnPosition;
++            }
++            if (mnPosition == nFractionStart)
++                return false;
++        }
++
++        if (mnPosition < maJSON.size()
++            && (maJSON[mnPosition] == 'e' || maJSON[mnPosition] == 'E'))
++        {
++            ++mnPosition;
++            if (mnPosition < maJSON.size()
++                && (maJSON[mnPosition] == '+' || maJSON[mnPosition] == '-'))
++            {
++                ++mnPosition;
++            }
++            const std::size_t nExponentStart = mnPosition;
++            while (mnPosition < maJSON.size() && maJSON[mnPosition] >= '0'
++                   && maJSON[mnPosition] <= '9')
++            {
++                ++mnPosition;
++            }
++            if (mnPosition == nExponentStart)
++                return false;
++        }
++
++        rNumber = maJSON.substr(nStart, mnPosition - nStart);
++        return true;
++    }
++
++    static unsigned requestField(std::string_view aName)
++    {
++        if (aName == "schemaVersion") return FIELD_SCHEMA_VERSION;
++        if (aName == "inputUrl") return FIELD_INPUT_URL;
++        if (aName == "outputUrl") return FIELD_OUTPUT_URL;
++        if (aName == "inputFilter") return FIELD_INPUT_FILTER;
++        if (aName == "inputFilterOptions") return FIELD_INPUT_FILTER_OPTIONS;
++        if (aName == "password") return FIELD_PASSWORD;
++        if (aName == "outputFilter") return FIELD_OUTPUT_FILTER;
++        if (aName == "outputFilterOptions") return FIELD_OUTPUT_FILTER_OPTIONS;
++        if (aName == "filterData") return FIELD_FILTER_DATA;
++        return 0;
++    }
++
++    bool parseStringField(OUString& rValue, bool bRequired)
++    {
++        if (consumeNull())
++        {
++            if (bRequired)
++                return fail(u"Required request field cannot be null"_ustr);
++            rValue.clear();
++            return true;
++        }
++
++        std::string aValue;
++        if (!parseString(aValue))
++            return false;
++        rValue = OUString::fromUtf8(aValue);
++        if (bRequired && rValue.isEmpty())
++            return fail(u"Required request field cannot be empty"_ustr);
++        return true;
++    }
++
++    bool parseFilterDataEntry(std::string& rType, std::string& rValue)
++    {
++        if (!consume('{'))
++            return fail(u"filterData entries must be objects"_ustr);
++
++        bool bHasType = false;
++        bool bHasValue = false;
++        skipWhitespace();
++        if (consumeWithoutWhitespace('}'))
++            return fail(u"filterData entry must contain type and value"_ustr);
++
++        while (true)
++        {
++            std::string aName;
++            if (!parseString(aName))
++                return false;
++            if (!consume(':'))
++                return fail(u"Expected ':' after filterData entry field"_ustr);
++
++            if (aName == "type")
++            {
++                if (bHasType)
++                    return fail(u"Duplicate filterData type field"_ustr);
++                bHasType = true;
++                if (!parseString(rType))
++                    return fail(u"filterData type must be a string"_ustr);
++            }
++            else if (aName == "value")
++            {
++                if (bHasValue)
++                    return fail(u"Duplicate filterData value field"_ustr);
++                bHasValue = true;
++                if (!parseString(rValue))
++                    return fail(u"filterData value must be a string"_ustr);
++            }
++            else
++            {
++                return fail(u"Unknown filterData entry field"_ustr);
++            }
++
++            skipWhitespace();
++            if (consumeWithoutWhitespace('}'))
++                break;
++            if (!consumeWithoutWhitespace(','))
++                return fail(u"Expected ',' or '}' after filterData entry field"_ustr);
++        }
++
++        if (!bHasType || !bHasValue)
++            return fail(u"filterData entry must contain type and value"_ustr);
++        if (!nativeConversionFilterDataTypeSupported(rType))
++            return fail(u"Unsupported filterData type"_ustr);
++        return true;
++    }
++
++    bool parseFilterData(NativeConversionRequest& rRequest)
++    {
++        if (consumeNull())
++            return true;
++        if (!consume('{'))
++            return fail(u"filterData must be an object or null"_ustr);
++
++        boost::property_tree::ptree aTree;
++        std::vector<std::string> aNames;
++        skipWhitespace();
++        if (consumeWithoutWhitespace('}'))
++            return true;
++
++        while (true)
++        {
++            std::string aName;
++            if (!parseString(aName))
++                return false;
++            if (aName.empty())
++                return fail(u"filterData entry name cannot be empty"_ustr);
++            if (std::find(aNames.begin(), aNames.end(), aName) != aNames.end())
++                return fail(u"Duplicate filterData entry"_ustr);
++            aNames.push_back(aName);
++
++            if (!consume(':'))
++                return fail(u"Expected ':' after filterData entry name"_ustr);
++            std::string aType;
++            std::string aValue;
++            if (!parseFilterDataEntry(aType, aValue))
++                return false;
++
++            boost::property_tree::ptree aEntry;
++            aEntry.put("type", aType);
++            aEntry.put("value", aValue);
++            aTree.push_back(std::make_pair(aName, aEntry));
++
++            skipWhitespace();
++            if (consumeWithoutWhitespace('}'))
++                break;
++            if (!consumeWithoutWhitespace(','))
++                return fail(u"Expected ',' or '}' after filterData entry"_ustr);
++        }
++
++        try
++        {
++            // The strict parser above has already verified that each entry has
++            // exactly one string type and one string value. Property tree is
++            // used only to adapt those validated scalars to PropertyValue.
++            std::ostringstream aStream;
++            boost::property_tree::write_json(aStream, aTree, false);
++            const std::vector<beans::PropertyValue> aValues
++                = comphelper::JsonToPropertyValues(OString(aStream.str()));
++            rRequest.maFilterData = comphelper::containerToSequence(aValues);
++            return true;
++        }
++        catch (...)
++        {
++            return fail(u"filterData could not be decoded"_ustr);
++        }
++    }
++
++    bool parseRequestField(unsigned nField, NativeConversionRequest& rRequest)
++    {
++        switch (nField)
++        {
++            case FIELD_SCHEMA_VERSION:
++            {
++                std::string_view aNumber;
++                if (!parseNumber(aNumber) || aNumber != "1")
++                    return fail(u"Unsupported or invalid schemaVersion"_ustr);
++                return true;
++            }
++            case FIELD_INPUT_URL:
++                return parseStringField(rRequest.maInputURL, true);
++            case FIELD_OUTPUT_URL:
++                return parseStringField(rRequest.maOutputURL, true);
++            case FIELD_INPUT_FILTER:
++                return parseStringField(rRequest.maInputFilter, false);
++            case FIELD_INPUT_FILTER_OPTIONS:
++                return parseStringField(rRequest.maInputFilterOptions, false);
++            case FIELD_PASSWORD:
++                return parseStringField(rRequest.maPassword, false);
++            case FIELD_OUTPUT_FILTER:
++                return parseStringField(rRequest.maOutputFilter, true);
++            case FIELD_OUTPUT_FILTER_OPTIONS:
++                return parseStringField(rRequest.maOutputFilterOptions, false);
++            case FIELD_FILTER_DATA:
++                return parseFilterData(rRequest);
++            default:
++                return fail(u"Unknown request field"_ustr);
++        }
++    }
++};
++
++bool nativeConversionParseRequest(const char* pRequestJSON, NativeConversionRequest& rRequest,
++                                  OUString& rError)
++{
++    if (!pRequestJSON || pRequestJSON[0] == '\0')
++    {
++        rError = u"requestJson must be a non-empty UTF-8 JSON object"_ustr;
++        return false;
++    }
++
++    try
++    {
++        NativeConversionJSONParser aParser(pRequestJSON, rError);
++        return aParser.parse(rRequest);
++    }
++    catch (const std::exception&)
++    {
++        rError = u"requestJson is not valid JSON"_ustr;
++        return false;
++    }
++    catch (...)
++    {
++        rError = u"requestJson could not be decoded"_ustr;
++        return false;
++    }
++}
++
++int nativeConversionWriteResult(const NativeConversionResult& rResult, char** ppResultJSON)
++{
++    tools::JsonWriter aJSON;
++    aJSON.put("schemaVersion", NATIVE_CONVERSION_SCHEMA_VERSION);
++    aJSON.put("ok", rResult.mbOk);
++    aJSON.put("stage", std::string_view(rResult.mpStage));
++    aJSON.put("cleanup", std::string_view(rResult.mpCleanup));
++    aJSON.put("hiddenLoad", rResult.mbHiddenLoad);
++    aJSON.put("visibleFrameSetupEntered", rResult.mbVisibleFrameSetupEntered);
++    if (!rResult.maMessage.isEmpty())
++        aJSON.put("message", rResult.maMessage);
++
++    const OString aEncoded = aJSON.finishAndGetAsOString();
++    char* pAllocation = static_cast<char*>(malloc(aEncoded.getLength() + 1));
++    if (!pAllocation)
++        return 2;
++
++    memcpy(pAllocation, aEncoded.getStr(), aEncoded.getLength() + 1);
++    *ppResultJSON = pAllocation;
++    return 0;
++}
++
++int nativeConversionWriteBoundaryFailure(char** ppResultJSON) noexcept
++{
++    static constexpr char aFallbackJSON[]
++        = "{\"schemaVersion\":1,\"ok\":false,\"stage\":\"cleanup\","
++          "\"cleanup\":\"uncertain\",\"hiddenLoad\":false,"
++          "\"visibleFrameSetupEntered\":false,"
++          "\"message\":\"Native conversion bridge boundary failure; runtime must be "
++          "terminated\"}";
++
++    char* pAllocation = static_cast<char*>(malloc(sizeof(aFallbackJSON)));
++    if (!pAllocation)
++        return 2;
++
++    memcpy(pAllocation, aFallbackJSON, sizeof(aFallbackJSON));
++    *ppResultJSON = pAllocation;
++    return 0;
++}
++
++bool nativeConversionHiddenLoadConfirmed(
++    const uno::Reference<lang::XComponent>& xComponent)
++{
++    const uno::Reference<frame::XModel> xModel(xComponent, uno::UNO_QUERY);
++    if (!xModel.is())
++        return false;
++
++    const comphelper::NamedValueCollection aArguments(xModel->getArgs());
++    return aArguments.getOrDefault(u"Hidden"_ustr, false);
++}
++
++const char* nativeConversionCleanup(
++    const uno::Reference<lang::XComponent>& xComponent) noexcept
++{
++    try
++    {
++        const uno::Reference<util::XCloseable> xCloseable(xComponent, uno::UNO_QUERY);
++        if (xCloseable.is())
++        {
++            try
++            {
++                xCloseable->close(true);
++                return "clean";
++            }
++            catch (...)
++            {
++                // A veto or any close exception makes reuse unsafe even when
++                // fallback disposal succeeds.
++                try
++                {
++                    xComponent->dispose();
++                }
++                catch (...)
++                {
++                }
++                return "uncertain";
++            }
++        }
++
++        try
++        {
++            xComponent->dispose();
++            return "clean";
++        }
++        catch (...)
++        {
++            return "uncertain";
++        }
++    }
++    catch (...)
++    {
++        return "uncertain";
++    }
++}
++
++int nativeConvertDocumentImpl(LibreOfficeKit* pKit, const char* pRequestJSON,
++                              char** ppResultJSON)
++{
++    NativeConversionResult aResult;
++    NativeConversionRequest aRequest;
++    if (!nativeConversionParseRequest(pRequestJSON, aRequest, aResult.maMessage))
++        return nativeConversionWriteResult(aResult, ppResultJSON);
++
++    if (!pKit || !gImpl || pKit != static_cast<LibreOfficeKit*>(gImpl))
++    {
++        aResult.maMessage = u"LibreOfficeKit instance is not initialized"_ustr;
++        return nativeConversionWriteResult(aResult, ppResultJSON);
++    }
++    if (!xContext.is())
++    {
++        aResult.maMessage = u"Component context is not available"_ustr;
++        return nativeConversionWriteResult(aResult, ppResultJSON);
++    }
++
++    SolarMutexGuard aGuard;
++    uno::Reference<lang::XComponent> xComponent;
++    bool bCleanupDone = false;
++    bool bConverted = false;
++    bool bMarkerArmed = false;
++    comphelper::ScopeGuard aCleanupGuard([&]() {
++        if (xComponent.is() && !bCleanupDone)
++        {
++            aResult.mpCleanup = nativeConversionCleanup(xComponent);
++            bCleanupDone = true;
++        }
++    });
++
++    const char* pFailureStage = "load";
++    try
++    {
++#if defined(__EMSCRIPTEN__)
++        SfxBaseController::ResetWasmVisibleFrameSetupDiagnostic();
++        bMarkerArmed = true;
++#endif
++
++        uno::Reference<frame::XDesktop2> xComponentLoader = frame::Desktop::create(xContext);
++        if (!xComponentLoader.is())
++        {
++            aResult.mpStage = "load";
++            aResult.maMessage = u"Component loader is not available"_ustr;
++        }
++        else
++        {
++            std::vector<beans::PropertyValue> aLoadProperties;
++            aLoadProperties.reserve(8);
++            aLoadProperties.push_back(
++                comphelper::makePropertyValue(u"Referer"_ustr, u"private:OpenEvent"_ustr));
++            aLoadProperties.push_back(comphelper::makePropertyValue(u"ReadOnly"_ustr, true));
++            aLoadProperties.push_back(comphelper::makePropertyValue(u"OpenNewView"_ustr, true));
++            aLoadProperties.push_back(comphelper::makePropertyValue(u"Hidden"_ustr, true));
++            aLoadProperties.push_back(comphelper::makePropertyValue(u"Silent"_ustr, true));
++            if (!aRequest.maInputFilter.isEmpty())
++            {
++                aLoadProperties.push_back(comphelper::makePropertyValue(
++                    u"FilterName"_ustr, aRequest.maInputFilter));
++            }
++            if (!aRequest.maInputFilterOptions.isEmpty())
++            {
++                aLoadProperties.push_back(comphelper::makePropertyValue(
++                    u"FilterOptions"_ustr, aRequest.maInputFilterOptions));
++            }
++            if (!aRequest.maPassword.isEmpty())
++            {
++                aLoadProperties.push_back(
++                    comphelper::makePropertyValue(u"Password"_ustr, aRequest.maPassword));
++            }
++
++            xComponent = xComponentLoader->loadComponentFromURL(
++                aRequest.maInputURL, u"_blank"_ustr, 0,
++                comphelper::containerToSequence(aLoadProperties));
++
++#if defined(__EMSCRIPTEN__)
++            aResult.mbVisibleFrameSetupEntered
++                = SfxBaseController::WasWasmVisibleFrameSetupEntered();
++#endif
++            if (!xComponent.is())
++            {
++                aResult.mpStage = "load";
++                aResult.maMessage = u"Document could not be loaded"_ustr;
++            }
++            else
++            {
++                aResult.mbHiddenLoad = nativeConversionHiddenLoadConfirmed(xComponent);
++                if (!aResult.mbHiddenLoad || aResult.mbVisibleFrameSetupEntered)
++                {
++                    aResult.mpStage = "load";
++                    aResult.maMessage
++                        = u"Hidden-load invariant was not satisfied"_ustr;
++                }
++                else
++                {
++                    pFailureStage = "export";
++                    const uno::Reference<frame::XStorable> xStorable(xComponent,
++                                                                     uno::UNO_QUERY_THROW);
++                    std::vector<beans::PropertyValue> aExportProperties;
++                    aExportProperties.reserve(5);
++                    aExportProperties.push_back(comphelper::makePropertyValue(
++                        u"ConversionRequestOrigin"_ustr, u"CommandLine"_ustr));
++                    aExportProperties.push_back(
++                        comphelper::makePropertyValue(u"Overwrite"_ustr, true));
++                    aExportProperties.push_back(comphelper::makePropertyValue(
++                        u"FilterName"_ustr, aRequest.maOutputFilter));
++                    if (!aRequest.maOutputFilterOptions.isEmpty())
++                    {
++                        aExportProperties.push_back(comphelper::makePropertyValue(
++                            u"FilterOptions"_ustr, aRequest.maOutputFilterOptions));
++                    }
++                    if (aRequest.maFilterData.hasElements())
++                    {
++                        aExportProperties.push_back(comphelper::makePropertyValue(
++                            u"FilterData"_ustr, aRequest.maFilterData));
++                    }
++
++                    xStorable->storeToURL(
++                        aRequest.maOutputURL,
++                        comphelper::containerToSequence(aExportProperties));
++                    bConverted = true;
++                }
++            }
++        }
++    }
++    catch (const uno::Exception& rException)
++    {
++        aResult.mpStage = pFailureStage;
++        aResult.maMessage = rException.Message.isEmpty()
++                                ? u"LibreOffice conversion failed"_ustr
++                                : rException.Message;
++    }
++    catch (const std::exception& rException)
++    {
++        aResult.mpStage = pFailureStage;
++        aResult.maMessage = OUString::fromUtf8(rException.what());
++    }
++    catch (...)
++    {
++        aResult.mpStage = pFailureStage;
++        aResult.maMessage = u"LibreOffice conversion failed"_ustr;
++    }
++
++#if defined(__EMSCRIPTEN__)
++    if (bMarkerArmed)
++    {
++        aResult.mbVisibleFrameSetupEntered
++            = SfxBaseController::WasWasmVisibleFrameSetupEntered();
++    }
++#else
++    (void)bMarkerArmed;
++#endif
++
++    fprintf(stderr,
++            "[LOK_CONVERT_BRIDGE] event=hidden-path hidden=%d visible-frame-setup-entered=%d\n",
++            aResult.mbHiddenLoad, aResult.mbVisibleFrameSetupEntered);
++    fflush(stderr);
++
++    if (xComponent.is())
++        aResult.mpCleanup = nativeConversionCleanup(xComponent);
++    bCleanupDone = true;
++    aCleanupGuard.dismiss();
++
++    if (std::string_view(aResult.mpCleanup) == "uncertain")
++    {
++        aResult.mbOk = false;
++        aResult.mpStage = "cleanup";
++        aResult.maMessage
++            = u"Document cleanup is uncertain; runtime must be terminated"_ustr;
++    }
++    else if (bConverted)
++    {
++        aResult.mbOk = true;
++        aResult.mpStage = "complete";
++        aResult.maMessage.clear();
++    }
++    else if (aResult.maMessage.isEmpty())
++    {
++        aResult.maMessage = u"LibreOffice conversion failed"_ustr;
++    }
++
++    return nativeConversionWriteResult(aResult, ppResultJSON);
++}
++
++} // anonymous namespace
++#endif
++
+ static LibreOfficeKitDocument* lo_documentLoad(LibreOfficeKit* pThis, const char* pURL)
+ {
+     return lo_documentLoadWithOptions(pThis, pURL, nullptr);
+@@ -8416,6 +9339,44 @@ static void lo_destroy(LibreOfficeKit* pThis)
+ // WASM shims for LibreOfficeKit vtable calls
+ // These provide stable exports that don't require vtable traversal from JS
+
++#if defined(__EMSCRIPTEN__)
++SAL_JNI_EXPORT
++int lok_convertDocument(LibreOfficeKit* pKit, const char* pRequestJSON, char** ppResultJSON)
++{
++    if (!ppResultJSON)
++        return 1;
++
++    *ppResultJSON = nullptr;
++    fprintf(stderr, "[LOK_CONVERT_BRIDGE] event=abi-enter kit=%p request=%p\n", (void*)pKit,
++            (const void*)pRequestJSON);
++    fflush(stderr);
++
++    int nResult = 0;
++    try
++    {
++        nResult = nativeConvertDocumentImpl(pKit, pRequestJSON, ppResultJSON);
++    }
++    catch (...)
++    {
++        // No exception may cross the private C ABI. The fallback result is
++        // deliberately conservative because an unexpected exception can make
++        // the runtime's native document state impossible to prove clean.
++        nResult = nativeConversionWriteBoundaryFailure(ppResultJSON);
++    }
++
++    fprintf(stderr, "[LOK_CONVERT_BRIDGE] event=abi-return code=%d result=%p\n", nResult,
++            ppResultJSON ? (void*)*ppResultJSON : nullptr);
++    fflush(stderr);
++    return nResult;
++}
++
++SAL_JNI_EXPORT
++void lok_convertFree(char* pAllocation) noexcept
++{
++    free(pAllocation);
++}
++#endif
++
+ SAL_JNI_EXPORT
+ LibreOfficeKitDocument* lok_documentLoad(LibreOfficeKit* pKit, const char* pPath)
+ {
+diff --git a/include/sfx2/sfxbasecontroller.hxx b/include/sfx2/sfxbasecontroller.hxx
+index 978cd5669..9400acc83 100644
+--- a/include/sfx2/sfxbasecontroller.hxx
++++ b/include/sfx2/sfxbasecontroller.hxx
+@@ -188,6 +188,13 @@ public:
+     virtual void SAL_CALL removeInfobar(const OUString& sId) override;
+     virtual sal_Bool SAL_CALL hasInfobar(const OUString& sId) override;
+
++#if defined(__EMSCRIPTEN__)
++    // Temporary conversion-runtime diagnostic. This records the actual
++    // non-hidden branch in ConnectSfxFrame_Impl instead of echoing load input.
++    static void ResetWasmVisibleFrameSetupDiagnostic();
++    static bool WasWasmVisibleFrameSetupEntered();
++#endif
++
+     // FIXME: TL needs this in sw/source/ui/uno/unotxdoc.cxx now;
+     // either the _Impl name should vanish or there should be an "official" API
+     SfxViewShell* GetViewShell_Impl() const;
+diff --git a/sfx2/source/view/sfxbasecontroller.cxx b/sfx2/source/view/sfxbasecontroller.cxx
+index 7ad3a2d6c..f1c14b64e 100644
+--- a/sfx2/source/view/sfxbasecontroller.cxx
++++ b/sfx2/source/view/sfxbasecontroller.cxx
+@@ -74,6 +74,9 @@
+ #include <sfxbasecontroller_internal.hxx>
+
+ #include <unordered_map>
++#if defined(__EMSCRIPTEN__)
++#include <atomic>
++#endif
+
+ #include <com/sun/star/ui/XSidebarProvider.hpp>
+ #include <sidebar/UnoSidebar.hxx>
+@@ -105,6 +108,23 @@ using ::com::sun::star::ui::XSidebarProvider;
+
+ typedef std::unordered_map< SfxGroupId, sal_Int16 > GroupHashMap;
+
++#if defined(__EMSCRIPTEN__)
++namespace
++{
++std::atomic<bool> gWasmVisibleFrameSetupEntered{ false };
++}
++
++void SfxBaseController::ResetWasmVisibleFrameSetupDiagnostic()
++{
++    gWasmVisibleFrameSetupEntered.store(false, std::memory_order_relaxed);
++}
++
++bool SfxBaseController::WasWasmVisibleFrameSetupEntered()
++{
++    return gWasmVisibleFrameSetupEntered.load(std::memory_order_relaxed);
++}
++#endif
++
+ sal_Int16 MapGroupIDToCommandGroup( SfxGroupId nGroupID )
+ {
+     static GroupHashMap s_aHashMap
+@@ -1191,6 +1211,9 @@ void SfxBaseController::ConnectSfxFrame_Impl( const ConnectSfxFrame i_eConnect )
+             SfxObjectShell& rDoc = *m_pData->m_pViewShell->GetObjectShell();
+             if ( !rFrame.IsMarkedHidden_Impl() )
+             {
++#if defined(__EMSCRIPTEN__)
++                gWasmVisibleFrameSetupEntered.store(true, std::memory_order_relaxed);
++#endif
+                 if ( rDoc.IsHelpDocument() || ( nPluginMode == 2 ) )
+                     pViewFrame->GetDispatcher()->HideUI();
+                 else

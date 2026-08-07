@@ -14,6 +14,15 @@
  */
 
 import type { EmscriptenModule } from './types.js';
+import {
+  NativeConversionError,
+  decodeNativeConversionResult,
+  encodeNativeConversionRequest,
+} from './native-conversion-bridge.js';
+import type {
+  NativeConversionRequest,
+  NativeConversionResult,
+} from './native-conversion-bridge.js';
 
 // Extended module type with our LOK shim exports
 interface LOKModule extends EmscriptenModule {
@@ -221,6 +230,14 @@ const DOC_CLASS = {
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
+function nativeAbiFailure(
+  message: string,
+  boundaryCause?: unknown,
+  result?: NativeConversionResult
+): NativeConversionError {
+  return new NativeConversionError('abi', message, false, result, boundaryCause);
+}
+
 export class LOKBindings {
   private module: LOKModule;
   private lokPtr = 0;
@@ -266,8 +283,25 @@ export class LOKBindings {
   allocString(str: string): number {
     const bytes = textEncoder.encode(str + '\0');
     const ptr = this.module._malloc(bytes.length);
-    // Always get fresh heap view after malloc (might have grown memory)
-    this.HEAPU8.set(bytes, ptr);
+    if (ptr === 0) {
+      throw new Error(`WASM allocation failed for ${bytes.length} bytes`);
+    }
+
+    // Always get a fresh heap view after malloc (memory may have grown).
+    const heap = this.HEAPU8;
+    if (
+      !Number.isSafeInteger(ptr)
+      || ptr < 0
+      || bytes.length > heap.length - ptr
+    ) {
+      try {
+        this.module._free(ptr);
+      } catch {
+        // Preserve the allocation-boundary error.
+      }
+      throw new Error('WASM allocator returned an out-of-bounds pointer');
+    }
+    heap.set(bytes, ptr);
     return ptr;
   }
 
@@ -276,12 +310,18 @@ export class LOKBindings {
    */
   readString(ptr: number): string | null {
     if (ptr === 0) return null;
-    // Always get fresh heap view
+
     const heap = this.HEAPU8;
-    let end = ptr;
-    while (heap[end] !== 0) end++;
-    // Copy the data to avoid SharedArrayBuffer issues in browsers
-    // TextDecoder.decode() doesn't accept SharedArrayBuffer views in some browsers
+    if (!Number.isSafeInteger(ptr) || ptr < 0 || ptr >= heap.length) {
+      throw new Error('WASM string pointer is out of bounds');
+    }
+
+    const end = heap.indexOf(0, ptr);
+    if (end < 0) {
+      throw new Error('WASM string is not null-terminated within memory bounds');
+    }
+
+    // Copy the data to avoid SharedArrayBuffer issues in browsers.
     const slice = heap.slice(ptr, end);
     return textDecoder.decode(slice);
   }
@@ -292,6 +332,52 @@ export class LOKBindings {
   readPtr(addr: number): number {
     // Always get fresh heap view
     return this.HEAPU32[addr >> 2] || 0;
+  }
+
+  private allocateConversionResultSlot(): number {
+    const slotSize = Uint32Array.BYTES_PER_ELEMENT;
+    const ptr = this.module._malloc(slotSize);
+    if (ptr === 0) {
+      throw new Error('WASM allocation failed for native conversion result slot');
+    }
+
+    const byteHeap = this.HEAPU8;
+    const pointerHeap = this.HEAPU32;
+    const index = ptr / slotSize;
+    if (
+      !Number.isSafeInteger(ptr)
+      || ptr < 0
+      || ptr % slotSize !== 0
+      || ptr > byteHeap.length - slotSize
+      || index >= pointerHeap.length
+    ) {
+      try {
+        this.module._free(ptr);
+      } catch {
+        // The caller will quarantine the runtime for this ABI failure.
+      }
+      throw new Error('WASM allocator returned an invalid result-slot pointer');
+    }
+
+    pointerHeap[index] = 0;
+    return ptr;
+  }
+
+  private readConversionResultPointer(slotPtr: number): number {
+    const slotSize = Uint32Array.BYTES_PER_ELEMENT;
+    const byteHeap = this.HEAPU8;
+    const pointerHeap = this.HEAPU32;
+    const index = slotPtr / slotSize;
+    if (
+      !Number.isSafeInteger(slotPtr)
+      || slotPtr < 0
+      || slotPtr % slotSize !== 0
+      || slotPtr > byteHeap.length - slotSize
+      || index >= pointerHeap.length
+    ) {
+      throw new Error('Native conversion result slot is out of bounds');
+    }
+    return pointerHeap[index] ?? 0;
   }
 
   /**
@@ -358,6 +444,157 @@ export class LOKBindings {
    */
   getVersionInfo(): string | null {
     return 'LibreOffice WASM';
+  }
+
+  /**
+   * Run one basic conversion as an official hidden native transaction.
+   */
+  convertDocument(request: NativeConversionRequest): NativeConversionResult {
+    if (this.lokPtr === 0) {
+      throw nativeAbiFailure('LOK is not initialized for native conversion');
+    }
+
+    const nativeConvert = this.module._lok_convertDocument;
+    const nativeFree = this.module._lok_convertFree;
+    if (typeof nativeConvert !== 'function' || typeof nativeFree !== 'function') {
+      throw nativeAbiFailure('Native conversion bridge exports are unavailable');
+    }
+
+    // Contract failures happen before any native allocation or call.
+    const requestJson = encodeNativeConversionRequest(request);
+    let requestPtr = 0;
+    let resultSlotPtr = 0;
+    let resultPtr = 0;
+    let resultPointerRead = false;
+    let result: NativeConversionResult | undefined;
+    let primaryError: NativeConversionError | undefined;
+    const cleanupErrors: unknown[] = [];
+
+    try {
+      try {
+        requestPtr = this.allocString(requestJson);
+      } catch (error) {
+        throw nativeAbiFailure('Failed to allocate the native conversion request', error);
+      }
+
+      try {
+        resultSlotPtr = this.allocateConversionResultSlot();
+      } catch (error) {
+        throw nativeAbiFailure('Failed to allocate the native conversion result slot', error);
+      }
+
+      let returnCode: number;
+      try {
+        returnCode = nativeConvert(this.lokPtr, requestPtr, resultSlotPtr);
+      } catch (error) {
+        throw nativeAbiFailure('Native conversion bridge trapped', error);
+      }
+
+      resultPointerRead = true;
+      try {
+        resultPtr = this.readConversionResultPointer(resultSlotPtr);
+      } catch (error) {
+        throw nativeAbiFailure('Native conversion result pointer is invalid', error);
+      }
+
+      if (!Number.isInteger(returnCode) || returnCode !== 0) {
+        throw nativeAbiFailure(
+          `Native conversion bridge returned ABI status ${String(returnCode)}`
+        );
+      }
+      if (resultPtr === 0) {
+        throw nativeAbiFailure('Native conversion bridge returned no result');
+      }
+
+      let decodedJson: unknown;
+      try {
+        const encodedResult = this.readString(resultPtr);
+        if (encodedResult === null) {
+          throw new Error('Native conversion result pointer was null');
+        }
+        decodedJson = JSON.parse(encodedResult) as unknown;
+      } catch (error) {
+        throw nativeAbiFailure('Native conversion bridge returned malformed JSON', error);
+      }
+
+      try {
+        result = decodeNativeConversionResult(decodedJson);
+      } catch (error) {
+        throw nativeAbiFailure(
+          'Native conversion bridge returned an invalid result contract',
+          error
+        );
+      }
+    } catch (error) {
+      primaryError = error instanceof NativeConversionError
+        ? error
+        : nativeAbiFailure('Native conversion bridge failed at the ABI boundary', error);
+
+      // A trap may occur after native code has populated the slot. Recover the
+      // pointer when possible so its matching allocator still gets a free call.
+      if (resultSlotPtr !== 0 && !resultPointerRead) {
+        resultPointerRead = true;
+        try {
+          resultPtr = this.readConversionResultPointer(resultSlotPtr);
+        } catch (slotError) {
+          cleanupErrors.push(slotError);
+        }
+      }
+    } finally {
+      if (resultPtr !== 0) {
+        try {
+          nativeFree(resultPtr);
+        } catch (error) {
+          cleanupErrors.push(error);
+        }
+      }
+      if (requestPtr !== 0) {
+        try {
+          this.module._free(requestPtr);
+        } catch (error) {
+          cleanupErrors.push(error);
+        }
+      }
+      if (resultSlotPtr !== 0) {
+        try {
+          this.module._free(resultSlotPtr);
+        } catch (error) {
+          cleanupErrors.push(error);
+        }
+      }
+    }
+
+    if (cleanupErrors.length > 0) {
+      const causes: unknown[] = primaryError
+        ? [primaryError.boundaryCause ?? primaryError, ...cleanupErrors]
+        : cleanupErrors;
+      const boundaryCause = causes.length === 1
+        ? causes[0]
+        : new AggregateError(causes, 'Native conversion allocation cleanup failed');
+
+      if (primaryError) {
+        throw new NativeConversionError(
+          primaryError.kind,
+          primaryError.message,
+          false,
+          primaryError.result,
+          boundaryCause
+        );
+      }
+      throw nativeAbiFailure(
+        'Native conversion allocation cleanup failed',
+        boundaryCause,
+        result
+      );
+    }
+
+    if (primaryError) {
+      throw primaryError;
+    }
+    if (!result) {
+      throw nativeAbiFailure('Native conversion bridge produced no decoded result');
+    }
+    return result;
   }
 
   /**

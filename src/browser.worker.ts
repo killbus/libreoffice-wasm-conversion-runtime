@@ -5,7 +5,7 @@
  * Communication is via postMessage.
  */
 
-import type { EditorOperationResult, EmscriptenModule, WasmLoadPhase, WasmLoadProgress } from './types.js';
+import type { ConversionOptions, EditorOperationResult, EmscriptenModule, WasmLoadPhase, WasmLoadProgress } from './types.js';
 import { LOKBindings } from './lok-bindings.js';
 import { FORMAT_FILTER_OPTIONS, OUTPUT_FORMAT_TO_LOK, buildLoadOptions } from './types.js';
 import { createEditor, OfficeEditor } from './editor/index.js';
@@ -387,6 +387,7 @@ interface WorkerResponse {
   testLokOperationsResult?: TestLokOperationsResult;
   editorSession?: EditorSessionInfo;
   editorOperationResult?: EditorOperationResult;
+  quarantine?: boolean;
 }
 
 /** Web Worker global scope with Module property */
@@ -714,8 +715,20 @@ async function handleInit(msg: WorkerMessage) {
 // Image formats that need multi-page handling
 const IMAGE_FORMATS = ['png', 'jpg', 'jpeg', 'svg'];
 
-function handleConvert(msg: WorkerMessage) {
-  if (!initialized || !module || !lokBindings) {
+function discardQuarantinedRuntime(): void {
+  // Do not call destroy() on a runtime whose native cleanup is uncertain.
+  // Terminating this Worker releases the discarded module and any live handles.
+  initialized = false;
+  cachedDoc = null;
+  editorSessions.clear();
+  converter = null;
+  lokBindings = null;
+  module = null;
+  setTimeout(() => self.close(), 0);
+}
+
+async function handleConvert(msg: WorkerMessage) {
+  if (!initialized || !module || !lokBindings || !converter) {
     postResponse({ type: 'error', id: msg.id, error: 'Worker not initialized' });
     return;
   }
@@ -727,11 +740,50 @@ function handleConvert(msg: WorkerMessage) {
     return;
   }
 
-  // Check if this is an image format that might need multi-page export
-  const isImageFormat = IMAGE_FORMATS.includes(outputFormat.toLowerCase());
+  const normalizedInputExt = (inputExt || 'docx').toLowerCase();
+  const normalizedOutputFormat = outputFormat.toLowerCase();
+  const isImageFormat = IMAGE_FORMATS.includes(normalizedOutputFormat);
 
-  const inPath = `/tmp/input/doc.${inputExt || 'docx'}`;
-  const outPath = `/tmp/output/doc.${outputFormat}`;
+  // Basic document conversion uses the official hidden native transaction.
+  // Image conversion intentionally retains raw document pointers for page-by-page export.
+  if (!isImageFormat) {
+    const activeConverter = converter;
+    try {
+      postProgress(msg.id, 10, 'Running hidden native conversion...');
+      const conversion = await activeConverter.convert(
+        inputData,
+        {
+          inputFormat: normalizedInputExt as ConversionOptions['inputFormat'],
+          outputFormat: normalizedOutputFormat as ConversionOptions['outputFormat'],
+          ...(filterOptions === undefined ? {} : { filterOptions }),
+          ...(password === undefined ? {} : { password }),
+        },
+        `doc.${normalizedInputExt}`
+      );
+
+      // Worker responses must own a regular transferable ArrayBuffer.
+      const result = new Uint8Array(conversion.data.length);
+      result.set(conversion.data);
+
+      postProgress(msg.id, 100, 'Complete');
+      postResponse({ type: 'result', id: msg.id, data: result });
+    } catch (error) {
+      const quarantine = !activeConverter.isReady();
+      postResponse({
+        type: 'error',
+        id: msg.id,
+        error: error instanceof Error ? error.message : String(error),
+        ...(quarantine ? { quarantine: true } : {}),
+      });
+      if (quarantine) {
+        discardQuarantinedRuntime();
+      }
+    }
+    return;
+  }
+
+  const inPath = `/tmp/input/doc.${normalizedInputExt}`;
+  const outPath = `/tmp/output/doc.${normalizedOutputFormat}`;
   let docPtr = 0;
   const outputFiles: string[] = []; // Track files to clean up
 
@@ -741,7 +793,7 @@ function handleConvert(msg: WorkerMessage) {
 
     postProgress(msg.id, 30, 'Loading document...');
     // Build load options for CSV import filter and/or password
-    const loadOptions = buildLoadOptions(inputExt, password);
+    const loadOptions = buildLoadOptions(normalizedInputExt, password);
     if (loadOptions) {
       docPtr = lokBindings.documentLoadWithOptions(inPath, loadOptions);
     } else {
@@ -758,11 +810,11 @@ function handleConvert(msg: WorkerMessage) {
     const docType = lokBindings.documentGetDocumentType(docPtr);
 
     // For image formats with multiple pages, export each page separately and zip
-    if (isImageFormat && pageCount > 1) {
-      postProgress(msg.id, 40, `Exporting ${pageCount} pages as ${outputFormat.toUpperCase()}...`);
+    if (pageCount > 1) {
+      postProgress(msg.id, 40, `Exporting ${pageCount} pages as ${normalizedOutputFormat.toUpperCase()}...`);
 
-      const lokFormat = OUTPUT_FORMAT_TO_LOK[outputFormat as keyof typeof OUTPUT_FORMAT_TO_LOK];
-      const baseOpts = filterOptions || FORMAT_FILTER_OPTIONS[outputFormat as keyof typeof FORMAT_FILTER_OPTIONS] || '';
+      const lokFormat = OUTPUT_FORMAT_TO_LOK[normalizedOutputFormat as keyof typeof OUTPUT_FORMAT_TO_LOK];
+      const baseOpts = filterOptions || FORMAT_FILTER_OPTIONS[normalizedOutputFormat as keyof typeof FORMAT_FILTER_OPTIONS] || '';
 
       // Export each page
       const pageFiles: Array<{ name: string; data: Uint8Array }> = [];
@@ -777,7 +829,7 @@ function handleConvert(msg: WorkerMessage) {
         const progress = 40 + Math.round((i / pageCount) * 40);
         postProgress(msg.id, progress, `Exporting page ${i + 1}/${pageCount}...`);
 
-        const pageOutPath = `/tmp/output/page_${i + 1}.${outputFormat}`;
+        const pageOutPath = `/tmp/output/page_${i + 1}.${normalizedOutputFormat}`;
         outputFiles.push(pageOutPath);
 
         // For presentations/drawings, we need to set the part AND use PixelWidth/PixelHeight
@@ -787,7 +839,7 @@ function handleConvert(msg: WorkerMessage) {
 
           // For image formats, include pixel dimensions in filter options
           let pageOpts = baseOpts;
-          if (outputFormat === 'png' || outputFormat === 'jpg' || outputFormat === 'jpeg') {
+          if (normalizedOutputFormat === 'png' || normalizedOutputFormat === 'jpg' || normalizedOutputFormat === 'jpeg') {
             pageOpts = `PixelWidth=${exportWidth};PixelHeight=${exportHeight}`;
             if (baseOpts) pageOpts = `${baseOpts};${pageOpts}`;
           }
@@ -799,7 +851,7 @@ function handleConvert(msg: WorkerMessage) {
           let pageOpts = `PageRange=${i + 1}-${i + 1}`;
 
           // For image formats, also include pixel dimensions
-          if (outputFormat === 'png' || outputFormat === 'jpg' || outputFormat === 'jpeg') {
+          if (normalizedOutputFormat === 'png' || normalizedOutputFormat === 'jpg' || normalizedOutputFormat === 'jpeg') {
             pageOpts += `;PixelWidth=${exportWidth};PixelHeight=${exportHeight}`;
           }
 
@@ -815,7 +867,7 @@ function handleConvert(msg: WorkerMessage) {
         if (pageData.length > 0) {
           const pageCopy = new Uint8Array(pageData.length);
           pageCopy.set(pageData);
-          pageFiles.push({ name: `page_${i + 1}.${outputFormat}`, data: pageCopy });
+          pageFiles.push({ name: `page_${i + 1}.${normalizedOutputFormat}`, data: pageCopy });
         } else {
           console.warn(`[Worker] Page ${i + 1} export produced empty file`);
         }
@@ -830,11 +882,11 @@ function handleConvert(msg: WorkerMessage) {
       postResponse({ type: 'result', id: msg.id, data: zipData });
 
     } else {
-      // Single page or non-image format: standard export
+      // Single-page image export remains on the raw LOK path.
       postProgress(msg.id, 50, 'Converting...');
 
-      const lokFormat = OUTPUT_FORMAT_TO_LOK[outputFormat as keyof typeof OUTPUT_FORMAT_TO_LOK];
-      const opts = filterOptions || FORMAT_FILTER_OPTIONS[outputFormat as keyof typeof FORMAT_FILTER_OPTIONS] || '';
+      const lokFormat = OUTPUT_FORMAT_TO_LOK[normalizedOutputFormat as keyof typeof OUTPUT_FORMAT_TO_LOK];
+      const opts = filterOptions || FORMAT_FILTER_OPTIONS[normalizedOutputFormat as keyof typeof FORMAT_FILTER_OPTIONS] || '';
 
       postProgress(msg.id, 70, 'Saving...');
       lokBindings.documentSaveAs(docPtr, outPath, lokFormat, opts);
@@ -862,7 +914,7 @@ function handleConvert(msg: WorkerMessage) {
       error: error instanceof Error ? error.message : String(error)
     });
   } finally {
-    // Cleanup
+    // Cleanup the legacy image transaction only.
     if (docPtr !== 0) {
       try { lokBindings.documentDestroy(docPtr); } catch { /* ignore */ }
     }

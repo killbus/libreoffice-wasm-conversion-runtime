@@ -97,6 +97,11 @@ import {
 } from './types.js';
 
 import { LOKBindings } from './lok-bindings.js';
+import {
+  NativeConversionError,
+  assertNativeConversionSucceeded,
+  createNativeConversionRequest,
+} from './native-conversion-bridge.js';
 import { createEditor, OfficeEditor } from './editor/index.js';
 import type { OpenDocumentOptions } from './editor/types.js';
 
@@ -114,6 +119,18 @@ interface EmscriptenWindow extends Window {
 /** Internal LOK bindings with lokPtr - use unknown cast for private property access */
 interface LOKBindingsInternal {
   lokPtr?: number;
+}
+
+interface EmscriptenWorker {
+  terminate?: () => void;
+}
+
+interface EmscriptenModuleWithPThread extends EmscriptenModule {
+  PThread?: {
+    terminateAllThreads?: () => void;
+    runningWorkers?: EmscriptenWorker[];
+    unusedWorkers?: EmscriptenWorker[];
+  };
 }
 
 /** Editor session info (internal worker type) */
@@ -141,6 +158,7 @@ interface WorkerResponse {
   testLokOperationsResult?: unknown;
   editorSession?: EditorSessionInfo;
   editorOperationResult?: unknown;
+  quarantine?: boolean;
 }
 
 /**
@@ -156,6 +174,7 @@ export class BrowserConverter {
   private lokBindings: LOKBindings | null = null;
   private initialized = false;
   private initializing = false;
+  private corrupted = false;
   private options: ResolvedBrowserConverterOptions;
 
   constructor(options: BrowserConverterOptions = {}) {
@@ -168,6 +187,47 @@ export class BrowserConverter {
     };
   }
 
+  private terminatePThreads(targetModule: EmscriptenModule | null): void {
+    if (!targetModule) return;
+
+    try {
+      const pthread = (targetModule as EmscriptenModuleWithPThread).PThread;
+      pthread?.terminateAllThreads?.();
+      for (const worker of pthread?.runningWorkers ?? []) {
+        worker.terminate?.();
+      }
+      for (const worker of pthread?.unusedWorkers ?? []) {
+        worker.terminate?.();
+      }
+      if (pthread?.runningWorkers) pthread.runningWorkers = [];
+      if (pthread?.unusedWorkers) pthread.unusedWorkers = [];
+    } catch {
+      // A discarded runtime stays unusable even if thread termination reports an error.
+    }
+  }
+
+  private quarantineRuntime(): void {
+    const targetModule = this.module;
+    this.initialized = false;
+    this.corrupted = true;
+    this.lokBindings = null;
+    this.module = null;
+    this._lokInstance = 0;
+    this.terminatePThreads(targetModule);
+  }
+
+  private mapNativeConversionError(error: NativeConversionError): ConversionError {
+    const code = error.result?.stage === 'load'
+      ? ConversionErrorCode.LOAD_FAILED
+      : error.kind === 'contract'
+        ? ConversionErrorCode.UNSUPPORTED_FORMAT
+        : ConversionErrorCode.CONVERSION_FAILED;
+    const details = error.result
+      ? `stage=${error.result.stage}, cleanup=${error.result.cleanup}`
+      : undefined;
+    return new ConversionError(code, error.message, details);
+  }
+
   /**
    * Initialize the LibreOffice WASM module
    */
@@ -177,6 +237,12 @@ export class BrowserConverter {
     if (this.initializing) {
       while (this.initializing) {
         await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      if (!this.initialized) {
+        throw new ConversionError(
+          ConversionErrorCode.WASM_NOT_INITIALIZED,
+          'Browser initialization failed'
+        );
       }
       return;
     }
@@ -191,6 +257,7 @@ export class BrowserConverter {
       this.injectFonts();
       this.initLOK();
       this.initialized = true;
+      this.corrupted = false;
       this.emitProgress('complete', 100, 'Ready');
       this.options.onReady?.();
     } catch (error) {
@@ -292,6 +359,12 @@ export class BrowserConverter {
     options: ConversionOptions,
     filename = 'document'
   ): Promise<ConversionResult> {
+    if (this.corrupted) {
+      throw new ConversionError(
+        ConversionErrorCode.WASM_NOT_INITIALIZED,
+        'The browser runtime was quarantined. Initialize a fresh runtime before converting again.'
+      );
+    }
     if (!this.initialized || !this.module || !this.lokBindings) {
       throw new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, 'Not initialized');
     }
@@ -312,54 +385,72 @@ export class BrowserConverter {
 
     const inPath = `/tmp/input/doc.${ext}`;
     const outPath = `/tmp/output/doc.${outputExt}`;
-
+    const isImageFormat = ['png', 'jpg', 'svg'].includes(outputExt);
     let docPtr = 0;
 
     try {
-      // Write input file to virtual filesystem
       this.module.FS.writeFile(inPath, inputData);
-      this.emitProgress('converting', 30, 'Loading document...');
 
-      // Load document with LOK
-      if (options.password) {
-        docPtr = this.lokBindings.documentLoadWithOptions(inPath, `,Password=${options.password}`);
+      if (isImageFormat) {
+        // Rendering/image export intentionally keeps the live document-pointer path.
+        this.emitProgress('converting', 30, 'Loading document...');
+        if (options.password) {
+          docPtr = this.lokBindings.documentLoadWithOptions(inPath, `,Password=${options.password}`);
+        } else {
+          docPtr = this.lokBindings.documentLoad(inPath);
+        }
+
+        if (docPtr === 0) {
+          const error = this.lokBindings.getError();
+          throw new ConversionError(ConversionErrorCode.LOAD_FAILED, error || 'Failed to load document');
+        }
+
+        const lokFormat = OUTPUT_FORMAT_TO_LOK[outputExt];
+        const filterOptions = options.filterOptions ?? FORMAT_FILTER_OPTIONS[outputExt] ?? '';
+        this.emitProgress('converting', 70, 'Saving...');
+        this.lokBindings.documentSaveAs(docPtr, outPath, lokFormat, filterOptions);
       } else {
-        docPtr = this.lokBindings.documentLoad(inPath);
+        this.emitProgress('converting', 40, 'Running hidden native conversion...');
+        try {
+          const request = createNativeConversionRequest({
+            inputPath: inPath,
+            outputPath: outPath,
+            inputFormat: ext,
+            outputFormat: outputExt,
+            password: options.password,
+            filterOptions: options.filterOptions,
+            pdf: options.pdf,
+          });
+          const nativeResult = this.lokBindings.convertDocument(request);
+          assertNativeConversionSucceeded(nativeResult);
+        } catch (error) {
+          if (error instanceof NativeConversionError) {
+            if (!error.runtimeReusable) {
+              this.quarantineRuntime();
+            }
+            throw this.mapNativeConversionError(error);
+          }
+          if (error instanceof ConversionError) {
+            throw error;
+          }
+          throw new ConversionError(
+            ConversionErrorCode.CONVERSION_FAILED,
+            `Conversion failed: ${String(error)}`
+          );
+        }
       }
-
-      if (docPtr === 0) {
-        const error = this.lokBindings.getError();
-        throw new ConversionError(ConversionErrorCode.LOAD_FAILED, error || 'Failed to load document');
-      }
-
-      this.emitProgress('converting', 50, 'Converting...');
-
-      // Get LOK format string and filter options
-      const lokFormat = OUTPUT_FORMAT_TO_LOK[outputExt];
-      let filterOptions = options.filterOptions ?? FORMAT_FILTER_OPTIONS[outputExt] ?? '';
-
-      if (!options.filterOptions && outputExt === 'pdf' && options.pdf) {
-        filterOptions = buildPdfFilterOptions(options.pdf) || filterOptions;
-      }
-
-      this.emitProgress('converting', 70, 'Saving...');
-
-      // Save document in target format
-      this.lokBindings.documentSaveAs(docPtr, outPath, lokFormat, filterOptions);
 
       this.emitProgress('converting', 90, 'Reading output...');
-
-      // Read the converted output
-      const result = this.module.FS.readFile(outPath) as Uint8Array;
-
-      if (result.length === 0) {
+      const sharedResult = this.module.FS.readFile(outPath) as Uint8Array;
+      if (sharedResult.length === 0) {
         throw new ConversionError(ConversionErrorCode.CONVERSION_FAILED, 'Empty output');
       }
 
+      const result = new Uint8Array(sharedResult.length);
+      result.set(sharedResult);
       const baseName = filename.includes('.') ? filename.substring(0, filename.lastIndexOf('.')) : filename;
 
       this.emitProgress('complete', 100, 'Done');
-
       return {
         data: result,
         mimeType: FORMAT_MIME_TYPES[outputExt],
@@ -367,15 +458,13 @@ export class BrowserConverter {
         duration: Date.now() - startTime,
       };
     } finally {
-      // Cleanup document
-      if (docPtr !== 0) {
+      if (docPtr !== 0 && this.lokBindings) {
         try {
           this.lokBindings.documentDestroy(docPtr);
         } catch { /* ignore */ }
       }
-      // Cleanup temp files
-      try { this.module.FS.unlink(inPath); } catch { /* ignore */ }
-      try { this.module.FS.unlink(outPath); } catch { /* ignore */ }
+      try { this.module?.FS.unlink(inPath); } catch { /* ignore */ }
+      try { this.module?.FS.unlink(outPath); } catch { /* ignore */ }
     }
   }
 
@@ -495,19 +584,22 @@ export class BrowserConverter {
    * Cleanup
    */
   async destroy(): Promise<void> {
+    const targetModule = this.module;
     if (this.lokBindings) {
       try {
         this.lokBindings.destroy();
       } catch { /* ignore */ }
       this.lokBindings = null;
     }
+    this.terminatePThreads(targetModule);
     this.module = null;
     this._lokInstance = 0;
     this.initialized = false;
+    this.corrupted = false;
   }
 
   isReady(): boolean {
-    return this.initialized && this._lokInstance >= 0;
+    return this.initialized && !this.corrupted && this._lokInstance > 0;
   }
 
   static getSupportedOutputFormats(): OutputFormat[] {
@@ -534,6 +626,7 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
   private worker: Worker | null = null;
   private initialized = false;
   private initializing = false;
+  private restartOnNextConvert = false;
   private messageId = 0;
   private pendingRequests = new Map<number, { resolve: (value: unknown) => void; reject: (error: Error) => void }>();
   private options: ResolvedWorkerBrowserConverterOptions;
@@ -549,6 +642,26 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
     };
   }
 
+  private discardWorker(
+    error: Error,
+    restartOnNextConvert: boolean,
+    targetWorker: Worker | null = this.worker
+  ): void {
+    if (targetWorker && this.worker !== targetWorker) return;
+
+    const worker = this.worker;
+    this.worker = null;
+    this.initialized = false;
+    this.restartOnNextConvert = restartOnNextConvert;
+    worker?.terminate();
+
+    const pending = [...this.pendingRequests.values()];
+    this.pendingRequests.clear();
+    for (const request of pending) {
+      request.reject(error);
+    }
+  }
+
   /**
    * Initialize the worker and LibreOffice WASM module
    */
@@ -559,6 +672,9 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
       while (this.initializing) {
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
+      if (!this.initialized) {
+        throw new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, 'Worker initialization failed');
+      }
       return;
     }
 
@@ -566,31 +682,57 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
     this.emitProgress('loading', 0, 'Starting worker...');
 
     try {
-      // Create the worker (classic worker, not module)
-      this.worker = new Worker(this.options.browserWorkerJs);
+      const worker = new Worker(this.options.browserWorkerJs);
+      this.worker = worker;
 
-      // Set up message handling
-      this.worker.onmessage = (event) => this.handleWorkerMessage(event as MessageEvent<WorkerResponse>);
-      this.worker.onerror = (error) => {
-        console.error('[WorkerConverter] Worker error:', error);
-        this.options.onError?.(new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, error.message));
+      worker.onmessage = (event) => {
+        if (this.worker === worker) {
+          this.handleWorkerMessage(event as MessageEvent<WorkerResponse>);
+        }
+      };
+      worker.onerror = (event) => {
+        if (this.worker !== worker) return;
+        const wasInitialized = this.initialized;
+        const error = new ConversionError(
+          ConversionErrorCode.WASM_NOT_INITIALIZED,
+          event.message || 'Worker failed'
+        );
+        console.error('[WorkerConverter] Worker error:', event);
+        this.discardWorker(error, wasInitialized, worker);
+        if (wasInitialized) {
+          this.options.onError?.(error);
+        }
       };
 
-      // Wait for worker to load
+      // Wait for the classic worker script to load before sending init.
       await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('Worker load timeout')), 10000);
-        const handler = (event: MessageEvent<WorkerResponse>) => {
+        const cleanup = () => {
+          clearTimeout(timeout);
+          worker.removeEventListener('message', messageHandler);
+          worker.removeEventListener('error', errorHandler);
+        };
+        const messageHandler = (event: MessageEvent<WorkerResponse>) => {
           if (event.data.type === 'loaded') {
-            clearTimeout(timeout);
-            this.worker?.removeEventListener('message', handler);
+            cleanup();
             resolve();
           }
         };
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.worker!.addEventListener('message', handler);
+        const errorHandler = (event: ErrorEvent) => {
+          cleanup();
+          reject(new Error(event.message || 'Worker failed to load'));
+        };
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error('Worker load timeout'));
+        }, 10000);
+        worker.addEventListener('message', messageHandler);
+        worker.addEventListener('error', errorHandler);
       });
 
-      // Initialize WASM in worker with explicit paths and optional fonts
+      if (this.worker !== worker) {
+        throw new Error('Worker became unavailable during initialization');
+      }
+
       await this.sendMessage('init', {
         sofficeJs: this.options.sofficeJs,
         sofficeWasm: this.options.sofficeWasm,
@@ -602,11 +744,13 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
       });
 
       this.initialized = true;
+      this.restartOnNextConvert = false;
       this.emitProgress('complete', 100, 'Ready');
       this.options.onReady?.();
     } catch (error) {
       const err = error instanceof ConversionError ? error :
         new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, String(error));
+      this.discardWorker(err, false);
       this.options.onError?.(err);
       throw err;
     } finally {
@@ -631,7 +775,14 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
     this.pendingRequests.delete(msg.id);
 
     if (msg.type === 'error') {
-      pending.reject(new ConversionError(ConversionErrorCode.CONVERSION_FAILED, msg.error ?? 'Unknown error'));
+      const error = new ConversionError(
+        ConversionErrorCode.CONVERSION_FAILED,
+        msg.error ?? 'Unknown error'
+      );
+      pending.reject(error);
+      if (msg.quarantine) {
+        this.discardWorker(error, true);
+      }
     } else if (msg.type === 'result') {
       pending.resolve(msg.data);
     } else if (msg.type === 'ready') {
@@ -665,7 +816,8 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
 
   private sendMessage(type: string, data: Record<string, unknown> = {}): Promise<unknown> {
     return new Promise((resolve, reject) => {
-      if (!this.worker) {
+      const worker = this.worker;
+      if (!worker) {
         reject(new Error('Worker not initialized'));
         return;
       }
@@ -673,16 +825,21 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
       const id = ++this.messageId;
       this.pendingRequests.set(id, { resolve, reject });
 
-      // If sending input data, copy it first to avoid detaching the caller's buffer
-      // This allows the same buffer to be used for multiple API calls
-      if (data.inputData instanceof Uint8Array) {
-        const copy = new Uint8Array(data.inputData.length);
-        copy.set(data.inputData);
-        const message = { type, id, ...data, inputData: copy };
-        this.worker.postMessage(message, [copy.buffer]);
-      } else {
-        const message = { type, id, ...data };
-        this.worker.postMessage(message);
+      try {
+        // If sending input data, copy it first to avoid detaching the caller's buffer
+        // This allows the same buffer to be used for multiple API calls
+        if (data.inputData instanceof Uint8Array) {
+          const copy = new Uint8Array(data.inputData.length);
+          copy.set(data.inputData);
+          const message = { type, id, ...data, inputData: copy };
+          worker.postMessage(message, [copy.buffer]);
+        } else {
+          const message = { type, id, ...data };
+          worker.postMessage(message);
+        }
+      } catch (error) {
+        this.pendingRequests.delete(id);
+        reject(error instanceof Error ? error : new Error(String(error)));
       }
     });
   }
@@ -695,6 +852,9 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
     options: ConversionOptions,
     filename = 'document'
   ): Promise<ConversionResult> {
+    if ((!this.initialized || !this.worker) && this.restartOnNextConvert) {
+      await this.initialize();
+    }
     if (!this.initialized || !this.worker) {
       throw new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, 'Not initialized');
     }
@@ -713,8 +873,8 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
       throw new ConversionError(ConversionErrorCode.UNSUPPORTED_FORMAT, `Unsupported: ${outputExt}`);
     }
 
-    let filterOptions = options.filterOptions ?? '';
-    if (!options.filterOptions && outputExt === 'pdf' && options.pdf) {
+    let filterOptions = options.filterOptions;
+    if (filterOptions === undefined && outputExt === 'pdf' && options.pdf) {
       filterOptions = buildPdfFilterOptions(options.pdf);
     }
 
@@ -1312,17 +1472,18 @@ export class WorkerBrowserConverter implements ILibreOfficeConverter {
    * Cleanup
    */
   async destroy(): Promise<void> {
-    if (this.worker) {
+    const worker = this.worker;
+    if (worker) {
       try {
         await this.sendMessage('destroy');
       } catch { /* ignore */ }
-      this.worker.terminate();
-      this.worker = null;
     }
-    this.initialized = false;
-    this.pendingRequests.clear();
+    this.discardWorker(
+      new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, 'Worker destroyed'),
+      false,
+      worker
+    );
   }
-
   isReady(): boolean {
     return this.initialized && this.worker !== null;
   }

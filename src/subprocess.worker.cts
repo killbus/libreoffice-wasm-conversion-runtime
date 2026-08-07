@@ -88,9 +88,14 @@ class NodeXHR {
 // Import converter and editor - these will be bundled by tsup
 import { LibreOfficeConverter } from './converter-node.js';
 import { createEditor, OfficeEditor } from './editor/index.js';
-import type { ConversionOptions, FilterOptions, InputFormatOptions, WasmLoaderModule } from './types.js';
+import type { ConversionOptions, InputFormatOptions, WasmLoaderModule } from './types.js';
 import { buildLoadOptions } from './types.js';
 import type { OperationResult } from './editor/types.js';
+import {
+  createNodeWorkerConversionOptions,
+  createNodeWorkerFailureResponse,
+} from './node-worker-protocol.js';
+import type { NodeWorkerConversionPayload } from './node-worker-protocol.js';
 
 // Import the WASM loader - path is relative to dist/ after build
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -116,11 +121,8 @@ function getRecentOutput(): string {
 }
 
 // Message payload types
-interface ConvertPayload {
+interface ConvertPayload extends NodeWorkerConversionPayload {
   inputData: number[];
-  inputExt: string;
-  outputFormat: string;
-  filterOptions?: FilterOptions;
 }
 
 interface DocumentPayload {
@@ -195,11 +197,7 @@ async function handleConvert(payload: ConvertPayload): Promise<number[]> {
   const inputData = new Uint8Array(payload.inputData);
   const result = await converter.convert(
     inputData,
-    {
-      inputFormat: payload.inputExt,
-      outputFormat: payload.outputFormat,
-      filterOptions: payload.filterOptions,
-    } as ConversionOptions,
+    createNodeWorkerConversionOptions(payload),
     'document'
   );
 
@@ -649,7 +647,10 @@ process.on('message', async (msg: WorkerMessage) => {
     log('Error:', errorMsg);
     const recentOutput = getRecentOutput();
     const fullError = recentOutput ? `${errorMsg}\n\nRecent LibreOffice output:\n${recentOutput}` : errorMsg;
-    process.send?.({ type: 'response', id: msg.id, success: false, error: fullError });
+    process.send?.({
+      type: 'response',
+      ...createNodeWorkerFailureResponse(msg.id, msg.type, fullError, converter),
+    });
   }
 });
 

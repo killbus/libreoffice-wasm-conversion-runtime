@@ -209,11 +209,13 @@ else
 fi
 
 # Conversion-only atoms -- applied ON TOP of the consolidated baseline patch
-# when CONVERSION_ONLY=1. Two independent atoms (archive 014/015 style), NOT
+# when CONVERSION_ONLY=1. Independent atoms (archive 014/015 style), NOT
 # one giant reverse-diff:
 #   1. exports -- EXPORTED_FUNCTIONS link contract only (Executable_soffice_bin.mk)
 #   2. shims   -- non-conversion LOK shim bodies only (desktop/source/lib/init.cxx)
-# Each atom is independently reversible for bisection. Order: exports then shims.
+#   3. bridge  -- private native conversion transaction (source + export list)
+# Each atom is independently reversible for bisection. Order: exports, shims,
+# then the private native conversion bridge.
 # KEEP: conversion group (hook/preinit/load/saveAs/destroy/getError/malloc/free)
 #       + abort group (abortOperation/setOperationTimeout/getOperationState/resetAbort).
 # See build/patches/CONVERSION-ONLY-TRIM.md.
@@ -245,6 +247,9 @@ if [ "${CONVERSION_ONLY:-0}" = "1" ]; then
     apply_conversion_atom \
         "wasm-trim-lok-shims-conversion-only.patch" \
         "${SCRIPT_DIR}/patches/wasm-trim-lok-shims-conversion-only.patch"
+    apply_conversion_atom \
+        "wasm-native-conversion-bridge.patch" \
+        "${SCRIPT_DIR}/patches/wasm-native-conversion-bridge.patch"
 fi
 
 # Create autotext files (handled in Step 6 background process)

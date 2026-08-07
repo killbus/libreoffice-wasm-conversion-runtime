@@ -541,6 +541,12 @@ export interface EmscriptenModule {
   _libreofficekit_hook?: (path: number) => number;
   _libreofficekit_hook_2?: (path: number, userProfile: number) => number;
   _main?: (argc: number, argv: number) => number;
+  _lok_convertDocument?: (
+    kit: number,
+    requestJson: number,
+    resultSlot: number
+  ) => number;
+  _lok_convertFree?: (allocation: number) => void;
 
   // WebAssembly function table for indirect calls
   wasmTable?: WebAssembly.Table;

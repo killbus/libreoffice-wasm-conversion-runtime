@@ -38,6 +38,11 @@ import {
   buildLoadOptions,
 } from './types.js';
 import { LOKBindings } from './lok-bindings.js';
+import {
+  NativeConversionError,
+  assertNativeConversionSucceeded,
+  createNativeConversionRequest,
+} from './native-conversion-bridge.js';
 
 // Declare the module factory type
 type ModuleFactory = (config: Partial<EmscriptenModule>) => Promise<EmscriptenModule>;
@@ -95,6 +100,56 @@ export class LibreOfficeConverter implements ILibreOfficeConverter {
            msg.includes('null function');
   }
 
+  private terminatePThreads(module: EmscriptenModule | null): void {
+    if (!module) return;
+
+    try {
+      const mod = module as EmscriptenModuleWithPThread;
+      mod.PThread?.terminateAllThreads?.();
+
+      for (const worker of mod.PThread?.runningWorkers ?? []) {
+        worker?.terminate?.();
+      }
+      if (mod.PThread?.runningWorkers) {
+        mod.PThread.runningWorkers = [];
+      }
+
+      for (const worker of mod.PThread?.unusedWorkers ?? []) {
+        worker?.terminate?.();
+      }
+      if (mod.PThread?.unusedWorkers) {
+        mod.PThread.unusedWorkers = [];
+      }
+    } catch {
+      // A poisoned runtime is discarded even if thread termination reports an error.
+    }
+  }
+
+  private quarantineRuntime(): void {
+    const module = this.module;
+    this.initialized = false;
+    this.corrupted = true;
+    this.lokBindings = null;
+    this.module = null;
+    this.terminatePThreads(module);
+
+    if (this.options.verbose) {
+      console.log('[LibreOfficeConverter] Native conversion runtime quarantined');
+    }
+  }
+
+  private mapNativeConversionError(error: NativeConversionError): ConversionError {
+    const code = error.result?.stage === 'load'
+      ? ConversionErrorCode.LOAD_FAILED
+      : error.kind === 'contract'
+        ? ConversionErrorCode.UNSUPPORTED_FORMAT
+        : ConversionErrorCode.CONVERSION_FAILED;
+    const details = error.result
+      ? `stage=${error.result.stage}, cleanup=${error.result.cleanup}`
+      : undefined;
+    return new ConversionError(code, error.message, details);
+  }
+
   /**
    * Force reinitialization of the converter (for recovery from errors)
    */
@@ -133,6 +188,12 @@ export class LibreOfficeConverter implements ILibreOfficeConverter {
     if (this.initializing) {
       while (this.initializing) {
         await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      if (!this.initialized) {
+        throw new ConversionError(
+          ConversionErrorCode.WASM_NOT_INITIALIZED,
+          'Converter initialization failed'
+        );
       }
       return;
     }
@@ -180,6 +241,12 @@ export class LibreOfficeConverter implements ILibreOfficeConverter {
     if (this.initializing) {
       while (this.initializing) {
         await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      if (!this.initialized) {
+        throw new ConversionError(
+          ConversionErrorCode.WASM_NOT_INITIALIZED,
+          'Converter initialization failed'
+        );
       }
       return;
     }
@@ -480,7 +547,12 @@ export class LibreOfficeConverter implements ILibreOfficeConverter {
       this.emitProgress('converting', 30, 'Converting document...');
 
       // Perform conversion
-      const result = await this.performConversion(inputPath, outputPath, options);
+      const result = await this.performConversion(
+        inputPath,
+        outputPath,
+        inputExt,
+        options
+      );
 
       this.emitProgress('complete', 100, 'Conversion complete');
 
@@ -518,11 +590,91 @@ export class LibreOfficeConverter implements ILibreOfficeConverter {
   }
 
   /**
-   * Perform the actual conversion using LibreOfficeKit
+   * Perform a basic conversion through the official hidden native bridge.
+   * Pointer-based image export remains on the legacy path below.
    */
   private async performConversion(
     inputPath: string,
     outputPath: string,
+    inputFormat: string,
+    options: ConversionOptions
+  ): Promise<Uint8Array> {
+    if (['png', 'jpg', 'svg'].includes(options.outputFormat)) {
+      return this.performLegacyImageConversion(
+        inputPath,
+        outputPath,
+        inputFormat,
+        options
+      );
+    }
+
+    if (!this.module || !this.lokBindings) {
+      throw new ConversionError(
+        ConversionErrorCode.WASM_NOT_INITIALIZED,
+        'Module not loaded'
+      );
+    }
+
+    const module = this.module;
+    const lokBindings = this.lokBindings;
+    this.emitProgress('converting', 40, 'Running hidden native conversion...');
+
+    try {
+      const request = createNativeConversionRequest({
+        inputPath,
+        outputPath,
+        inputFormat,
+        outputFormat: options.outputFormat,
+        password: options.password,
+        filterOptions: options.filterOptions,
+        pdf: options.pdf,
+      });
+      const nativeResult = lokBindings.convertDocument(request);
+      assertNativeConversionSucceeded(nativeResult);
+    } catch (error) {
+      if (error instanceof NativeConversionError) {
+        if (!error.runtimeReusable) {
+          this.quarantineRuntime();
+        }
+        throw this.mapNativeConversionError(error);
+      }
+      if (error instanceof ConversionError) {
+        throw error;
+      }
+      throw new ConversionError(
+        ConversionErrorCode.CONVERSION_FAILED,
+        `Conversion failed: ${String(error)}`
+      );
+    }
+
+    this.emitProgress('converting', 90, 'Reading output...');
+    try {
+      const outputData = module.FS.readFile(outputPath) as Uint8Array;
+      if (outputData.length === 0) {
+        throw new ConversionError(
+          ConversionErrorCode.CONVERSION_FAILED,
+          'Conversion produced empty output'
+        );
+      }
+      return outputData;
+    } catch (error) {
+      if (error instanceof ConversionError) {
+        throw error;
+      }
+      throw new ConversionError(
+        ConversionErrorCode.CONVERSION_FAILED,
+        `Failed to read converted file: ${String(error)}`
+      );
+    }
+  }
+
+  /**
+   * Preserve the raw document-pointer transaction for image export only.
+   */
+  private async performLegacyImageConversion(
+    inputPath: string,
+    outputPath: string,
+    inputFormat: string,
     options: ConversionOptions
   ): Promise<Uint8Array> {
     if (!this.module || !this.lokBindings) {
@@ -538,7 +690,7 @@ export class LibreOfficeConverter implements ILibreOfficeConverter {
 
     try {
       // Build load options (e.g., for CSV import filter or password-protected documents)
-      const loadOptions = buildLoadOptions(options.inputFormat, options.password);
+      const loadOptions = buildLoadOptions(inputFormat, options.password);
 
       // Debug: verify file exists before LOK load
       if (this.options.verbose) {
@@ -1452,39 +1604,8 @@ export class LibreOfficeConverter implements ILibreOfficeConverter {
       this.lokBindings = null;
     }
 
-    // Terminate Emscripten pthread workers
-    if (this.module) {
-      try {
-        const mod = this.module as EmscriptenModuleWithPThread;
-
-        // Try to terminate all pthread workers
-        if (mod.PThread?.terminateAllThreads) {
-          mod.PThread.terminateAllThreads();
-        }
-
-        // Terminate any running workers
-        if (mod.PThread?.runningWorkers) {
-          for (const worker of mod.PThread.runningWorkers) {
-            if (worker?.terminate) {
-              worker.terminate();
-            }
-          }
-          mod.PThread.runningWorkers = [];
-        }
-
-        // Also check unusedWorkers
-        if (mod.PThread?.unusedWorkers) {
-          for (const worker of mod.PThread.unusedWorkers) {
-            if (worker?.terminate) {
-              worker.terminate();
-            }
-          }
-          mod.PThread.unusedWorkers = [];
-        }
-      } catch {
-        // Ignore pthread cleanup errors
-      }
-    }
+    // Terminate Emscripten pthread workers.
+    this.terminatePThreads(this.module);
 
     this.module = null;
     this.initialized = false;

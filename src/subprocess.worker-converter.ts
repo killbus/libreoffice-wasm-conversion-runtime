@@ -20,7 +20,6 @@ import {
   FORMAT_MIME_TYPES,
   FullQualityPagePreview,
   FullQualityRenderOptions,
-  OUTPUT_FORMAT_TO_LOK,
   FORMAT_FILTER_OPTIONS,
   buildPdfFilterOptions,
   ILibreOfficeConverter,
@@ -31,17 +30,14 @@ import {
   PagePreview,
   RenderOptions,
 } from './types.js';
+import type { NodeWorkerOperationResponse } from './node-worker-protocol.js';
 
 // Re-export types used by consumers
 export type { LOKDocumentType, OutputFormat, PagePreview, DocumentInfo, EditorSession, RenderOptions };
 
-interface WorkerMessage {
-  type: 'ready' | 'error' | 'response';
-  id?: string;
-  success?: boolean;
-  error?: string;
-  data?: unknown;
-}
+type WorkerMessage =
+  | { type: 'ready' | 'error'; error?: string }
+  | ({ type: 'response' } & NodeWorkerOperationResponse);
 
 interface SubprocessConverterOptions extends LibreOfficeWasmOptions {
   /** Max retries for initialization (default: 3) */
@@ -54,10 +50,15 @@ interface SubprocessConverterOptions extends LibreOfficeWasmOptions {
 
 export class SubprocessConverter implements ILibreOfficeConverter {
   private child: ChildProcess | null = null;
-  private pending = new Map<string, { resolve: (v: unknown) => void; reject: (e: Error) => void }>();
+  private pending = new Map<string, {
+    resolve: (value: unknown) => void;
+    reject: (error: Error) => void;
+    timeout: NodeJS.Timeout;
+  }>();
   private options: SubprocessConverterOptions;
   private initialized = false;
   private initializing = false;
+  private restartOnNextConvert = false;
   private workerPath: string = '';
 
   constructor(options: SubprocessConverterOptions = {}) {
@@ -69,6 +70,42 @@ export class SubprocessConverter implements ILibreOfficeConverter {
       restartOnMemoryError: true,
       ...options
     };
+  }
+
+  private rejectPending(error: Error): void {
+    const pendingRequests = [...this.pending.values()];
+    this.pending.clear();
+    for (const pending of pendingRequests) {
+      clearTimeout(pending.timeout);
+      pending.reject(error);
+    }
+  }
+
+  private discardChild(
+    error: Error,
+    restartOnNextConvert: boolean,
+    targetChild: ChildProcess | null = this.child
+  ): void {
+    if (targetChild && this.child !== targetChild) return;
+
+    const child = this.child;
+    this.child = null;
+    this.initialized = false;
+    this.restartOnNextConvert = restartOnNextConvert;
+
+    if (child) {
+      child.removeAllListeners();
+      try { child.kill('SIGKILL'); } catch { /* Already stopped. */ }
+    }
+
+    this.rejectPending(error);
+  }
+
+  private killWorker(): void {
+    this.discardChild(
+      new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, 'Subprocess restarted'),
+      false
+    );
   }
 
   private isMemoryError(error: string | Error): boolean {
@@ -99,46 +136,69 @@ export class SubprocessConverter implements ILibreOfficeConverter {
 
     const wasmPath = resolve(this.options.wasmPath || './wasm');
 
-    this.child = fork(this.workerPath, [], {
+    const child = fork(this.workerPath, [], {
       env: { ...process.env, WASM_PATH: wasmPath, VERBOSE: String(this.options.verbose || false) },
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
     });
+    this.child = child;
 
-    this.child.stdout?.on('data', (d: Buffer) => { if (this.options.verbose) process.stdout.write(d); });
-    this.child.stderr?.on('data', (d: Buffer) => { if (this.options.verbose) process.stderr.write(d); });
+    child.stdout?.on('data', (d: Buffer) => { if (this.options.verbose) process.stdout.write(d); });
+    child.stderr?.on('data', (d: Buffer) => { if (this.options.verbose) process.stderr.write(d); });
 
-    this.child.on('message', (msg: WorkerMessage) => {
-      if (msg.type === 'response' && msg.id) {
-        const p = this.pending.get(msg.id);
-        if (p) {
-          this.pending.delete(msg.id);
-          msg.success ? p.resolve(msg.data) : p.reject(new ConversionError(ConversionErrorCode.CONVERSION_FAILED, msg.error || 'Error'));
-        }
+    child.on('message', (msg: WorkerMessage) => {
+      if (this.child !== child || msg.type !== 'response') return;
+
+      const pending = this.pending.get(msg.id);
+      if (!pending) return;
+
+      clearTimeout(pending.timeout);
+      this.pending.delete(msg.id);
+
+      if (msg.success) {
+        pending.resolve(msg.data);
+        return;
+      }
+
+      const error = new ConversionError(
+        ConversionErrorCode.CONVERSION_FAILED,
+        msg.error || 'Unknown subprocess error'
+      );
+      pending.reject(error);
+      if (msg.quarantine) {
+        this.discardChild(error, true, child);
       }
     });
 
-    this.child.on('error', (e) => {
-      for (const p of this.pending.values()) p.reject(e);
-      this.pending.clear();
+    child.on('error', (error) => {
+      if (this.child !== child) return;
+      this.discardChild(error, this.initialized, child);
     });
 
-    this.child.on('exit', (code) => {
-      if (code !== 0) {
-        for (const p of this.pending.values()) p.reject(new Error(`Exit ${code}`));
-        this.pending.clear();
-      }
+    child.on('exit', (code) => {
+      if (this.child !== child) return;
+
+      const wasInitialized = this.initialized;
       this.child = null;
       this.initialized = false;
+      this.restartOnNextConvert = wasInitialized;
+      this.rejectPending(new Error(`Subprocess exited with code ${code ?? 'unknown'}`));
     });
 
     // Wait for ready signal (subprocess started)
     await new Promise<void>((resolve, reject) => {
-      const t = setTimeout(() => reject(new Error('Subprocess start timeout')), 30000);
-      const h = (msg: WorkerMessage) => {
-        if (msg.type === 'ready') { clearTimeout(t); this.child?.off('message', h); resolve(); }
-        else if (msg.type === 'error') { clearTimeout(t); this.child?.off('message', h); reject(new Error(msg.error)); }
+      const timeout = setTimeout(() => reject(new Error('Subprocess start timeout')), 30000);
+      const handler = (msg: WorkerMessage) => {
+        if (msg.type === 'ready') {
+          clearTimeout(timeout);
+          child.off('message', handler);
+          resolve();
+        } else if (msg.type === 'error') {
+          clearTimeout(timeout);
+          child.off('message', handler);
+          reject(new Error(msg.error || 'Subprocess failed to start'));
+        }
       };
-      this.child?.on('message', h);
+      child.on('message', handler);
     });
 
     // Build init payload with fonts and options
@@ -158,19 +218,16 @@ export class SubprocessConverter implements ILibreOfficeConverter {
     await this.send('init', initPayload, 180000); // 3 minute timeout for WASM init
   }
 
-  private killWorker(): void {
-    if (this.child) {
-      try { this.child.kill('SIGKILL'); } catch {}
-      this.child = null;
-    }
-    this.initialized = false;
-    this.pending.clear();
-  }
-
   async initialize(): Promise<void> {
     if (this.initialized) return;
     if (this.initializing) {
       while (this.initializing) await new Promise(r => setTimeout(r, 100));
+      if (!this.initialized) {
+        throw new ConversionError(
+          ConversionErrorCode.WASM_NOT_INITIALIZED,
+          'Subprocess initialization failed'
+        );
+      }
       return;
     }
     this.initializing = true;
@@ -184,6 +241,7 @@ export class SubprocessConverter implements ILibreOfficeConverter {
         await this.spawnWorker();
         this.initialized = true;
         this.initializing = false;
+        this.restartOnNextConvert = false;
         this.options.onReady?.();
         return;
       } catch (e) {
@@ -206,18 +264,31 @@ export class SubprocessConverter implements ILibreOfficeConverter {
     throw err;
   }
 
-  private send(type: string, payload?: unknown, timeout: number = 300000): Promise<unknown> {
+  private send(type: string, payload?: unknown, timeoutMs: number = 300000): Promise<unknown> {
     return new Promise((resolve, reject) => {
-      if (!this.child) { reject(new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, 'No process')); return; }
+      const child = this.child;
+      if (!child) {
+        reject(new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, 'No process'));
+        return;
+      }
+
       const id = randomUUID();
-      this.pending.set(id, { resolve, reject });
-      this.child.send({ type, id, payload });
-      setTimeout(() => {
-        if (this.pending.has(id)) {
+      const timeout = setTimeout(() => {
+        const pending = this.pending.get(id);
+        if (pending) {
           this.pending.delete(id);
-          reject(new ConversionError(ConversionErrorCode.CONVERSION_FAILED, 'Timeout'));
+          pending.reject(new ConversionError(ConversionErrorCode.CONVERSION_FAILED, 'Timeout'));
         }
-      }, timeout);
+      }, timeoutMs);
+
+      this.pending.set(id, { resolve, reject, timeout });
+      try {
+        child.send({ type, id, payload });
+      } catch (error) {
+        clearTimeout(timeout);
+        this.pending.delete(id);
+        reject(error instanceof Error ? error : new Error(String(error)));
+      }
     });
   }
 
@@ -232,13 +303,18 @@ export class SubprocessConverter implements ILibreOfficeConverter {
   }
 
   async convert(input: Uint8Array | ArrayBuffer | Buffer, options: ConversionOptions, filename = 'document'): Promise<ConversionResult> {
-    if (!this.initialized || !this.child) throw new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, 'Not initialized');
+    if ((!this.initialized || !this.child) && this.restartOnNextConvert) {
+      await this.initialize();
+    }
+    if (!this.initialized || !this.child) {
+      throw new ConversionError(ConversionErrorCode.WASM_NOT_INITIALIZED, 'Not initialized');
+    }
 
     const start = Date.now();
     const data = this.normalizeInput(input);
     if (data.length === 0) throw new ConversionError(ConversionErrorCode.INVALID_INPUT, 'Empty');
 
-    const ext = options.inputFormat || (filename.includes('.') ? filename.slice(filename.lastIndexOf('.') + 1).toLowerCase() : 'docx');
+    const inputFormat = options.inputFormat || (filename.includes('.') ? filename.slice(filename.lastIndexOf('.') + 1).toLowerCase() : 'docx');
     let filterOptions = options.filterOptions ?? FORMAT_FILTER_OPTIONS[options.outputFormat] ?? '';
     if (!options.filterOptions && options.outputFormat === 'pdf' && options.pdf) {
       filterOptions = buildPdfFilterOptions(options.pdf) || filterOptions;
@@ -251,9 +327,10 @@ export class SubprocessConverter implements ILibreOfficeConverter {
       try {
         const r = await this.send('convert', {
           inputData: Array.from(data),
-          inputExt: ext,
-          outputFormat: OUTPUT_FORMAT_TO_LOK[options.outputFormat],
+          inputFormat,
+          outputFormat: options.outputFormat,
           filterOptions,
+          password: options.password,
         }) as number[];
 
         const base = filename.includes('.') ? filename.slice(0, filename.lastIndexOf('.')) : filename;
@@ -269,6 +346,9 @@ export class SubprocessConverter implements ILibreOfficeConverter {
         if (this.options.verbose) {
           console.error(`[SubprocessConverter] Conversion attempt ${attempt}/${maxRetries} failed:`, lastError.message);
         }
+
+        // A quarantined runtime must not retry inside the poisoned subprocess.
+        if (this.restartOnNextConvert) break;
 
         // If it's a memory error and we should restart, do so
         if (this.isMemoryError(lastError) && this.options.restartOnMemoryError && attempt < maxRetries) {
@@ -544,25 +624,24 @@ export class SubprocessConverter implements ILibreOfficeConverter {
 
   async destroy(): Promise<void> {
     if (this.child) {
-      // Send destroy message (child will exit after cleanup)
-      try { 
-        await this.send('destroy'); 
+      try {
+        await this.send('destroy');
       } catch {
-        // Child may have already exited, that's fine
-      }
-      
-      // Force kill if still running (child should have exited via process.exit)
-      if (this.child) {
-        try { 
-          this.child.kill('SIGKILL'); 
-        } catch {
-          // Already dead, that's fine
-        }
-        this.child = null;
+        // Child may have already exited, that's fine.
       }
     }
-    this.initialized = false;
-    this.pending.clear();
+
+    const error = new ConversionError(
+      ConversionErrorCode.WASM_NOT_INITIALIZED,
+      'Converter destroyed'
+    );
+    if (this.child) {
+      this.discardChild(error, false, this.child);
+    } else {
+      this.initialized = false;
+      this.restartOnNextConvert = false;
+      this.rejectPending(error);
+    }
   }
 
   isReady(): boolean { return this.initialized && this.child !== null; }

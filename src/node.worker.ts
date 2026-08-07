@@ -11,9 +11,14 @@
 import { parentPort } from 'worker_threads';
 import { LibreOfficeConverter } from './converter-node.js';
 import { createEditor, OfficeEditor } from './editor/index.js';
-import type { ConversionOptions, FilterOptions, InputFormatOptions, WasmLoaderModule } from './types.js';
+import type { ConversionOptions, InputFormatOptions, WasmLoaderModule } from './types.js';
 import { buildLoadOptions } from './types.js';
 import type { OperationResult } from './editor/types.js';
+import {
+  createNodeWorkerConversionOptions,
+  createNodeWorkerFailureResponse,
+} from './node-worker-protocol.js';
+import type { NodeWorkerConversionPayload } from './node-worker-protocol.js';
 
 // Import the WASM loader - path is relative to dist/ after build
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -30,11 +35,8 @@ interface InitPayload {
   verbose: boolean;
 }
 
-interface ConvertPayload {
+interface ConvertPayload extends NodeWorkerConversionPayload {
   inputData: Uint8Array;
-  inputFormat: string;
-  outputFormat: string;
-  filterOptions?: FilterOptions;
   filename?: string;
 }
 
@@ -124,15 +126,9 @@ async function handleConvert(payload: ConvertPayload): Promise<Uint8Array> {
     throw new Error('Worker not initialized');
   }
 
-  const options: ConversionOptions = {
-    inputFormat: payload.inputFormat as ConversionOptions['inputFormat'],
-    outputFormat: payload.outputFormat as ConversionOptions['outputFormat'],
-    filterOptions: payload.filterOptions,
-  };
-
   const result = await converter.convert(
     payload.inputData,
-    options,
+    createNodeWorkerConversionOptions(payload),
     payload.filename || 'document'
   );
 
@@ -535,11 +531,9 @@ parentPort?.on('message', async (message: WorkerMessage) => {
       data: result,
     });
   } catch (error) {
-    parentPort?.postMessage({
-      id: message.id,
-      success: false,
-      error: (error as Error).message,
-    });
+    parentPort?.postMessage(
+      createNodeWorkerFailureResponse(message.id, message.type, error, converter)
+    );
   }
 });
 
