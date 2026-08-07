@@ -5,9 +5,9 @@ name: Build WASM
 #
 #   baseline         -- current untrimmed autogen.input + full patch.
 #                      Validates the build pipeline itself + gate test on GHA.
-#   conversion-only  -- two LOK trim atoms (exports, then shims) on top of the
-#                      full baseline patch. Keeps baseline autogen.input by
-#                      default so atoms are isolated from PENDING-VERIFY
+#   conversion-only  -- LOK trim atoms (exports, then shims) plus the private
+#                      bridge atom on top of the full baseline patch. Keeps
+#                      baseline autogen.input by default so atoms are isolated from PENDING-VERIFY
 #                      autogen switches (see input use_conversion_autogen).
 #
 # Artifacts (soffice.wasm/data/cjs) are uploaded, NEVER auto-pushed to LFS
@@ -123,11 +123,17 @@ jobs:
           BUILD_JOBS: '4'
           SKIP_DEPS: '0'
           CLEAN_BUILD: ${{ inputs.clean_build && '1' || '0' }}
-          # conversion-only mode applies the two LOK trim atoms on top of the
-          # consolidated baseline patch (exports, then shims). See
-          # build/patches/CONVERSION-ONLY-TRIM.md.
+          # actions/cache restores a source tree with the previous reviewed
+          # patch stack applied. Normalize tracked source, but preserve ignored
+          # LibreOffice build outputs before replaying the active stack.
+          RESET_PATCHED_SOURCE: '1'
+          # conversion-only mode applies exports, shims, then the private bridge
+          # on top of the consolidated baseline patch.
           CONVERSION_ONLY: ${{ inputs.mode == 'conversion-only' && '1' || '0' }}
-        run: bash build/build-wasm.sh
+        run: |
+          # Never let an early compile failure upload checked-in LFS artifacts.
+          rm -f wasm/soffice.*
+          bash build/build-wasm.sh
 
       - name: Show produced artifacts
         run: ls -lh wasm/soffice.*

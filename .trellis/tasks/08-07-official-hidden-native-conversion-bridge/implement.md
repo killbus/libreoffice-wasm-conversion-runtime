@@ -66,7 +66,7 @@
 
 - [x] Review the exact diff and record the branch/base/patch hashes.
 - [x] Confirm every inexpensive gate is green.
-- [ ] Trigger one manual `build-wasm.yml` run; do not trigger earlier.
+- [x] Trigger each reviewed `build-wasm.yml` attempt only after inexpensive gates are green.
 - [ ] Download the artifact to a dedicated `D:/tmp` directory and record its
       SHA-256 hashes.
 - [ ] Verify `_lok_convertDocument` and `_lok_convertFree` exports.
@@ -119,6 +119,40 @@ Patch verification will use `git apply --check` and
   and `pnpm install --frozen-lockfile` passed again.
 - The checked-in baseline `wasm/` artifact does not export the new ABI, so
   fresh-artifact integration gates remain intentionally pending.
+
+## First expensive build record (2026-08-07)
+
+- The first workflow attempt was dispatched as
+  [GHA 31177338506](https://github.com/killbus/libreoffice-wasm-conversion-runtime/actions/runs/31177338506).
+- Dispatch head: `f27003112840b9d7858c1367e1f2e96e7f881973`.
+- Inputs: `mode=conversion-only`, `clean_build=false`,
+  `use_conversion_autogen=false`.
+- Final status: `failure`; diagnosis and failed-artifact evidence are recorded
+  below. A corrected retry remains necessary.
+
+## Patch-stack replay and first-build diagnosis (2026-08-07)
+
+- The first expensive run [GHA 31177338506](https://github.com/killbus/libreoffice-wasm-conversion-runtime/actions/runs/31177338506) failed before compilation reached a native-bridge defect.
+- The Actions cache restored LibreOffice source with the baseline patch and later conversion atoms already applied. The old whole-baseline reverse dry-run was invalidated because later atoms touched the same files; the script then reapplied the baseline and produced duplicate definitions. The first compiler error was `include/comphelper/lok.hxx: OperationType` multiple definition.
+- The bridge patch itself applied successfully in that run. The failed artifact (`D:/tmp/lo-native-bridge-run-31177338506-artifact`, artifact `8993448347`, archive digest `sha256:63ea9ef08dffac7e81997953dc58cf2e474bcdb52a1ed7b96686598c13b2462c`) was the checked-in stale LFS WASM and did not contain `_lok_convertDocument` or `_lok_convertFree`.
+- The fix adds `build/patch-stack.sh` with `applied`, `pending`, and `inconsistent` states; only a fully pending patch may be applied, with `--fuzz=0`. GNU patch reverse probes use `--force` so a failed reverse probe cannot cancel `-R` and misclassify pristine source. `RESET_PATCHED_SOURCE=1` resets tracked source and removes only exact patch-created paths while preserving ignored LibreOffice build outputs.
+- The workflow now enables source reset and removes `wasm/soffice.*` before building, preventing an early failure from uploading stale checked-in artifacts.
+- The corrected full-stack gate at `D:/tmp/lo-full-patch-stack-gate.sh` passed against pinned LibreOffice `d1c9e0e4e1ddeb24fe8f93e56860b3765043f8b1`: pristine stack checks, mixed-state fail-hard detection, reset preservation, and strict second replay all passed.
+
+## Repair gate record (2026-08-07)
+
+- Bash syntax checks passed for `build/build-wasm.sh` and
+  `build/patch-stack.sh`.
+- Directed native-bridge and patch-stack suite: 7 files, 56 tests passed.
+- CI-equivalent non-artifact suite: 16 files, 144 tests passed, 1 skipped.
+- `pnpm typecheck`: passed.
+- `pnpm lint`: passed with 0 errors and 22 existing warnings.
+- `pnpm build`: passed.
+- `git diff --check`: passed.
+- Full four-patch apply, reset, and second replay against pinned LibreOffice:
+  passed while preserving ignored `workdir/`.
+- Reusable replay rules were captured in
+  `.trellis/spec/backend/wasm-patch-stack.md`.
 
 ## Risk and rollback points
 

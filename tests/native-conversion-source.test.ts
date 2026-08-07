@@ -9,6 +9,14 @@ const buildScript = readFileSync(
   new URL('../build/build-wasm.sh', import.meta.url),
   'utf8'
 );
+const patchStackScript = readFileSync(
+  new URL('../build/patch-stack.sh', import.meta.url),
+  'utf8'
+);
+const workflow = readFileSync(
+  new URL('../.github/workflows/build-wasm.yml', import.meta.url),
+  'utf8'
+);
 
 describe('native conversion source and build gates', () => {
   it('keeps the bridge patch limited to the four reviewed LibreOffice files', () => {
@@ -127,6 +135,57 @@ describe('native conversion source and build gates', () => {
     expect(patch).toMatch(
       /nativeConversionHiddenLoadConfirmed\([\s\S]*?xModel->getArgs\(\)[\s\S]*?u"Hidden"_ustr/
     );
+  });
+
+  it('classifies patch files before applying and fails hard on mixed state', () => {
+    for (const state of ['applied', 'pending', 'inconsistent']) {
+      expect(patchStackScript).toContain(`printf '%s\\n' '${state}'`);
+    }
+    expect(patchStackScript).toMatch(
+      /patch --reverse --force[^\n]*--fuzz=0 --dry-run/
+    );
+    expect(patchStackScript).toMatch(
+      /patch --forward[^\n]*--fuzz=0 --dry-run/
+    );
+
+    const stateCase = buildScript.match(
+      /case "\$patch_state" in([\s\S]*?)\n    esac/
+    )?.[1];
+    expect(stateCase).toBeDefined();
+    expect(stateCase).toMatch(/pending\)[\s\S]*?apply_pending_patch/);
+    expect(stateCase?.match(/apply_pending_patch/g)).toHaveLength(1);
+    expect(stateCase).toMatch(
+      /inconsistent\)[\s\S]*?Refusing a partial or fuzzy reapply[\s\S]*?return 1/
+    );
+    expect(buildScript).not.toContain('patch -f -p1');
+  });
+
+  it('normalizes cached source without deleting ignored build outputs', () => {
+    expect(buildScript).toContain(
+      'if [ "$RESET_PATCHED_SOURCE" = "1" ] || [ "$CLEAN_BUILD" = "1" ]'
+    );
+    expect(buildScript).toContain(
+      'reset_patched_source "${ACTIVE_PATCHES[@]}"'
+    );
+    expect(patchStackScript).toContain('git reset --hard HEAD');
+    expect(patchStackScript).toContain('git clean -fd');
+    expect(patchStackScript).toMatch(
+      /--- \\\/dev\\\/null[\s\S]*?^\s*git clean -fdx -- "\$created_path"/m
+    );
+    expect(
+      patchStackScript.match(/^\s*git clean -fdx(?:\s|$).*$/gm)
+    ).toEqual(['        git clean -fdx -- "$created_path"']);
+  });
+
+  it('resets cached source and removes stale artifacts before the build', () => {
+    expect(workflow).toContain("RESET_PATCHED_SOURCE: '1'");
+
+    const cleanupIndex = workflow.indexOf('rm -f wasm/soffice.*');
+    const buildIndex = workflow.indexOf('bash build/build-wasm.sh');
+    const uploadIndex = workflow.indexOf('- name: Upload WASM artifacts');
+    expect(cleanupIndex).toBeGreaterThan(-1);
+    expect(cleanupIndex).toBeLessThan(buildIndex);
+    expect(buildIndex).toBeLessThan(uploadIndex);
   });
 
   it('applies exactly exports, shims, then bridge without later trim atoms', () => {

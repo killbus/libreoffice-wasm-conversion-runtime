@@ -17,7 +17,9 @@ EMSDK_VERSION="${EMSDK_VERSION:-3.1.74}"
 BUILD_JOBS="${BUILD_JOBS:-$(nproc)}"
 SKIP_DEPS="${SKIP_DEPS:-0}"
 CLEAN_BUILD="${CLEAN_BUILD:-0}"
+RESET_PATCHED_SOURCE="${RESET_PATCHED_SOURCE:-0}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/patch-stack.sh"
 
 # Detect Docker environment and use pre-installed paths
 if [ -d "/opt/emsdk" ] && [ -d "/build/libreoffice" ]; then
@@ -59,6 +61,7 @@ echo "  EMSDK Dir:    ${EMSDK_DIR}"
 echo "  Jobs:         ${BUILD_JOBS}"
 echo "  Docker mode:  ${DOCKER_MODE}"
 echo "  Clean build:  ${CLEAN_BUILD}"
+echo "  Reset source: ${RESET_PATCHED_SOURCE}"
 echo ""
 
 mkdir -p "${BUILD_DIR}" "${OUTPUT_DIR}"
@@ -167,10 +170,36 @@ fi
 
 cd "${LO_DIR}"
 
-# Clean if requested
+CONSOLIDATED_PATCH="${SCRIPT_DIR}/patches/wasm-build-fixes.patch"
+CONVERSION_EXPORTS_PATCH="${SCRIPT_DIR}/patches/wasm-trim-lok-exports-conversion-only.patch"
+CONVERSION_SHIMS_PATCH="${SCRIPT_DIR}/patches/wasm-trim-lok-shims-conversion-only.patch"
+NATIVE_BRIDGE_PATCH="${SCRIPT_DIR}/patches/wasm-native-conversion-bridge.patch"
+ACTIVE_PATCHES=("$CONSOLIDATED_PATCH")
+if [ "${CONVERSION_ONLY:-0}" = "1" ]; then
+    ACTIVE_PATCHES+=(
+        "$CONVERSION_EXPORTS_PATCH"
+        "$CONVERSION_SHIMS_PATCH"
+        "$NATIVE_BRIDGE_PATCH"
+    )
+fi
+
+# Clean if requested. A clean build also implies source normalization below.
 if [ "$CLEAN_BUILD" = "1" ]; then
     log_warn "Cleaning previous build..."
     make clean 2>/dev/null || true
+fi
+
+# Cached build outputs are intentionally preserved, but tracked source must be
+# pristine before the reviewed patch stack is replayed. This avoids mistaking a
+# baseline patch for pending after later atoms modify the same files.
+if [ "$RESET_PATCHED_SOURCE" = "1" ] || [ "$CLEAN_BUILD" = "1" ]; then
+    log_warn "Resetting patched LibreOffice source while preserving ignored build outputs..."
+    if reset_patched_source "${ACTIVE_PATCHES[@]}"; then
+        log_success "LibreOffice source reset to HEAD"
+    else
+        log_error "Failed to reset LibreOffice source"
+        exit 1
+    fi
 fi
 
 # ============================================================
@@ -187,26 +216,46 @@ log_info "[4/7] Applying patches for headless WASM build..."
 # - writerperfect module fixes
 # - xmlsecurity headless fixes
 # - Emscripten fs image optimizations
-CONSOLIDATED_PATCH="${SCRIPT_DIR}/patches/wasm-build-fixes.patch"
-if [ -f "$CONSOLIDATED_PATCH" ]; then
-    log_info "Checking consolidated WASM build fixes patch..."
+apply_reviewed_patch() {
+    local patch_name="$1"
+    local patch_path="$2"
+    local patch_state
 
-    # Check if patch is already applied
-    if patch -R -p1 -s -f --dry-run < "$CONSOLIDATED_PATCH" &>/dev/null; then
-        log_success "wasm-build-fixes.patch already applied"
-    else
-        log_info "Applying wasm-build-fixes.patch..."
-        if patch -f -p1 < "$CONSOLIDATED_PATCH"; then
-            log_success "Applied wasm-build-fixes.patch"
-        else
-            log_error "Failed to apply wasm-build-fixes.patch"
-            log_warn "Build may fail without these patches"
-        fi
+    if [ ! -f "$patch_path" ]; then
+        log_error "Reviewed patch not found: $patch_path"
+        return 1
     fi
-else
-    log_error "Consolidated patch not found: $CONSOLIDATED_PATCH"
-    log_warn "Please ensure build/patches/wasm-build-fixes.patch exists"
-fi
+
+    patch_state="$(patch_file_state "$patch_path")"
+    case "$patch_state" in
+        applied)
+            log_success "${patch_name} already applied"
+            ;;
+        pending)
+            log_info "Applying ${patch_name}..."
+            if ! apply_pending_patch "$patch_path"; then
+                log_error "Failed to apply ${patch_name}"
+                return 1
+            fi
+            if [ "$(patch_file_state "$patch_path")" != "applied" ]; then
+                log_error "${patch_name} did not reach the applied state"
+                return 1
+            fi
+            log_success "Applied ${patch_name}"
+            ;;
+        inconsistent)
+            log_error "${patch_name} is neither fully pending nor fully applied"
+            log_error "Refusing a partial or fuzzy reapply; rerun with RESET_PATCHED_SOURCE=1"
+            return 1
+            ;;
+        *)
+            log_error "Unknown patch state '${patch_state}' for ${patch_name}"
+            return 1
+            ;;
+    esac
+}
+
+apply_reviewed_patch "wasm-build-fixes.patch" "$CONSOLIDATED_PATCH"
 
 # Conversion-only atoms -- applied ON TOP of the consolidated baseline patch
 # when CONVERSION_ONLY=1. Independent atoms (archive 014/015 style), NOT
@@ -220,36 +269,20 @@ fi
 #       + abort group (abortOperation/setOperationTimeout/getOperationState/resetAbort).
 # See build/patches/CONVERSION-ONLY-TRIM.md.
 apply_conversion_atom() {
-    local atom_name="$1"
-    local atom_path="$2"
-    if [ ! -f "$atom_path" ]; then
-        log_error "Conversion-only atom not found: $atom_path"
-        exit 1
-    fi
-    if patch -R -p1 -s -f --dry-run < "$atom_path" &>/dev/null; then
-        log_success "${atom_name} already applied"
-    else
-        log_info "Applying ${atom_name}..."
-        if patch -f -p1 < "$atom_path"; then
-            log_success "Applied ${atom_name}"
-        else
-            log_error "Failed to apply ${atom_name}"
-            exit 1
-        fi
-    fi
+    apply_reviewed_patch "$@"
 }
 
 if [ "${CONVERSION_ONLY:-0}" = "1" ]; then
-    log_info "CONVERSION_ONLY=1 -- applying conversion-only atoms (exports, then shims)..."
+    log_info "CONVERSION_ONLY=1 -- applying conversion-only atoms (exports, shims, then bridge)..."
     apply_conversion_atom \
         "wasm-trim-lok-exports-conversion-only.patch" \
-        "${SCRIPT_DIR}/patches/wasm-trim-lok-exports-conversion-only.patch"
+        "$CONVERSION_EXPORTS_PATCH"
     apply_conversion_atom \
         "wasm-trim-lok-shims-conversion-only.patch" \
-        "${SCRIPT_DIR}/patches/wasm-trim-lok-shims-conversion-only.patch"
+        "$CONVERSION_SHIMS_PATCH"
     apply_conversion_atom \
         "wasm-native-conversion-bridge.patch" \
-        "${SCRIPT_DIR}/patches/wasm-native-conversion-bridge.patch"
+        "$NATIVE_BRIDGE_PATCH"
 fi
 
 # Create autotext files (handled in Step 6 background process)
