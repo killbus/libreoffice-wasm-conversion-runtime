@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "kind": "libreoffice-wasm-runtime-acceptance-receipt",
+  "acceptanceAttempt": 2,
+  "decision": "rejected",
+  "signedDecision": "FAIL",
+  "releaseQualified": false,
+  "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+  "payloadArchiveSha256": "e9aac8dde2fb627251155fc97651c2bd35bec63b01e39f882d342c024a87de9a",
+  "releaseId": "367637128",
+  "tagName": "runtime-artifact-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+  "targetCommit": "df3f73c789e6d2abf71cbcd75186118d2bbc795a",
+  "runtimeCheckout": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+  "pdfHowCheckout": "b41fde5db9829ede7e6e217de6ac12c2b475b7fc",
+  "handoffCommit": "a69957419a5b3e91dd7ad6a7419aa4d155202a34",
+  "acceptanceOwner": "OpenAI Codex AI 编程代理（当前验收会话实例）",
+  "generatedAt": "2026-08-11T16:52:41Z",
+  "admissionStatus": "ADMITTED",
+  "attemptStarted": true,
+  "formalInvocationCount": 1,
+  "retryOrBackfillPermitted": false,
+  "terminalFailure": {
+    "commandIndex": 2,
+    "commandName": "checkout-runtime",
+    "timeoutSeconds": 60,
+    "exitCode": 1,
+    "message": "TIMEOUT after 60 seconds: checkout-runtime. Stop immediately; no retry or backfill is permitted."
+  },
+  "gateResults": [
+    {
+      "gate": "fresh-runtime-checkout",
+      "status": "failed",
+      "summary": "The mandatory formal git checkout process exceeded its fixed 60-second boundary. A later HEAD observation cannot convert the timed-out command into a passing result."
+    },
+    {
+      "gate": "all-subsequent-attempt-2-gates",
+      "status": "not-run",
+      "summary": "Fail-closed execution stopped immediately. PDFHow checkout, Release download and verification, workflow/CLI checks, Node gates, Chromium candidate gate, five cold starts, and final immutability checks were not run."
+    }
+  ],
+  "rejectionReasons": [
+    "The mandatory checkout-runtime command exceeded its admitted 60-second timeout.",
+    "The formal command package requires immediate termination and prohibits retry or backfill after any timeout.",
+    "The required complete retry-free gate set and five consecutive cold-start samples therefore do not exist for Attempt 2."
+  ],
+  "requiredDisposition": [
+    "Preserve D:\\tmp\\lo-runtime-acceptance-attempt-2 and all Attempt 2 evidence unchanged.",
+    "Keep Release 367637128 draft and releaseQualified false; do not publish or represent the candidate as accepted.",
+    "Do not rerun, supplement, or continue Acceptance Attempt 2.",
+    "Any further acceptance execution requires a separately documented and formally admitted later attempt with a new handoff."
+  ],
+  "evidenceManifest": "acceptance-attempt-2-evidence.json",
+  "report": "acceptance-attempt-2-report.md",
+  "signature": {
+    "identity": "OpenAI Codex AI 编程代理（当前验收会话实例）",
+    "role": "independent acceptance owner",
+    "decision": "FAIL",
+    "signedAt": "2026-08-11T16:52:41Z"
+  }
+}

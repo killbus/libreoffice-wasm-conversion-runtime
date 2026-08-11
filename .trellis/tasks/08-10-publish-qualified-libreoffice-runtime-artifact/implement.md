@@ -615,3 +615,36 @@ The formal handoff is acceptance/acceptance-attempt-2-handoff.md. The complete v
 Release 367637128 remains draft with releaseQualified false. Existing Release assets have not been replaced or modified. Build WASM run 31211473147 remains the newest native/WASM build, so no new native/WASM build has occurred since the frozen candidate. Any drift discovered by the independent owner fails closed before execution.
 
 Attempt 1 evidence and the rejected receipt remain unchanged and continue to be the authoritative history for Attempt 1.
+
+### Acceptance Attempt 2 formal failure and Attempt 3 timeout remediation — 2026-08-11
+
+The independent execution phase for Acceptance Attempt 2 has ended. The formal decision is `FAIL`; the attempt is CLOSED and continuation is prohibited. The failure occurred at `checkout-runtime`, whose one permitted invocation exceeded the admitted 60-second timeout. The command package stopped immediately with `TIMEOUT after 60 seconds: checkout-runtime. Stop immediately; no retry or backfill is permitted.` Every later gate was NOT RUN, and Release qualification remains false.
+
+The independent owner persisted the machine-readable records `acceptance/acceptance-attempt-2-evidence.json` and `acceptance/acceptance-attempt-2-receipt.rejected.json`. The additive narrative report is `acceptance/acceptance-attempt-2-report.md`. The external evidence root `D:\tmp\lo-runtime-acceptance-attempt-2` must remain unchanged. Nothing in this section modifies or supersedes Attempt 1 history or the previously admitted Attempt 2 handoff.
+
+A separate diagnostic clone, isolated from Attempt 2 evidence, completed the same detached checkout with exit code 0 after 108.631 seconds, at HEAD `a1c3cd6d6d2dd25fab063539e9fe40fbb327b846` with a clean worktree. This confirms that the fixed commit exists and that the formal 60-second boundary was insufficient. The diagnostic is not Attempt 2 acceptance evidence, is not a retry or backfill, and cannot change the FAIL decision.
+
+TEAM B has made a process-only remediation for a possible later attempt. The new `acceptance/attempt-3-commands.ps1` retains fresh `--no-checkout` clones and fixed detached checkouts, but gives both `checkout-runtime` and `checkout-pdfhow` a 300-second timeout. It uses the new root `D:\tmp\lo-runtime-acceptance-attempt-3` and the independent helper `acceptance/attempt-3-download-assets.mjs`. It does not use an old worktree, TEAM B staging, a prior extraction, Attempt 1/2 downloads, or a local overlay. No frozen candidate byte, Release asset, product implementation, native/WASM artifact, or acceptance gate was changed or executed by this remediation.
+
+The formal next-attempt record is `acceptance/acceptance-attempt-3-handoff.md`. Current state:
+
+- Acceptance Attempt 2: CLOSED / FAIL;
+- Attempt 2 failure stage: `checkout-runtime`;
+- Attempt 2 retry, continuation, and backfill: NOT PERMITTED;
+- Attempt 2 subsequent gates: NOT RUN;
+- current next-action owner: TEAM B, for handoff persistence only;
+- Acceptance Attempt 3: NOT ADMITTED;
+- Attempt 3 eligible: false;
+- Attempt 3 started: false;
+- Attempt 3 PASS/FAIL decision: none;
+- Runtime checkout: `a1c3cd6d6d2dd25fab063539e9fe40fbb327b846`;
+- PDFHow checkout: `b41fde5db9829ede7e6e217de6ac12c2b475b7fc`;
+- Release ID: `367637128`;
+- required Release state: `draft: true`;
+- required manifest state: `releaseQualified: false`.
+
+TEAM B has not admitted or executed Attempt 3 and does not predeclare PASS or FAIL. Before any Attempt 3 command may run, a newly independent acceptance owner must verify the handoff, remote refs, fixed commits, Release identity, all asset names/sizes/SHA-256 values, and latest native/WASM workflow run, then explicitly persist the correctly spelled statement `Acceptance Attempt 3: ADMITTED`. Any mismatch keeps the attempt NOT ADMITTED.
+
+After admission, Attempt 3 must start every gate from zero: fresh Release downloads; archive safety and exact inventory; provenance, ABI/schema, pthread and worker-absence assertions; workflow and CLI contracts; downloaded-byte Node gates and cleanup; the full retry-free Chromium candidate gate; five consecutive fresh-browser cold starts; and final Release/native-build immutability checks. Attempt 1/2 results cannot be reused or backfilled.
+
+Release `367637128` remains prohibited from publication until a new attempt independently passes. Assets must not be replaced or re-uploaded, the candidate must not be represented as qualified, and no unnecessary native/WASM build may be triggered.

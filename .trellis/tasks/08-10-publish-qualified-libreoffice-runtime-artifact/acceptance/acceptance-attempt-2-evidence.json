@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "kind": "libreoffice-wasm-runtime-acceptance-attempt-evidence",
+  "acceptanceAttempt": 2,
+  "acceptanceOwner": "OpenAI Codex AI 编程代理（当前验收会话实例）",
+  "decision": "rejected",
+  "generatedAt": "2026-08-11T16:52:41Z",
+  "admission": {
+    "status": "ADMITTED",
+    "handoffCommit": "a69957419a5b3e91dd7ad6a7419aa4d155202a34",
+    "handoffFile": "acceptance-attempt-2-handoff.md",
+    "handoffSha256": "868841c0161907a1d3d860c610ebb2d6a0f750a4b7214f003c887e189f897c74",
+    "formalCommandFile": "attempt-2-commands.ps1",
+    "formalCommandFileSha256": "dbf03212431ac5d7152a711f7aa80abd6116b23638ad9285320a50142d819159",
+    "downloadHelperFile": "attempt-2-download-assets.mjs",
+    "downloadHelperFileSha256": "55dabea400875c12c3e533e4527128ec1c92e90fab31f7606f2b08c038e019f1"
+  },
+  "fixedInputs": {
+    "runtimeCheckout": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+    "pdfHowCheckout": "b41fde5db9829ede7e6e217de6ac12c2b475b7fc",
+    "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+    "releaseId": 367637128,
+    "releaseTag": "runtime-artifact-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+    "releaseTarget": "df3f73c789e6d2abf71cbcd75186118d2bbc795a",
+    "archiveSha256": "e9aac8dde2fb627251155fc97651c2bd35bec63b01e39f882d342c024a87de9a",
+    "nativeWorkflowRunId": 31211473147,
+    "nativeCommit": "71d33678ed74872ebbb1bc37f5778143f8f5e401",
+    "fixtureSha256": "a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59df"
+  },
+  "formalInvocation": {
+    "command": "pwsh -NoProfile -File .trellis/tasks/08-10-publish-qualified-libreoffice-runtime-artifact/acceptance/attempt-2-commands.ps1 -PinnedDocxFixture D:\\Repositories\\pdfhow.com-next\\scratch\\岭南版美术四年级期末复习知识点(3).docx -AcceptanceRoot D:\\tmp\\lo-runtime-acceptance-attempt-2",
+    "checkoutCommit": "a69957419a5b3e91dd7ad6a7419aa4d155202a34",
+    "checkoutMode": "fresh detached handoff checkout",
+    "acceptanceRoot": "D:\\tmp\\lo-runtime-acceptance-attempt-2",
+    "retryPolicy": "disabled",
+    "invocationCount": 1,
+    "exitCode": 1,
+    "observedElapsedSecondsApproximately": 104.5,
+    "terminalMessage": "TIMEOUT after 60 seconds: checkout-runtime. Stop immediately; no retry or backfill is permitted."
+  },
+  "commandResults": [
+    {
+      "index": 1,
+      "name": "clone-runtime",
+      "status": "passed",
+      "timeoutSeconds": 300,
+      "retry": "disabled; command was invoked once only",
+      "startedAt": "2026-08-11T16:37:06.1686405Z",
+      "evidence": [
+        { "path": "D:\\tmp\\lo-runtime-acceptance-attempt-2\\evidence\\01-clone-runtime.command.json", "sha256": "b1490eb2035e7f84ebbf6e6221f4c21571cc15b32a0b730ad9c533deb6d22356" },
+        { "path": "D:\\tmp\\lo-runtime-acceptance-attempt-2\\evidence\\01-clone-runtime.stdout.log", "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
+        { "path": "D:\\tmp\\lo-runtime-acceptance-attempt-2\\evidence\\01-clone-runtime.stderr.log", "sha256": "ab60e5dc852a3f0b9bd87c8dfb9b58839ab8016dfe9d2ed6d6b1029eaff9806c" }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "checkout-runtime",
+      "status": "failed-timeout",
+      "timeoutSeconds": 60,
+      "retry": "disabled; command was invoked once only",
+      "startedAt": "2026-08-11T16:37:48.9592272Z",
+      "command": "git checkout --detach a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+      "evidence": [
+        { "path": "D:\\tmp\\lo-runtime-acceptance-attempt-2\\evidence\\02-checkout-runtime.command.json", "sha256": "8ec9f941dc4a846b3e57ad6888279ec6082cec52ed7257b9b8fead27085d8a45" },
+        { "path": "D:\\tmp\\lo-runtime-acceptance-attempt-2\\evidence\\02-checkout-runtime.stdout.log", "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
+        { "path": "D:\\tmp\\lo-runtime-acceptance-attempt-2\\evidence\\02-checkout-runtime.stderr.log", "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+      ]
+    }
+  ],
+  "postFailureFilesystemObservation": {
+    "runtimeRepositoryHead": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+    "headDoesNotOverrideTimeout": true,
+    "worktreeClean": false,
+    "summary": "A read-only postmortem found the requested HEAD but an incomplete checkout state with tracked deletions and corresponding untracked paths. The formal checkout command did not exit within 60 seconds, so no checkout success may be inferred."
+  },
+  "gateDisposition": [
+    { "gate": "fresh-runtime-checkout", "status": "failed" },
+    { "gate": "pdfhow-checkout-and-remediation-identity", "status": "not-run" },
+    { "gate": "preflight-no-new-native-wasm-build", "status": "not-run" },
+    { "gate": "release-identity-and-download-all-assets", "status": "not-run" },
+    { "gate": "archive-safety-inventory-provenance-abi-schema-pthread-worker-absence", "status": "not-run" },
+    { "gate": "workflow-guards-and-cli-contract", "status": "not-run" },
+    { "gate": "downloaded-byte-node-positive-negative-reuse-recovery-abi-cleanup", "status": "not-run" },
+    { "gate": "pdfhow-full-retry-free-chromium-candidate", "status": "not-run" },
+    { "gate": "five-consecutive-fresh-browser-cold-starts", "status": "not-run" },
+    { "gate": "final-no-new-native-wasm-build", "status": "not-run" },
+    { "gate": "final-release-and-assets-immutable", "status": "not-run" }
+  ],
+  "environment": {
+    "os": "Microsoft Windows 11 Enterprise 10.0.22621 build 22621, 64-bit",
+    "powerShell": "7.6.4",
+    "git": "2.53.0.windows.1",
+    "node": "v24.16.0",
+    "pnpm": "11.6.0",
+    "githubCli": "2.83.2",
+    "browser": "not established; browser installation and Chromium gates were not reached by Attempt 2",
+    "criticalEnvironment": {
+      "CI": "1",
+      "PLAYWRIGHT_WORKERS": "1",
+      "PLAYWRIGHT_HTML_OPEN": "never",
+      "ACCEPTANCE_RETRY_POLICY": "disabled",
+      "GIT_TERMINAL_PROMPT": "0",
+      "npm_config_fetch_retries": "0",
+      "npm_config_fetch_retry_maxtimeout": "0",
+      "npm_config_fetch_retry_mintimeout": "0"
+    }
+  },
+  "attempt1Preservation": {
+    "receipt": { "path": "acceptance-receipt.rejected.json", "sha256": "cf78cae0a5673ad33ff27b52f729374b994da729eae1545a006abfaad3723803" },
+    "evidence": { "path": "acceptance-evidence.json", "sha256": "f2e69d68c90634c4e4e6984b9b856384b0ec0d92ec539b4daa1773edcd2a8b44" },
+    "report": { "path": "acceptance-report.md", "sha256": "087c573ec9e0313e908f2ba0aa1b5e58628a986878db98de10d7ce15bf0011e6" }
+  }
+}
