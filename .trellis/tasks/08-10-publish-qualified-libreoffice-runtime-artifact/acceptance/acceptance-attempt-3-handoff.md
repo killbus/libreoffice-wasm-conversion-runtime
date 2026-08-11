@@ -2,14 +2,41 @@
 
 ## Admission status
 
-- Acceptance Attempt 3: **NOT ADMITTED**
-- State: awaiting independent handoff verification and admission signature
+- Acceptance Attempt 3: **ADMITTED**
+- State: independently verified and admitted; formal execution has not started
 - Started: `false`
-- Eligible to execute: `false`
-- Acceptance owner: not assigned by TEAM B; the independent acceptance session must record its own identity when admitting the attempt
-- Decision: none; TEAM B does not predeclare PASS or FAIL
+- Eligible to execute: `true`
+- Acceptance owner: OpenAI Codex AI 编程代理（当前验收会话实例）
+- Decision: pending independent execution and signature; TEAM B does not predeclare PASS or FAIL
 
 TEAM B has prepared this implementation/process remediation record only. TEAM B must not execute any Attempt 3 command. No command in the normative package may run until an independent acceptance owner verifies this record against the remotes and explicitly persists the correctly spelled statement `Acceptance Attempt 3: ADMITTED`.
+
+## Independent admission signature — 2026-08-11
+
+**Acceptance Attempt 3: ADMITTED**
+
+I, **OpenAI Codex AI 编程代理（当前验收会话实例）**, independently accept responsibility for executing Acceptance Attempt 3 and for signing its final PASS/FAIL decision. I did not participate in TEAM B's implementation, remediation, commits, or conclusion formulation.
+
+Before admitting the attempt, I independently verified the following without running the formal Attempt 3 command package:
+
+- the clean handoff checkout and remote feature ref both resolve to `9446c68269c4fc4444383bbca2bc5919d5c5291d`;
+- Runtime `origin/main` resolves to `a1c3cd6d6d2dd25fab063539e9fe40fbb327b846`, and that remediation commit is contained by the handoff feature tip;
+- PDFHow `origin/main` resolves to `b41fde5db9829ede7e6e217de6ac12c2b475b7fc`;
+- Release `367637128` has the fixed tag and target, remains `draft: true` with `published_at: null`, and still exposes exactly the five fixed asset IDs, names, byte sizes, and SHA-256 digests recorded below;
+- the fixed `CANDIDATE-MANIFEST.json` still records candidate ID `21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b`, `releaseQualified: false`, native commit/run/ABI/schema, wrapper commit, `main-script` pthread mode, `externalWorker: null`, and the exact eight runtime assets without `soffice.worker.js`;
+- Build WASM workflow `325462492` still reports run `31211473147`, created `2026-08-07T19:26:24Z`, head SHA `71d33678ed74872ebbb1bc37f5778143f8f5e401`, conclusion `success`, as its latest run;
+- Attempt 1 historical receipt/evidence/report SHA-256 values remain unchanged, and the handoff commit does not modify the existing Attempt 2 handoff or command package;
+- the Attempt 3 command package differs from Attempt 2 only in the new attempt identity/root/helper and the intended 300-second Runtime/PDFHow checkout timeouts; it remains single-pass, retry-free, and fail-closed and retains every required gate;
+- PowerShell parsing, `node --check`, task-state assertions, and Trellis validation passed;
+- the pinned DOCX exists at 6,693,403 bytes with SHA-256 `a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59df`;
+- `D:\tmp\lo-runtime-acceptance-attempt-3` does not exist, and no Attempt 3 formal command has run.
+
+Admission binds the command package hashes as follows:
+
+- `attempt-3-commands.ps1`: `900fb7b7c89280e6f36ad6f8f2e8b7f6089326a73c3f33f9cd406624d762422d`;
+- `attempt-3-download-assets.mjs`: `0b5eaa1d55ae5dc0a9c651de6ba47a682136a09a1b381023440b9faad2b22cb0`.
+
+This signature makes Attempt 3 eligible but does not mark it started and does not imply PASS. The formal command may be invoked exactly once only after this admission record is committed, pushed, and independently rechecked at the remote ref.
 
 This record is additive. It does not edit, delete, replace, or reinterpret any Acceptance Attempt 1 or Attempt 2 evidence, receipt, report, trace, failed sample, external evidence directory, or recorded SHA-256 value.
 

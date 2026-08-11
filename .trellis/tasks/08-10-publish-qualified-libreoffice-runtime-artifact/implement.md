@@ -648,3 +648,21 @@ TEAM B has not admitted or executed Attempt 3 and does not predeclare PASS or FA
 After admission, Attempt 3 must start every gate from zero: fresh Release downloads; archive safety and exact inventory; provenance, ABI/schema, pthread and worker-absence assertions; workflow and CLI contracts; downloaded-byte Node gates and cleanup; the full retry-free Chromium candidate gate; five consecutive fresh-browser cold starts; and final Release/native-build immutability checks. Attempt 1/2 results cannot be reused or backfilled.
 
 Release `367637128` remains prohibited from publication until a new attempt independently passes. Assets must not be replaced or re-uploaded, the candidate must not be represented as qualified, and no unnecessary native/WASM build may be triggered.
+### Acceptance Attempt 3 formal admission — 2026-08-11
+
+The independent acceptance owner **OpenAI Codex AI 编程代理（当前验收会话实例）** verified the Attempt 3 handoff against the local clean checkout, the Runtime and PDFHow remote refs, Draft Release `367637128`, all five fixed asset identities, the candidate manifest, the latest Build WASM run, the pinned DOCX, the command package, and the preserved Attempt 1/2 history. No mismatch was found.
+
+Current formal state:
+
+- Acceptance Attempt 3: ADMITTED;
+- admission scope: execution and independent PASS/FAIL signature;
+- Attempt 3 eligible: true;
+- Attempt 3 started: false;
+- Attempt 3 decision: pending independent execution;
+- acceptance root: `D:\tmp\lo-runtime-acceptance-attempt-3`, confirmed absent at admission;
+- Runtime checkout: `a1c3cd6d6d2dd25fab063539e9fe40fbb327b846` with a 300-second checkout timeout;
+- PDFHow checkout: `b41fde5db9829ede7e6e217de6ac12c2b475b7fc` with a 300-second checkout timeout;
+- Release `367637128`: `draft: true`, `published_at: null`, and `releaseQualified: false`;
+- latest Build WASM run: `31211473147`, with no later native/WASM build.
+
+The exact independent admission signature and verification inventory are persisted in `acceptance/acceptance-attempt-3-handoff.md`. The formal Attempt 3 command package has not run. It may be invoked exactly once only after this admission commit is pushed and the remote ref is reverified. Any later command failure or timeout closes Attempt 3 immediately with no retry, continuation, replacement, or backfill.
