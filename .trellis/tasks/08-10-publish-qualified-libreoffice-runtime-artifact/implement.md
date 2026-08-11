@@ -590,3 +590,28 @@ The following conditions still block Attempt 2:
    new failure.
 4. Keep release `367637128` draft and `releaseQualified: false`; do not replace
    assets, publish, trigger a native build, or start Attempt 2 beforehand.
+
+### Acceptance Attempt 2 formal admission handoff — 2026-08-11
+
+The preceding implementation-handoff section remains an accurate historical record of the state at that time: it was not then an acceptance-admission record and Attempt 2 was then blocked. This new additive section records the later remediation commits, independent-owner assignment, formal command package, and current admission state without changing that historical meaning.
+
+Current formal state:
+
+- Acceptance Attempt 2: ADMITTED;
+- acceptance owner: OpenAI Codex AI 编程代理（当前验收会话实例）;
+- admission scope: execution and independent PASS/FAIL signature;
+- Runtime checkout: a1c3cd6d6d2dd25fab063539e9fe40fbb327b846;
+- PDFHow checkout: b41fde5db9829ede7e6e217de6ac12c2b475b7fc;
+- Release ID: 367637128;
+- required Release state: draft;
+- required manifest state: releaseQualified false;
+- current acceptance decision: pending independent execution;
+- Attempt 2 started: false.
+
+The Runtime remediation commit is present on origin/main and is contained by origin/feat/publish-qualified-libreoffice-runtime-artifact. The PDFHow remediation commit is present on origin/main. The independent owner did not participate in TEAM B implementation, remediation, commits, or conclusion formulation. TEAM B does not predeclare PASS or FAIL.
+
+The formal handoff is acceptance/acceptance-attempt-2-handoff.md. The complete verbatim command package is acceptance/attempt-2-commands.ps1 plus acceptance/attempt-2-download-assets.mjs. It fixes fresh paths, checkouts, environment, inputs and outputs, per-command timeout, retry disabled, expected exit 0, evidence files, five independent cold-start commands, and immediate stop with no rerun or backfill after failure. TEAM B has not executed those commands as Attempt 2.
+
+Release 367637128 remains draft with releaseQualified false. Existing Release assets have not been replaced or modified. Build WASM run 31211473147 remains the newest native/WASM build, so no new native/WASM build has occurred since the frozen candidate. Any drift discovered by the independent owner fails closed before execution.
+
+Attempt 1 evidence and the rejected receipt remain unchanged and continue to be the authoritative history for Attempt 1.
