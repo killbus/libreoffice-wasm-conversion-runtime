@@ -713,3 +713,19 @@ Current formal state:
 - latest Build WASM run: `31211473147`, with no later native/WASM build.
 
 The formal Attempt 3 command package has not run. It may be invoked exactly once only after this re-admission commit is pushed and the remote feature ref is reverified. Any formal failure or timeout closes Attempt 3 immediately and prohibits retry, continuation, replacement, supplementation, or backfill.
+
+### Acceptance Attempt 3 independent execution closure — 2026-08-11
+
+The independently admitted command package was invoked exactly once from fresh detached checkout `027fd8d69f7d02584a97e444180946e61516c687`, using `D:\tmp\lo-runtime-acceptance-attempt-3` as the new formal root. Runtime clone, fixed detached checkout, HEAD/ref verification, and remediation ancestry verification completed.
+
+Formal command 6, `clone-pdfhow`, started at `2026-08-11T20:12:28.6943643Z` and exceeded its fixed 300-second timeout. The command package exited `1` with `TIMEOUT after 300 seconds: clone-pdfhow. Stop immediately; no retry or backfill is permitted.` No retry, continuation, replacement, supplementation, or backfill occurred. The completion marker is absent and no Git process remained after termination.
+
+Acceptance Attempt 3 is therefore **CLOSED / FAIL**. PDFHow checkout/ref verification and every later gate were NOT RUN: Build WASM preflight, Release download/verification, archive assertions, workflow/CLI checks, Node gates, Chromium candidate gate, five cold-start samples, and final Build WASM/Release immutability checks.
+
+The independent records are:
+
+- `acceptance/acceptance-attempt-3-receipt.rejected.json`;
+- `acceptance/acceptance-attempt-3-evidence.json`;
+- `acceptance/acceptance-attempt-3-report.md`.
+
+Raw evidence remains preserved under `D:\tmp\lo-runtime-acceptance-attempt-3`. Release `367637128` must remain draft/unpublished, `releaseQualified` must remain `false`, assets must remain immutable, and Attempt 3 may not be rerun or continued. Any later execution requires a separately documented TEAM B remediation/handoff and explicit independent admission as a new acceptance attempt.

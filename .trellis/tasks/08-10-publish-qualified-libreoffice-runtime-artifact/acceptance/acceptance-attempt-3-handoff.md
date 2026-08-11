@@ -2,12 +2,12 @@
 
 ## Admission status
 
-- Acceptance Attempt 3: **ADMITTED**
-- State: independently re-admitted after TEAM B timestamp-contract remediation; formal execution has not started
-- Started: `false`
-- Eligible to execute: `true`
+- Acceptance Attempt 3: **CLOSED / FAIL**
+- State: independently invoked exactly once; terminal `clone-pdfhow` timeout closed the attempt
+- Started: `true`
+- Eligible to execute: `false`
 - Acceptance owner: OpenAI Codex AI 编程代理（当前验收会话实例）
-- Decision: pending independent execution and signature; TEAM B does not predeclare PASS or FAIL
+- Decision: independently signed `FAIL`; retry, continuation, supplementation, and backfill are forbidden
 
 TEAM B has prepared this implementation/process remediation record only. TEAM B must not execute any Attempt 3 command. No command in the normative package may run until an independent acceptance owner verifies this record against the remotes and explicitly persists the correctly spelled statement `Acceptance Attempt 3: ADMITTED`.
 
@@ -286,3 +286,27 @@ Attempt 3 must execute every gate from the beginning after admission. It may not
 ## TEAM B declaration
 
 TEAM B has persisted the Attempt 2 failure history and prepared this timeout-remediated Attempt 3 handoff only. TEAM B has not executed Attempt 3, has not admitted Attempt 3, and has not predeclared its PASS/FAIL conclusion.
+
+## Independent execution closure and signature — 2026-08-11
+
+**Acceptance Attempt 3: CLOSED / FAIL**
+
+The independent acceptance owner invoked the admitted command package exactly once from fresh detached checkout `027fd8d69f7d02584a97e444180946e61516c687`, using formal root `D:\tmp\lo-runtime-acceptance-attempt-3`.
+
+The formal invocation completed the Runtime clone, fixed detached checkout, HEAD/ref verification, and feature-branch ancestry assertion. Command 6, the mandatory fresh PDFHow clone, began at `2026-08-11T20:12:28.6943643Z` and exceeded its fixed 300-second timeout. The formal command exited `1` with:
+
+```text
+TIMEOUT after 300 seconds: clone-pdfhow. Stop immediately; no retry or backfill is permitted.
+```
+
+No second formal invocation occurred. No failed command was restarted. PDFHow checkout/ref verification and every later gate were NOT RUN, including Release download/verification, archive assertions, workflow/CLI checks, Node gates, Chromium candidate execution, all five cold starts, and final Build WASM/Release immutability checks. `ATTEMPT-3-COMMAND-COMPLETED.json` is absent, and no Git process remained after termination.
+
+Formal evidence is preserved under `D:\tmp\lo-runtime-acceptance-attempt-3`. The machine-readable evidence manifest, rejected receipt, and signed report are:
+
+- `acceptance/acceptance-attempt-3-evidence.json`
+- `acceptance/acceptance-attempt-3-receipt.rejected.json`
+- `acceptance/acceptance-attempt-3-report.md`
+
+Release `367637128` must remain draft and unpublished, `releaseQualified` must remain `false`, assets must remain immutable, and Acceptance Attempt 3 must not be retried, continued, supplemented, replaced, or backfilled. Any later attempt requires a new TEAM B handoff, a fresh acceptance root, explicit independent admission, and a new attempt number.
+
+I, **OpenAI Codex AI 编程代理（当前验收会话实例）**, independently sign the final decision **FAIL** for Acceptance Attempt 3.

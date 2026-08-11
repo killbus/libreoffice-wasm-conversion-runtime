@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "kind": "libreoffice-wasm-runtime-acceptance-receipt",
+  "acceptanceAttempt": 3,
+  "decision": "rejected",
+  "signedDecision": "FAIL",
+  "releaseQualified": false,
+  "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+  "payloadArchiveSha256": "e9aac8dde2fb627251155fc97651c2bd35bec63b01e39f882d342c024a87de9a",
+  "releaseId": "367637128",
+  "tagName": "runtime-artifact-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+  "targetCommit": "df3f73c789e6d2abf71cbcd75186118d2bbc795a",
+  "runtimeCheckout": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+  "pdfHowCheckout": "b41fde5db9829ede7e6e217de6ac12c2b475b7fc",
+  "teamBHandoffCommit": "d73b72cd38709d4bff94b380cf30439d55516d27",
+  "formalCheckoutCommit": "027fd8d69f7d02584a97e444180946e61516c687",
+  "acceptanceOwner": "OpenAI Codex AI 编程代理（当前验收会话实例）",
+  "generatedAt": "2026-08-11T20:17:29Z",
+  "admissionStatus": "ADMITTED",
+  "attemptStarted": true,
+  "formalInvocationCount": 1,
+  "retryOrBackfillPermitted": false,
+  "terminalFailure": {
+    "commandIndex": 6,
+    "commandName": "clone-pdfhow",
+    "startedAt": "2026-08-11T20:12:28.6943643Z",
+    "timeoutSeconds": 300,
+    "exitCode": 1,
+    "message": "TIMEOUT after 300 seconds: clone-pdfhow. Stop immediately; no retry or backfill is permitted."
+  },
+  "gateResults": [
+    {
+      "gate": "fresh-runtime-checkout-and-ref-verification",
+      "status": "passed",
+      "summary": "The formal invocation cloned Runtime, checked out the fixed remediation commit, verified HEAD and the fixed remote refs, and verified that the remediation commit is contained in the feature branch."
+    },
+    {
+      "gate": "fresh-pdfhow-checkout",
+      "status": "failed",
+      "summary": "The mandatory fresh PDFHow clone did not finish inside its admitted 300-second boundary. The process was terminated and no retry was attempted."
+    },
+    {
+      "gate": "all-subsequent-attempt-3-gates",
+      "status": "not-run",
+      "summary": "Fail-closed execution stopped immediately. PDFHow checkout/ref verification, native-workflow preflight, Release download and verification, archive checks, workflow/CLI checks, Node gates, Chromium candidate gate, five cold starts, and final immutability checks were not run."
+    }
+  ],
+  "rejectionReasons": [
+    "The mandatory clone-pdfhow command exceeded its admitted 300-second timeout.",
+    "The formal command package requires immediate termination and prohibits retry, continuation, replacement, supplementation, or backfill after any timeout.",
+    "The required complete retry-free gate set and five consecutive cold-start samples therefore do not exist for Acceptance Attempt 3."
+  ],
+  "requiredDisposition": [
+    "Preserve D:\\tmp\\lo-runtime-acceptance-attempt-3 and all Attempt 3 evidence unchanged.",
+    "Keep Release 367637128 draft and releaseQualified false; do not publish or represent the candidate as accepted.",
+    "Do not rerun, supplement, or continue Acceptance Attempt 3.",
+    "Any further acceptance execution requires a separately documented and formally admitted later attempt with a new handoff."
+  ],
+  "evidenceManifest": "acceptance-attempt-3-evidence.json",
+  "report": "acceptance-attempt-3-report.md",
+  "signature": {
+    "identity": "OpenAI Codex AI 编程代理（当前验收会话实例）",
+    "role": "independent acceptance owner",
+    "decision": "FAIL",
+    "signedAt": "2026-08-11T20:17:29Z"
+  }
+}
