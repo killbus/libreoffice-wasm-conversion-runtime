@@ -2,12 +2,12 @@
 
 ## Admission status
 
-- Acceptance Attempt 3: **NOT ADMITTED**
-- State: command-package remediation completed by TEAM B after pre-start revocation; awaiting independent re-admission
+- Acceptance Attempt 3: **ADMITTED**
+- State: independently re-admitted after TEAM B timestamp-contract remediation; formal execution has not started
 - Started: `false`
-- Eligible to execute: `false`
-- Acceptance owner: not assigned for execution; admission revocation signed by OpenAI Codex AI 编程代理（当前验收会话实例）
-- Decision: no Attempt 3 PASS/FAIL because execution never started; admission rejected fail closed
+- Eligible to execute: `true`
+- Acceptance owner: OpenAI Codex AI 编程代理（当前验收会话实例）
+- Decision: pending independent execution and signature; TEAM B does not predeclare PASS or FAIL
 
 TEAM B has prepared this implementation/process remediation record only. TEAM B must not execute any Attempt 3 command. No command in the normative package may run until an independent acceptance owner verifies this record against the remotes and explicitly persists the correctly spelled statement `Acceptance Attempt 3: ADMITTED`.
 
@@ -89,6 +89,35 @@ Remediated package SHA-256 values:
 - `attempt-3-time-contract.tests.ps1`: `61af58aaf3cd5fd0d5b62e8a334a1bb295802ff9cf90fa01250ad3129e5cc208`.
 
 The independent acceptance executor must verify this new TEAM B commit and the fixed remote/Release/build state, then explicitly persist `Acceptance Attempt 3: ADMITTED` before executing the formal package. This remediation handoff does not restore the revoked admission by itself.
+
+## Independent re-admission signature after timestamp remediation — 2026-08-11
+
+**Acceptance Attempt 3: ADMITTED**
+
+I, **OpenAI Codex AI 编程代理（当前验收会话实例）**, independently accept responsibility for executing Acceptance Attempt 3 and for signing its final PASS/FAIL decision. I did not participate in TEAM B's timestamp-contract implementation, remediation commit, test-result formulation, or handoff conclusion.
+
+Before re-admitting the attempt, I independently verified the following without running the formal Attempt 3 command package:
+
+- the clean local checkout and remote feature ref both resolve to TEAM B handoff commit `d73b72cd38709d4bff94b380cf30439d55516d27`;
+- Runtime `origin/main` resolves to `a1c3cd6d6d2dd25fab063539e9fe40fbb327b846`, that commit is contained by the handoff feature tip, and PDFHow `origin/main` resolves to `b41fde5db9829ede7e6e217de6ac12c2b475b7fc`;
+- the TEAM B delta from the admission-revocation commit is limited to the handoff/task history, the shared timestamp helper and executable contract test, and replacement of both affected direct timestamp comparisons with the helper;
+- PowerShell parser validation passed for the formal command, helper, and contract test; `node --check` passed for the download helper; Trellis validation and `git diff --check` passed;
+- the contract test passed on PowerShell `7.6.4`, including JSON `System.DateTime`, equivalent types/offsets, one-second drift rejection, invalid/ambiguous/unsupported input rejection, and `tr-TR` culture independence;
+- Release `367637128` retains the fixed ID, tag, target, `draft: true`, `published_at: null`, and exactly the five fixed asset IDs, names, byte sizes, and SHA-256 digests;
+- the remote `CANDIDATE-MANIFEST.json` retains candidate ID `21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b`, `releaseQualified: false`, fixed native/wrapper provenance, ABI `lok-convert-document-v1`, schema 1, `main-script` pthread mode, `externalWorker: null`, and exactly eight runtime files without `soffice.worker.js`;
+- Build WASM workflow `325462492` still reports run `31211473147`, created `2026-08-07T19:26:24Z`, head SHA `71d33678ed74872ebbb1bc37f5778143f8f5e401`, conclusion `success`, as its latest run, and the remediated helper accepts that GitHub JSON `System.DateTime` as the same UTC instant;
+- Attempt 1 receipt/evidence/report SHA-256 values remain unchanged, and TEAM B did not modify the Attempt 2 handoff or command history;
+- the pinned DOCX remains 6,693,403 bytes with SHA-256 `a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59df`;
+- `D:\tmp\lo-runtime-acceptance-attempt-3` does not exist, TEAM B did not run Attempt 3, and the independent formal Attempt 3 command has not started.
+
+This re-admission binds the complete package hashes as follows:
+
+- `attempt-3-commands.ps1`: `0a57a72f4d64f99570ce7db53124e17ed94936ccd536b924ef9c342723bdb929`;
+- `attempt-3-download-assets.mjs`: `731356b001b7cdba1e5c778092638494af65e8f64a63637f486fb360b51ce8f5`;
+- `attempt-3-time-contract.ps1`: `d07788e24e6200928fa9685d0778e7d903cb8c3b32d44fd7d67aadaa685d550e`;
+- `attempt-3-time-contract.tests.ps1`: `61af58aaf3cd5fd0d5b62e8a334a1bb295802ff9cf90fa01250ad3129e5cc208`.
+
+Attempt 3 is now eligible but remains `started: false`; this signature does not imply PASS. The formal command may be invoked exactly once only after this re-admission record is committed, pushed, and independently rechecked at the remote feature ref. Any command failure or timeout closes Attempt 3 immediately with no retry, continuation, replacement, supplementation, or backfill.
 
 ## Acceptance Attempt 2 failure carried forward
 

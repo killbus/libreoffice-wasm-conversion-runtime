@@ -692,3 +692,24 @@ Remediated package SHA-256 values:
 The fixed Runtime/PDFHow commits, candidate, Release identity, five asset identities, 300-second checkout limits, retry-free/fail-closed rules, and every previously required gate remain unchanged. Release `367637128` must remain `draft: true`, `published_at: null`, and `releaseQualified: false`; no asset may be replaced and no native/WASM build may be triggered.
 
 TEAM B has prepared this remediation/handoff commit only. Before any Attempt 3 formal command runs, an independent acceptance owner must verify the new remote commit and all fixed external state, then explicitly persist the correctly spelled statement `Acceptance Attempt 3: ADMITTED`. The revoked admission is not restored by this TEAM B change.
+
+### Acceptance Attempt 3 independent re-admission after timestamp remediation — 2026-08-11
+
+The independent acceptance owner verified TEAM B handoff commit `d73b72cd38709d4bff94b380cf30439d55516d27` against the remote feature ref and independently reran the timestamp contract test on PowerShell `7.6.4`. Parser validation, `node --check`, task assertions, Trellis validation, package SHA-256 checks, fixed Runtime/PDFHow remote refs, Release identity/assets, candidate manifest, latest Build WASM identity, historical evidence hashes, pinned DOCX identity, and absence of `D:\tmp\lo-runtime-acceptance-attempt-3` all passed.
+
+The independent owner did not participate in TEAM B's timestamp-contract implementation, remediation commit, test-result formulation, or handoff conclusion. The exact re-admission signature and verification inventory are persisted in `acceptance/acceptance-attempt-3-handoff.md`.
+
+Current formal state:
+
+- Acceptance Attempt 3: **ADMITTED**;
+- admission scope: execution and independent final PASS/FAIL signature;
+- eligible: true;
+- started: false;
+- decision: pending independent execution;
+- acceptance owner: OpenAI Codex AI 编程代理（当前验收会话实例）;
+- TEAM B executed Attempt 3: false;
+- formal acceptance root: `D:\tmp\lo-runtime-acceptance-attempt-3`, confirmed absent at re-admission;
+- Release `367637128`: `draft: true`, `published_at: null`, and `releaseQualified: false`;
+- latest Build WASM run: `31211473147`, with no later native/WASM build.
+
+The formal Attempt 3 command package has not run. It may be invoked exactly once only after this re-admission commit is pushed and the remote feature ref is reverified. Any formal failure or timeout closes Attempt 3 immediately and prohibits retry, continuation, replacement, supplementation, or backfill.
