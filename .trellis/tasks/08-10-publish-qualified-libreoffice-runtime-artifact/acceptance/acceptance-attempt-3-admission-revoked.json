@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "kind": "libreoffice-wasm-runtime-acceptance-admission-revocation",
+  "acceptanceAttempt": 3,
+  "admissionOutcome": "NOT ADMITTED",
+  "formalExecutionStarted": false,
+  "eligible": false,
+  "passFailDecision": null,
+  "acceptanceOwner": "OpenAI Codex AI 编程代理（当前验收会话实例）",
+  "generatedAt": "2026-08-11T18:45:07.1087937Z",
+  "handoffAdmissionCommit": "4bfb5d9a099a28c76dadbd0c772bfbf63b7f6f4c",
+  "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+  "releaseId": 367637128,
+  "releaseDraft": true,
+  "releaseQualified": false,
+  "latestBuildWasmRunId": 31211473147,
+  "latestBuildWasmCreatedAt": "2026-08-07T19:26:24Z",
+  "latestBuildWasmHeadSha": "71d33678ed74872ebbb1bc37f5778143f8f5e401",
+  "attemptRoot": "D:\\tmp\\lo-runtime-acceptance-attempt-3",
+  "attemptRootExisted": false,
+  "environment": {
+    "powerShellVersion": "7.6.4",
+    "jsonCreatedAtType": "System.DateTime"
+  },
+  "commandPackage": {
+    "script": "acceptance/attempt-3-commands.ps1",
+    "scriptSha256": "900fb7b7c89280e6f36ad6f8f2e8b7f6089326a73c3f33f9cd406624d762422d",
+    "affectedAssertions": [
+      {
+        "line": 238,
+        "expression": "$preflightLatestWorkflowRun.created_at -eq $NativeWorkflowCreatedAt"
+      },
+      {
+        "line": 415,
+        "expression": "$latestWorkflowRun.created_at -eq $NativeWorkflowCreatedAt"
+      }
+    ]
+  },
+  "observation": {
+    "apiCreatedAt": "2026-08-07T19:26:24Z",
+    "deserializedValue": "08/07/2026 19:26:24",
+    "directStringEquality": false,
+    "invariantUtc": "2026-08-07T19:26:24Z",
+    "invariantUtcEquality": true
+  },
+  "reason": "The normative package accepts PowerShell 7 or later but its direct GitHub JSON DateTime-to-string comparisons evaluate false on PowerShell 7.6.4, causing a deterministic false workflow-drift failure before formal gates can proceed.",
+  "failClosedActions": [
+    "Formal Attempt 3 command not started",
+    "No local command-package fix or substitution",
+    "No Release asset download or mutation",
+    "No retry or backfill",
+    "Admission revoked before execution"
+  ],
+  "requiredRemediation": [
+    "Normalize or otherwise compare GitHub JSON timestamps type-safely across supported PowerShell 7 versions",
+    "Add an executable contract test covering the supported PowerShell JSON date behavior",
+    "Persist a new TEAM B handoff commit",
+    "Obtain a new independent admission before any formal Attempt 3 command runs"
+  ]
+}

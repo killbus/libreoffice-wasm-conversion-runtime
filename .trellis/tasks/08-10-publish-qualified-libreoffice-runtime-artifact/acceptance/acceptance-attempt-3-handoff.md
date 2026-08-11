@@ -2,12 +2,12 @@
 
 ## Admission status
 
-- Acceptance Attempt 3: **ADMITTED**
-- State: independently verified and admitted; formal execution has not started
+- Acceptance Attempt 3: **NOT ADMITTED**
+- State: admission revoked before execution; awaiting TEAM B command-package remediation and independent re-admission
 - Started: `false`
-- Eligible to execute: `true`
-- Acceptance owner: OpenAI Codex AI 编程代理（当前验收会话实例）
-- Decision: pending independent execution and signature; TEAM B does not predeclare PASS or FAIL
+- Eligible to execute: `false`
+- Acceptance owner: not assigned for execution; admission revocation signed by OpenAI Codex AI 编程代理（当前验收会话实例）
+- Decision: no Attempt 3 PASS/FAIL because execution never started; admission rejected fail closed
 
 TEAM B has prepared this implementation/process remediation record only. TEAM B must not execute any Attempt 3 command. No command in the normative package may run until an independent acceptance owner verifies this record against the remotes and explicitly persists the correctly spelled statement `Acceptance Attempt 3: ADMITTED`.
 
@@ -37,6 +37,26 @@ Admission binds the command package hashes as follows:
 - `attempt-3-download-assets.mjs`: `0b5eaa1d55ae5dc0a9c651de6ba47a682136a09a1b381023440b9faad2b22cb0`.
 
 This signature makes Attempt 3 eligible but does not mark it started and does not imply PASS. The formal command may be invoked exactly once only after this admission record is committed, pushed, and independently rechecked at the remote ref.
+## Independent pre-start admission revocation — 2026-08-11
+
+**Acceptance Attempt 3: NOT ADMITTED**
+
+After the admission commit was pushed but before any formal Attempt 3 command ran, the mandatory final remote recheck exposed a command-package/runtime contract mismatch. GitHub still returned the exact frozen Build WASM `created_at` value `2026-08-07T19:26:24Z`, but PowerShell `7.6.4` deserialized that JSON value as `System.DateTime`. The normative command compares that object directly to the string `$NativeWorkflowCreatedAt` at lines 238 and 415. The direct comparison evaluates to `false`, while normalization back to invariant UTC evaluates to the expected frozen value.
+
+The command package declares only “PowerShell 7 or later” and therefore admits PowerShell 7.6.4. As written, it would fail its preflight Build WASM creation-time assertion before reaching the remaining gates, despite there being no workflow drift. This contradicts the formal command/environment contract.
+
+Fail-closed disposition:
+
+- Attempt 3 formal execution: **NOT STARTED**;
+- Attempt 3 eligible: `false`;
+- Attempt 3 PASS/FAIL decision: none, because the formal attempt did not start;
+- `D:\tmp\lo-runtime-acceptance-attempt-3`: absent;
+- no Release asset downloaded or modified by Attempt 3;
+- Release `367637128` remains draft and unqualified;
+- Build WASM run `31211473147` remains the latest run;
+- no retry, substitution, local patch, or formal gate execution was performed.
+
+TEAM B must remediate and test the PowerShell JSON date contract, persist a new handoff commit, and return the package for a new independent admission decision. The independent executor must not locally edit the command and continue.
 
 This record is additive. It does not edit, delete, replace, or reinterpret any Acceptance Attempt 1 or Attempt 2 evidence, receipt, report, trace, failed sample, external evidence directory, or recorded SHA-256 value.
 

@@ -666,3 +666,10 @@ Current formal state:
 - latest Build WASM run: `31211473147`, with no later native/WASM build.
 
 The exact independent admission signature and verification inventory are persisted in `acceptance/acceptance-attempt-3-handoff.md`. The formal Attempt 3 command package has not run. It may be invoked exactly once only after this admission commit is pushed and the remote ref is reverified. Any later command failure or timeout closes Attempt 3 immediately with no retry, continuation, replacement, or backfill.
+### Acceptance Attempt 3 pre-start admission revocation — 2026-08-11
+
+The admission commit was pushed and the remote ref matched, but the independent owner did not start the formal command. During the mandatory final pre-start recheck, PowerShell `7.6.4` deserialized GitHub's fixed ISO `created_at` field as `System.DateTime`. The normative script directly compares that value to the string `2026-08-07T19:26:24Z` at lines 238 and 415, and the comparison evaluates false even though invariant UTC normalization proves the remote value is unchanged.
+
+Because the command declares compatibility with PowerShell 7 or later, this is a formal command/environment contract defect rather than Build WASM drift. The independent owner did not edit the script or substitute a command. Attempt 3 is therefore **NOT ADMITTED**, eligible false, started false, and has no PASS/FAIL decision. `D:\tmp\lo-runtime-acceptance-attempt-3` remains absent. Release `367637128` remains draft/unpublished/unqualified, its five assets remain unchanged, and Build WASM run `31211473147` remains latest.
+
+The machine-readable revocation record is `acceptance/acceptance-attempt-3-admission-revoked.json`. TEAM B owns the next action: remediate and test the PowerShell JSON-date comparison contract, persist a new handoff commit without running Attempt 3, and request independent re-admission.
