@@ -3,7 +3,7 @@
 ## Admission status
 
 - Acceptance Attempt 3: **NOT ADMITTED**
-- State: admission revoked before execution; awaiting TEAM B command-package remediation and independent re-admission
+- State: command-package remediation completed by TEAM B after pre-start revocation; awaiting independent re-admission
 - Started: `false`
 - Eligible to execute: `false`
 - Acceptance owner: not assigned for execution; admission revocation signed by OpenAI Codex AI 编程代理（当前验收会话实例）
@@ -31,7 +31,7 @@ Before admitting the attempt, I independently verified the following without run
 - the pinned DOCX exists at 6,693,403 bytes with SHA-256 `a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59df`;
 - `D:\tmp\lo-runtime-acceptance-attempt-3` does not exist, and no Attempt 3 formal command has run.
 
-Admission binds the command package hashes as follows:
+That subsequently revoked admission bound the historical command package hashes as follows:
 
 - `attempt-3-commands.ps1`: `900fb7b7c89280e6f36ad6f8f2e8b7f6089326a73c3f33f9cd406624d762422d`;
 - `attempt-3-download-assets.mjs`: `0b5eaa1d55ae5dc0a9c651de6ba47a682136a09a1b381023440b9faad2b22cb0`.
@@ -59,6 +59,36 @@ Fail-closed disposition:
 TEAM B must remediate and test the PowerShell JSON date contract, persist a new handoff commit, and return the package for a new independent admission decision. The independent executor must not locally edit the command and continue.
 
 This record is additive. It does not edit, delete, replace, or reinterpret any Acceptance Attempt 1 or Attempt 2 evidence, receipt, report, trace, failed sample, external evidence directory, or recorded SHA-256 value.
+
+## TEAM B timestamp-contract remediation handoff — 2026-08-11
+
+TEAM B has completed only the command-package remediation requested after the pre-start admission revocation. Attempt 3 remains **NOT ADMITTED**, `eligible: false`, `started: false`, with no PASS/FAIL decision. TEAM B did not run any Attempt 3 formal command, download any Attempt 3 asset, create `D:\tmp\lo-runtime-acceptance-attempt-3`, publish or mutate Release `367637128`, or trigger a native/WASM build.
+
+The former direct `System.DateTime`-to-string checks in both the preflight and final Build WASM invariance gates now call the same dot-sourced helper, `attempt-3-time-contract.ps1`. The helper converts supported values to an unambiguous UTC instant before comparing ticks:
+
+- `System.DateTimeOffset` is normalized with `ToUniversalTime()`;
+- `System.DateTime` is accepted only when `Kind` is not `Unspecified`, then normalized to UTC;
+- strings must contain an explicit `Z` or numeric offset and are parsed with `InvariantCulture`, `AssumeUniversal`, and `AdjustToUniversal`;
+- null, unsupported types, invalid strings, offset-free strings, ambiguous `DateTime`, and different instants fail closed.
+
+Both affected assertions are remediated. The preflight and final checks use `Assert-SameAcceptanceUtcInstant`; neither retains direct object-to-string equality.
+
+Executable contract test:
+
+```powershell
+pwsh -NoLogo -NoProfile -File .trellis/tasks/08-10-publish-qualified-libreoffice-runtime-artifact/acceptance/attempt-3-time-contract.tests.ps1
+```
+
+Verified result on PowerShell `7.6.4`: exit code `0`; `ConvertFrom-Json` returned `System.DateTime`; the same instant passed across JSON `DateTime`, ISO string, `DateTimeOffset`, and a different explicit offset; a one-second change failed closed; invalid, offset-free, unsupported, and `DateTimeKind.Unspecified` inputs failed closed; comparison remained valid under `tr-TR` culture.
+
+Remediated package SHA-256 values:
+
+- `attempt-3-commands.ps1`: `0a57a72f4d64f99570ce7db53124e17ed94936ccd536b924ef9c342723bdb929`;
+- `attempt-3-download-assets.mjs`: `731356b001b7cdba1e5c778092638494af65e8f64a63637f486fb360b51ce8f5`;
+- `attempt-3-time-contract.ps1`: `d07788e24e6200928fa9685d0778e7d903cb8c3b32d44fd7d67aadaa685d550e`;
+- `attempt-3-time-contract.tests.ps1`: `61af58aaf3cd5fd0d5b62e8a334a1bb295802ff9cf90fa01250ad3129e5cc208`.
+
+The independent acceptance executor must verify this new TEAM B commit and the fixed remote/Release/build state, then explicitly persist `Acceptance Attempt 3: ADMITTED` before executing the formal package. This remediation handoff does not restore the revoked admission by itself.
 
 ## Acceptance Attempt 2 failure carried forward
 
@@ -121,7 +151,10 @@ Release `367637128` must remain draft and `releaseQualified` must remain false. 
 The complete verbatim Attempt 3 command package is:
 
 1. `acceptance/attempt-3-commands.ps1`
-2. `acceptance/attempt-3-download-assets.mjs`
+2. `acceptance/attempt-3-time-contract.ps1`
+3. `acceptance/attempt-3-download-assets.mjs`
+
+The executable remediation-only contract test is `acceptance/attempt-3-time-contract.tests.ps1`; it is not an Attempt 3 gate and running it does not start Attempt 3.
 
 `attempt-3-commands.ps1` fixes working directories, repository URLs, checkout commits, environment variables, inputs, outputs, per-command timeout boundaries, expected exit code 0, and evidence paths. Every external process is invoked once through `Invoke-FailClosedCommand`, which writes command JSON, stdout and stderr, kills the process tree on timeout, requires the expected exit code, and throws immediately. Retry, continuation, replacement, and backfill are disabled.
 

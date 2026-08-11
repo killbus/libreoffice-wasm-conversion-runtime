@@ -14,6 +14,12 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
   throw 'Acceptance Attempt 3 requires PowerShell 7 or later (pwsh).'
 }
 
+$TimeContractPath = Join-Path $PSScriptRoot 'attempt-3-time-contract.ps1'
+if (-not (Test-Path -LiteralPath $TimeContractPath -PathType Leaf)) {
+  throw "Acceptance Attempt 3 timestamp contract helper is missing: $TimeContractPath"
+}
+. $TimeContractPath
+
 # This is a single-pass, retry-free, fail-closed acceptance command file.
 # TEAM B must not execute it. The independent acceptance owner runs it once.
 # If any command fails or times out, execution stops immediately. Failed or
@@ -235,7 +241,7 @@ $preflightWorkflowCheck = Invoke-FailClosedCommand 'preflight-no-new-native-wasm
 $preflightWorkflowPayload = $preflightWorkflowCheck.stdout | ConvertFrom-Json
 $preflightLatestWorkflowRun = @($preflightWorkflowPayload.workflow_runs)[0]
 Assert-True ([int64]$preflightLatestWorkflowRun.id -eq $NativeWorkflowRunId) 'Preflight found a newer Build WASM run.'
-Assert-True ($preflightLatestWorkflowRun.created_at -eq $NativeWorkflowCreatedAt) 'Preflight Build WASM creation time changed.'
+Assert-SameAcceptanceUtcInstant -Actual $preflightLatestWorkflowRun.created_at -Expected $NativeWorkflowCreatedAt -Message 'Preflight Build WASM creation time changed.'
 Assert-True ($preflightLatestWorkflowRun.head_sha -eq $NativeCommit) 'Preflight Build WASM head SHA changed.'
 Assert-True ($preflightLatestWorkflowRun.conclusion -eq 'success') 'Preflight frozen Build WASM run is not successful.'
 Write-JsonEvidence (Join-Path $EvidenceRoot 'preflight-native-workflow-assertions.json') ([ordered]@{
@@ -412,7 +418,7 @@ $workflowCheck = Invoke-FailClosedCommand 'verify-no-new-native-wasm-build' 'gh'
 $workflowPayload = $workflowCheck.stdout | ConvertFrom-Json
 $latestWorkflowRun = @($workflowPayload.workflow_runs)[0]
 Assert-True ([int64]$latestWorkflowRun.id -eq $NativeWorkflowRunId) 'A different Build WASM run is now latest.'
-Assert-True ($latestWorkflowRun.created_at -eq $NativeWorkflowCreatedAt) 'Latest Build WASM creation time changed.'
+Assert-SameAcceptanceUtcInstant -Actual $latestWorkflowRun.created_at -Expected $NativeWorkflowCreatedAt -Message 'Latest Build WASM creation time changed.'
 Assert-True ($latestWorkflowRun.head_sha -eq $NativeCommit) 'Latest Build WASM head SHA changed.'
 Assert-True ($latestWorkflowRun.conclusion -eq 'success') 'Frozen Build WASM run is not successful.'
 Write-JsonEvidence (Join-Path $EvidenceRoot 'native-workflow-assertions.json') ([ordered]@{

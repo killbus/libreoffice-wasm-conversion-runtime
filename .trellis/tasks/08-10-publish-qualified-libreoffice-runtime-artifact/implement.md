@@ -673,3 +673,22 @@ The admission commit was pushed and the remote ref matched, but the independent 
 Because the command declares compatibility with PowerShell 7 or later, this is a formal command/environment contract defect rather than Build WASM drift. The independent owner did not edit the script or substitute a command. Attempt 3 is therefore **NOT ADMITTED**, eligible false, started false, and has no PASS/FAIL decision. `D:\tmp\lo-runtime-acceptance-attempt-3` remains absent. Release `367637128` remains draft/unpublished/unqualified, its five assets remain unchanged, and Build WASM run `31211473147` remains latest.
 
 The machine-readable revocation record is `acceptance/acceptance-attempt-3-admission-revoked.json`. TEAM B owns the next action: remediate and test the PowerShell JSON-date comparison contract, persist a new handoff commit without running Attempt 3, and request independent re-admission.
+
+### Acceptance Attempt 3 timestamp-contract remediation handoff — 2026-08-11
+
+Following the independent pre-start revocation at commit `d342e25640f703bee5d2099213ab2d195b5319b0`, TEAM B remediated only the normative PowerShell timestamp-comparison contract. Attempt 3 was not executed, continued, retried, or backfilled. Its formal state remains **NOT ADMITTED**, `eligible: false`, `started: false`, with no PASS/FAIL decision and no assigned execution owner.
+
+The new shared helper `acceptance/attempt-3-time-contract.ps1` normalizes supported timestamp values to UTC instants before comparing ticks. It handles `DateTimeOffset`, rejects `DateTimeKind.Unspecified`, requires explicit timezone information for strings, parses strings with invariant culture and UTC adjustment, and fails closed on null, invalid, ambiguous, unsupported, or genuinely changed values. Both the preflight and final Build WASM `created_at` assertions in `acceptance/attempt-3-commands.ps1` now call this helper; neither direct object-to-string comparison remains.
+
+The executable contract test `acceptance/attempt-3-time-contract.tests.ps1` was run with PowerShell `7.6.4` and exited `0`. It confirmed that `ConvertFrom-Json` returns `System.DateTime` for the GitHub-style timestamp, that the same instant passes across different supported object types and explicit offsets, that a one-second change fails closed, that invalid/offset-free/unsupported/unspecified inputs fail closed, and that comparison is independent of a `tr-TR` current culture. PowerShell parser validation passed for the formal command, helper, and test.
+
+Remediated package SHA-256 values:
+
+- `attempt-3-commands.ps1`: `0a57a72f4d64f99570ce7db53124e17ed94936ccd536b924ef9c342723bdb929`;
+- `attempt-3-download-assets.mjs`: `731356b001b7cdba1e5c778092638494af65e8f64a63637f486fb360b51ce8f5`;
+- `attempt-3-time-contract.ps1`: `d07788e24e6200928fa9685d0778e7d903cb8c3b32d44fd7d67aadaa685d550e`;
+- `attempt-3-time-contract.tests.ps1`: `61af58aaf3cd5fd0d5b62e8a334a1bb295802ff9cf90fa01250ad3129e5cc208`.
+
+The fixed Runtime/PDFHow commits, candidate, Release identity, five asset identities, 300-second checkout limits, retry-free/fail-closed rules, and every previously required gate remain unchanged. Release `367637128` must remain `draft: true`, `published_at: null`, and `releaseQualified: false`; no asset may be replaced and no native/WASM build may be triggered.
+
+TEAM B has prepared this remediation/handoff commit only. Before any Attempt 3 formal command runs, an independent acceptance owner must verify the new remote commit and all fixed external state, then explicitly persist the correctly spelled statement `Acceptance Attempt 3: ADMITTED`. The revoked admission is not restored by this TEAM B change.
