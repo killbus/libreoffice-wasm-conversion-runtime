@@ -38,9 +38,9 @@ This remediation is not Attempt 6 execution or evidence. The formal command inde
 - `attempt-6-commands.ps1`: `a12bf9894b6154a66dd18a0a2d42be4727ed53b87a930e56da044853505320be`
 - `attempt-6-download-assets.mjs`: `c89029017a349b88d29dfc4b799bc710624c4b0559a86e93080674bd870a1806`
 - `attempt-6-time-contract.ps1`: `d07788e24e6200928fa9685d0778e7d903cb8c3b32d44fd7d67aadaa685d550e`
-- `attempt-6-time-contract.tests.ps1`: `6641538284bc8ba00b2bbadc661b2f33edd9406b238d445cfb3c48333139442b`
+- `attempt-6-time-contract.tests.ps1`: `e901328495809eb1a6a0df19ba5001518b02c976277248e3a9bf937647ad131f`
 - `attempt-6-command-launch.ps1`: `4e278a03386813c9d48bd4366124403916d0f7c0bd57632cea45d4f1ccc6f11d`
-- `attempt-6-command-launch.tests.ps1`: `cbcebe59ff763e745189e58a3c1ad28b2818c7503f79059c113ed59eb1842ce5`
+- `attempt-6-command-launch.tests.ps1`: `7be0bb39e8570b1add9afc42e0b4c7274e56b75df7a5e5b78507818e982acae5`
 
 ## Fixed baseline
 
