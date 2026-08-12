@@ -2,15 +2,51 @@
 
 ## Admission status
 
-- Acceptance Attempt 4: **NOT ADMITTED**
-- Eligible: `false`
+- Acceptance Attempt 4: **ADMITTED**
+- Eligible: `true`
 - Started: `false`
+- Independent formal invocation count: `0`
 - TEAM B formal invocation count: `0`
-- Designated independent acceptance owner: OpenAI Codex AI 编程代理（当前验收会话实例）
-- Admission scope after a future independent signature: execution and independent PASS/FAIL signature
-- PASS/FAIL conclusion: not set and not predeclared by TEAM B
+- Independent acceptance owner: OpenAI Codex AI 编程代理（当前验收会话实例）
+- Admission scope: execution and independent PASS/FAIL signature
+- PASS/FAIL conclusion: pending independent execution; not predeclared by TEAM B
 
-TEAM B has prepared only the implementation/process remediation and this handoff. TEAM B has not executed Acceptance Attempt 4 and cannot admit it. No command in the normative package may run until the independent acceptance owner verifies this committed and pushed handoff against all fixed remote identities and explicitly persists the correctly spelled statement `Acceptance Attempt 4: ADMITTED` in a later independent record.
+TEAM B prepared only the implementation/process remediation and this handoff and did not execute or admit Acceptance Attempt 4. The independent owner has now completed the read-only checks and signed the admission below. No normative Attempt 4 command has run. The formal package may be invoked exactly once only after this admission record is committed, pushed, and the remote feature ref is independently rechecked at that admission commit.
+
+## Independent admission signature — 2026-08-12
+
+**Acceptance Attempt 4: ADMITTED**
+
+I, **OpenAI Codex AI 编程代理（当前验收会话实例）**, independently accept responsibility for executing Acceptance Attempt 4 and for signing its final PASS/FAIL decision. I did not participate in TEAM B's implementation, timeout remediation, commits, package-test result formulation, or handoff conclusion.
+
+Before admitting the attempt, I independently verified the following without invoking the formal Attempt 4 command package:
+
+- a new clean detached handoff checkout and the remote feature ref both resolved to TEAM B handoff commit `9779ef9412a3572f2a4a0f700e7bdaff57715cf8`;
+- Runtime `origin/main` resolved to `a1c3cd6d6d2dd25fab063539e9fe40fbb327b846`, and that remediation commit is an ancestor of the handoff feature tip;
+- PDFHow `origin/main` resolved to `b41fde5db9829ede7e6e217de6ac12c2b475b7fc`;
+- the delta from Attempt 3 closure commit `6e5a716cf0287afc5d6b97dfbceb658c19859146` is limited to the separately named Attempt 4 handoff/command/helper/test files plus `implement.md` and `task.json`; the intended process change is the retry-free `clone-pdfhow` timeout increase from 300 to 900 seconds;
+- PowerShell parser validation passed for all three PowerShell files, `node --check` passed for the download helper, the timestamp contract test passed independently on PowerShell `7.6.4`, and Trellis validation plus `git diff --check` passed;
+- Release `367637128` retains tag `runtime-artifact-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b`, target `df3f73c789e6d2abf71cbcd75186118d2bbc795a`, `draft: true`, and `published_at: null`;
+- the Release still exposes exactly the following five immutable assets:
+  - asset `508126612`, `ASSET-SHA256SUMS`, 677 bytes, SHA-256 `83bb7bb697dcf4b8feb59934ad928aa22b8d87c18104ebeed451a3eb7aff9c32`;
+  - asset `508126611`, `CANDIDATE-MANIFEST.json`, 2,365 bytes, SHA-256 `c33b76b49346b08d0cdcbf1ce64db3025f9ceacd29113664279c56e0dae8dab0`;
+  - asset `508126614`, `libreoffice-wasm-runtime-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b.zip`, 248,934,231 bytes, SHA-256 `e9aac8dde2fb627251155fc97651c2bd35bec63b01e39f882d342c024a87de9a`;
+  - asset `508126610`, `SHA256SUMS`, 333 bytes, SHA-256 `df1e89e0364660c75d00fcaa4cf77fbd80176986812a8009e9a3e176e9bc9dac`;
+  - asset `508140311`, `STAGING-REPORT.json`, 4,571 bytes, SHA-256 `2094842f73c67cd31481741480a27646607f4a18eda3337bf5dfaebc714c7cc6`;
+- the independently downloaded admission copy of `CANDIDATE-MANIFEST.json` was 2,365 bytes with the fixed SHA-256 and records candidate ID `21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b`, `releaseQualified: false`, fixed native/wrapper provenance, ABI `lok-convert-document-v1`, schema 1, `main-script` pthread mode, `externalWorker: null`, and exactly eight runtime assets without `soffice.worker.js`; those admission bytes are not formal Attempt 4 evidence and may not be reused by the formal run;
+- Build WASM workflow `325462492` still reports run `31211473147`, created `2026-08-07T19:26:24Z`, head SHA `71d33678ed74872ebbb1bc37f5778143f8f5e401`, status `completed`, conclusion `success`, as its latest run, so no newer native/WASM build exists;
+- the pinned DOCX remains 6,693,403 bytes with SHA-256 `a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59df`;
+- all 19 files under the preserved Attempt 3 evidence root still match the names, sizes, and SHA-256 values in the committed rejected evidence record;
+- `D:\tmp\lo-runtime-acceptance-attempt-4` does not exist, TEAM B did not execute Attempt 4, and the independent formal invocation count remains zero.
+
+This admission binds the complete command package hashes:
+
+- `attempt-4-commands.ps1`: `c6f52640bc9cd19d0dccf6fc8da91edb4a4251474e56c6db978c842b24e6b8c8`;
+- `attempt-4-download-assets.mjs`: `eaa675440202c62c848e6628597157ec30f52a751731da643765d67c6b25120e`;
+- `attempt-4-time-contract.ps1`: `d07788e24e6200928fa9685d0778e7d903cb8c3b32d44fd7d67aadaa685d550e`;
+- `attempt-4-time-contract.tests.ps1`: `3f42151806763042931aba2aa0b3e3c35c278e4d6919f8fb317d49c6be8c7aa7`.
+
+Attempt 4 is eligible but remains `started: false`; this signature does not imply PASS. Any formal nonzero exit, timeout, assertion failure, crash, or missing evidence closes Attempt 4 immediately with no retry, continuation, failed-sample restart, replacement, supplementation, or backfill.
 
 ## Acceptance Attempt 3 failure carried forward
 

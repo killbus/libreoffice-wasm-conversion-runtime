@@ -742,3 +742,30 @@ TEAM B prepared `acceptance/acceptance-attempt-4-handoff.md` and separately name
 Current formal state: Acceptance Attempt 4 is **NOT ADMITTED**; eligible `false`; started `false`; formal invocation count `0`; TEAM B has not executed it or predeclared PASS/FAIL. The new formal root is `D:\tmp\lo-runtime-acceptance-attempt-4`.
 
 Runtime/PDFHow commits, frozen candidate, Release `367637128`, asset identities and Build WASM baseline remain fixed. Release publication, asset replacement and unnecessary native/WASM builds remain prohibited. Independent verification and an explicit persisted `Acceptance Attempt 4: ADMITTED` are required before any formal command may run.
+
+### Acceptance Attempt 4 independent admission — 2026-08-12
+
+**Acceptance Attempt 4: ADMITTED**
+
+The independent acceptance owner, OpenAI Codex AI 编程代理（当前验收会话实例）, verified TEAM B handoff commit `9779ef9412a3572f2a4a0f700e7bdaff57715cf8` from a new clean detached checkout and confirmed that the remote feature ref pointed to the same commit. Runtime `origin/main` remained `a1c3cd6d6d2dd25fab063539e9fe40fbb327b846` and was contained by the handoff feature tip; PDFHow `origin/main` remained `b41fde5db9829ede7e6e217de6ac12c2b475b7fc`.
+
+The independent review confirmed the exact four Attempt 4 package hashes, PowerShell parsing, download-helper `node --check`, the timestamp contract on PowerShell `7.6.4`, Trellis validation, and `git diff --check`. The delta from Attempt 3 closure is limited to the separately named Attempt 4 materials and task history, with the formal PDFHow clone timeout raised from 300 to 900 seconds while retaining one invocation, no retry, and fail-closed termination.
+
+Release `367637128` still has the fixed tag and target, remains `draft: true` with `published_at: null`, and retains exactly five assets with the fixed IDs, names, sizes, and SHA-256 digests. The candidate manifest still records candidate `21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b`, `releaseQualified: false`, fixed provenance, ABI `lok-convert-document-v1`, schema 1, `main-script` pthread mode, `externalWorker: null`, and exactly eight runtime files without `soffice.worker.js`. Build WASM run `31211473147`, created `2026-08-07T19:26:24Z` at `71d33678ed74872ebbb1bc37f5778143f8f5e401`, remains the latest successful run.
+
+The pinned DOCX remains 6,693,403 bytes with SHA-256 `a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59df`. All 19 preserved Attempt 3 raw evidence files still match the committed rejected evidence inventory. `D:\tmp\lo-runtime-acceptance-attempt-4` was absent at admission. TEAM B did not execute Attempt 4, and the independent owner did not run any formal Attempt 4 command before admission.
+
+Current formal state:
+
+- Acceptance Attempt 4: **ADMITTED**;
+- admission scope: execution and independent final PASS/FAIL signature;
+- eligible: true;
+- started: false;
+- decision: pending independent execution;
+- formal invocation count: 0;
+- acceptance owner: OpenAI Codex AI 编程代理（当前验收会话实例）;
+- formal root: `D:\tmp\lo-runtime-acceptance-attempt-4`, confirmed absent at admission;
+- Release `367637128`: `draft: true`, `published_at: null`, `releaseQualified: false`;
+- latest Build WASM run: `31211473147`, with no later native/WASM build.
+
+The exact signature and verification inventory are persisted in `acceptance/acceptance-attempt-4-handoff.md`. This admission does not imply PASS. The formal command may be invoked exactly once only after this admission commit is pushed and the remote feature ref is reverified. Any nonzero exit, timeout, assertion failure, crash, or missing evidence closes Attempt 4 immediately and prohibits retry, continuation, failed-sample restart, replacement, supplementation, or backfill.
