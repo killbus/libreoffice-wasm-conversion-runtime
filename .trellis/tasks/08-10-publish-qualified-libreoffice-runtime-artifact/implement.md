@@ -729,3 +729,16 @@ The independent records are:
 - `acceptance/acceptance-attempt-3-report.md`.
 
 Raw evidence remains preserved under `D:\tmp\lo-runtime-acceptance-attempt-3`. Release `367637128` must remain draft/unpublished, `releaseQualified` must remain `false`, assets must remain immutable, and Attempt 3 may not be rerun or continued. Any later execution requires a separately documented TEAM B remediation/handoff and explicit independent admission as a new acceptance attempt.
+
+
+### Acceptance Attempt 4 clone-timeout remediation handoff — 2026-08-12
+
+Attempt 3 remains **CLOSED / FAIL** at independent record commit `6e5a716cf0287afc5d6b97dfbceb658c19859146`. Its sole formal invocation timed out at command 6 `clone-pdfhow` after 300 seconds; exit code was `1`, no retry/continuation/backfill occurred, and all subsequent gates were NOT RUN. `D:\tmp\lo-runtime-acceptance-attempt-3` must remain unchanged and Attempt 3 must never run again.
+
+TEAM B performed a separate non-acceptance diagnosis in `D:\tmp\lo-runtime-team-b-pdfhow-clone-diagnostic-20260812`: the full no-checkout clone exited `0` in `20.611` seconds, and detached checkout `b41fde5db9829ede7e6e217de6ac12c2b475b7fc` exited `0` in `3.842` seconds with the fixed HEAD and a clean worktree. This diagnosis is not acceptance evidence and cannot satisfy any later gate.
+
+TEAM B prepared `acceptance/acceptance-attempt-4-handoff.md` and separately named Attempt 4 command/helper/test files. `clone-pdfhow` remains a full fresh clone, single-pass, retry-free and fail-closed, with timeout raised from `300` to `900` seconds.
+
+Current formal state: Acceptance Attempt 4 is **NOT ADMITTED**; eligible `false`; started `false`; formal invocation count `0`; TEAM B has not executed it or predeclared PASS/FAIL. The new formal root is `D:\tmp\lo-runtime-acceptance-attempt-4`.
+
+Runtime/PDFHow commits, frozen candidate, Release `367637128`, asset identities and Build WASM baseline remain fixed. Release publication, asset replacement and unnecessary native/WASM builds remain prohibited. Independent verification and an explicit persisted `Acceptance Attempt 4: ADMITTED` are required before any formal command may run.
