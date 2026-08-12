@@ -98,5 +98,5 @@ Execute `acceptance/attempt-6-commands.ps1` exactly once in a fresh PowerShell s
 
 ---
 
-**Admission Commit**: (to be added after git commit)
+**Admission Commit**: `85a0fc3` ("acceptance: admit attempt 6 for formal execution")
 **Admission Authority**: Independent Acceptance Owner - OpenAI Codex AI 编程代理
