@@ -820,3 +820,24 @@ Formal state after this TEAM B handoff preparation:
 - Release: `367637128`, required `draft: true`, `published_at: null`, `releaseQualified: false`
 
 Attempt 5 must start from zero in its fresh root and cannot reuse or backfill Attempt 1/2/3/4 evidence. TEAM B has not executed or admitted Attempt 5 and has not predeclared PASS or FAIL. Release assets may not be replaced, re-uploaded, renamed, removed, or modified; the Release may not be published; no unnecessary native/WASM build may be triggered. The independent acceptance owner must first verify the committed and pushed handoff against the fixed remote state and separately persist the correctly spelled statement `Acceptance Attempt 5: ADMITTED`. Until then, no normative Attempt 5 command may run.
+
+### Acceptance Attempt 5 independent admission — 2026-08-12
+
+The independent acceptance owner, **OpenAI Codex AI 编程代理（当前验收会话实例）**, verified TEAM B handoff commit `99e53cd2841fe2d6f37b05f58875adce7a740f70` from a separate clean admission checkout and persisted:
+
+**Acceptance Attempt 5: ADMITTED**
+
+The owner did not participate in TEAM B's implementation, Windows launcher remediation, commits, package-test result formulation, or handoff conclusion, and independently accepts responsibility for the single formal execution and final PASS/FAIL signature.
+
+Admission verification completed without invoking the formal command package. It covered the fixed Runtime/PDFHow refs, remediation ancestry and bounded delta, all immutable package hashes, parser/Node/Trellis/diff checks, timestamp and production-same Windows launcher contract tests, fresh Attempt 5 root absence, full Attempt 4 evidence preservation, the pinned DOCX hash, Release ID/tag/target/draft/unpublished state, all five asset identities and native-byte hashes, candidate manifest inventory/provenance/ABI/schema/pthread/forbidden-worker fields, and the unchanged latest Build WASM run. No newer native/WASM build was found.
+
+Post-admission state:
+
+- eligible: `true`
+- started: `false`
+- decision: `null`
+- formal invocation count: `0`
+- acceptance wait state: `attempt-5-admitted-awaiting-independent-execution`
+- formal root: `D:\tmp\lo-runtime-acceptance-attempt-5` (must be created only by the single formal invocation)
+
+Admission does not imply PASS. The pushed admission commit must be independently confirmed as the remote feature ref before the formal command starts. The formal execution must use a new checkout distinct from the admission checkout. Any command failure, timeout, assertion failure, crash, or missing evidence closes Attempt 5 FAIL with no retry, continuation, replacement, supplementation, or backfill. A monitoring or transport `stream disconnected` may be retried only for observation and never permits a second formal invocation.

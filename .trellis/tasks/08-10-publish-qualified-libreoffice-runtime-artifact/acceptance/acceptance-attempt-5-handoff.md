@@ -2,17 +2,49 @@
 
 ## Admission status
 
-- Acceptance Attempt 5: **NOT ADMITTED**
-- eligible: `false`
+- Acceptance Attempt 5: **ADMITTED**
+- eligible: `true`
 - started: `false`
 - formal invocation count: `0`
-- decision: `null`; TEAM B does not predeclare PASS or FAIL
-- admission scope after an independent signature: execution and independent PASS/FAIL signature only
-- independent acceptance owner after admission: **OpenAI Codex AI 编程代理（当前验收会话实例）**
+- decision: `null`; no PASS or FAIL is predeclared
+- admission scope: execution and independent PASS/FAIL signature only
+- independent acceptance owner: **OpenAI Codex AI 编程代理（当前验收会话实例）**
 - new formal root: `D:\tmp\lo-runtime-acceptance-attempt-5`
 
-TEAM B has prepared only the implementation/process remediation and this handoff. TEAM B has not executed Acceptance Attempt 5 and cannot admit it. No normative command may run until the independent owner verifies this committed and pushed handoff against all fixed remote identities and explicitly persists the correctly spelled statement `Acceptance Attempt 5: ADMITTED` in a later independent record.
+TEAM B prepared only the implementation/process remediation and the original handoff. TEAM B did not execute or admit Acceptance Attempt 5. The independent owner subsequently verified the committed and pushed handoff against the fixed identities and persisted the admission signature below. This admission does not imply PASS and does not start the formal invocation.
 
+## Independent admission signature — 2026-08-12
+
+**Acceptance Attempt 5: ADMITTED**
+
+I, **OpenAI Codex AI 编程代理（当前验收会话实例）**, am the independent acceptance executor for this attempt. I did not participate in TEAM B's Attempt 5 implementation, Windows command-launch remediation, commits, package-test result formulation, or handoff conclusion. I accept responsibility under my actual system identity for the single formal Acceptance Attempt 5 execution and for independently signing its final PASS/FAIL decision.
+
+Before this admission, and without invoking any formal Attempt 5 command, I independently verified:
+
+- the clean admission checkout `D:\tmp\lo-runtime-attempt-5-admission-check-99e53cd` and the remote feature ref resolved to TEAM B handoff commit `99e53cd2841fe2d6f37b05f58875adce7a740f70`;
+- Runtime `origin/main` resolved to `a1c3cd6d6d2dd25fab063539e9fe40fbb327b846`, which is an ancestor of the feature tip, and PDFHow `origin/main` resolved to `b41fde5db9829ede7e6e217de6ac12c2b475b7fc`;
+- the delta from Attempt 4 closure commit `4cfd07117d441f100765de0281296cbd6a7be131` is limited to Attempt 5 handoff/command/helper/test files plus `task.json` and `implement.md`, without changing Attempt 4 evidence;
+- the Attempt 5 formal root `D:\tmp\lo-runtime-acceptance-attempt-5` did not exist, while the preserved Attempt 4 root still existed and all 43 formal evidence files plus all 3 external launch artifacts matched their committed names, sizes, and SHA-256 values;
+- all five PowerShell files passed parser validation, `attempt-5-download-assets.mjs` passed `node --check`, Trellis task validation and `git diff --check` passed, and the timestamp contract test passed on PowerShell `7.6.4`;
+- the production-same launcher contract test independently passed on PowerShell `7.6.4` with git `2.53.0.windows.1`, gh `2.83.2`, Node `v24.16.0`, and pnpm.cmd `11.6.0`, covering `.cmd`/`.bat` argument preservation, exact child exit `23`, native executable launching, and fail-closed quote/CR/LF/percent/exclamation inputs;
+- the formal command dot-sources the same launcher helper and executes the same launcher contract test as formal command 1;
+- Release `367637128` retained the fixed tag, target `df3f73c789e6d2abf71cbcd75186118d2bbc795a`, `draft: true`, and `published_at: null`;
+- the Release exposed exactly the five fixed assets with unchanged IDs, names, sizes, update timestamps, and SHA-256 values recorded below;
+- a native-byte admission download of `CANDIDATE-MANIFEST.json` was exactly 2,365 bytes with SHA-256 `c33b76b49346b08d0cdcbf1ce64db3025f9ceacd29113664279c56e0dae8dab0`; it records the frozen candidate, `releaseQualified: false`, fixed native/wrapper provenance, ABI `lok-convert-document-v1`, schema 1, pthread mode `main-script`, `externalWorker: null`, exactly eight runtime files, and no `soffice.worker.js`;
+- the latest Build WASM run remained `31211473147`, created `2026-08-07T19:26:24Z`, head SHA `71d33678ed74872ebbb1bc37f5778143f8f5e401`, status `completed`, conclusion `success`, with no newer native/WASM build;
+- the pinned DOCX remained 6,693,403 bytes with SHA-256 `a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59df`;
+- TEAM B did not execute Attempt 5, and the independent formal invocation count remained zero.
+
+This admission binds the immutable formal package hashes:
+
+- `attempt-5-commands.ps1`: `20ab8596fbb93212188ac50d21d56669daac565204684bcf22f4b3da0d1aa475`;
+- `attempt-5-download-assets.mjs`: `c89029017a349b88d29dfc4b799bc710624c4b0559a86e93080674bd870a1806`;
+- `attempt-5-time-contract.ps1`: `d07788e24e6200928fa9685d0778e7d903cb8c3b32d44fd7d67aadaa685d550e`;
+- `attempt-5-time-contract.tests.ps1`: `6641538284bc8ba00b2bbadc661b2f33edd9406b238d445cfb3c48333139442b`;
+- `attempt-5-command-launch.ps1`: `4e278a03386813c9d48bd4366124403916d0f7c0bd57632cea45d4f1ccc6f11d`;
+- `attempt-5-command-launch.tests.ps1`: `cbcebe59ff763e745189e58a3c1ad28b2818c7503f79059c113ed59eb1842ce5`.
+
+Admission makes Attempt 5 eligible but leaves `started: false`, `decision: null`, and formal invocation count `0`. The formal run must use a different new checkout and the fixed fresh root. Any formal nonzero exit, timeout, assertion failure, crash, or missing evidence closes Attempt 5 immediately with no retry, continuation, failed-sample replacement, supplementation, or backfill. Transport or monitoring disconnections may be retried only as observation operations and never authorize a second formal invocation.
 ## Acceptance Attempt 4 failure carried forward
 
 Acceptance Attempt 4 is permanently **CLOSED / FAIL**. It was formally invoked exactly once. Commands 1–12 completed; command 13, `runtime-install`, returned child exit code `1` before its 600-second timeout because the command package passed the resolved `pnpm.cmd` through `ProcessStartInfo.ArgumentList` as a `cmd.exe /d /s /c` command string containing literal backslash-escaped quotes. `cmd.exe` rejected the malformed launcher before pnpm started.
