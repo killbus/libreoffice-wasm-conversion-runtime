@@ -789,3 +789,34 @@ The independent owner signed and persisted:
 - `acceptance/acceptance-attempt-4-report.md`.
 
 Preserve `D:\tmp\lo-runtime-acceptance-attempt-4` unchanged. Release `367637128` must remain draft/unpublished, `releaseQualified` must remain `false`, and all five assets must remain immutable. Attempt 4 may not be rerun or continued. Any later acceptance requires TEAM B remediation, a new Attempt 5 handoff and formal root, and explicit independent admission before execution.
+### Acceptance Attempt 5 Windows command-launch remediation handoff — 2026-08-12
+
+Acceptance Attempt 4 remains permanently **CLOSED / FAIL** under independent closure commit `4cfd07117d441f100765de0281296cbd6a7be131`. Its sole formal invocation stopped fail closed at command 13, `runtime-install`, because the normative launcher supplied the resolved `pnpm.cmd` command through `ProcessStartInfo.ArgumentList`; .NET argv escaping produced leading literal backslash-escaped/doubled quotes that `cmd.exe /d /s /c` rejected before pnpm started. There was no retry, continuation, rerun, replacement, supplementation, or backfill, and all subsequent gates were NOT RUN. `D:\tmp\lo-runtime-acceptance-attempt-4` must remain unchanged and cannot satisfy any later gate.
+
+TEAM B prepared a separate Attempt 5 command package and handoff. The shared production helper `acceptance/attempt-5-command-launch.ps1` keeps native executables on `ProcessStartInfo.ArgumentList`, but launches every resolved `.cmd` or `.bat` through `%ComSpec%` using one raw `ProcessStartInfo.Arguments` value for the conventional `/d /s /c ""<executable>" "<argument>" ..."` contract. The complete cmd.exe command string is never passed through `ArgumentList`. Embedded double quotes, CR/LF, `%`, and `!` fail closed before process start, and command metadata records the resolved executable and selected launch contract.
+
+The production-same-helper executable test `acceptance/attempt-5-command-launch.tests.ps1` passed as TEAM B remediation verification on PowerShell `7.6.3`. It covered synthetic `.cmd` and `.bat` wrappers in paths containing spaces, exact preservation of arguments containing spaces, `&`, `|`, `^`, parentheses, long grep text, and Windows paths, exact propagation of child exit `23`, fail-closed unsupported expansion/quote tokens, native `git.exe`/`gh.exe`/`node.exe`, and actual `pnpm.cmd` `11.6.0`. This verification is not Attempt 5 execution or acceptance evidence. The formal Attempt 5 command independently runs the same test as command 1 after admission.
+
+The immutable Attempt 5 package is:
+
+- `acceptance/attempt-5-commands.ps1` — SHA-256 `20ab8596fbb93212188ac50d21d56669daac565204684bcf22f4b3da0d1aa475`
+- `acceptance/attempt-5-download-assets.mjs` — SHA-256 `c89029017a349b88d29dfc4b799bc710624c4b0559a86e93080674bd870a1806`
+- `acceptance/attempt-5-time-contract.ps1` — SHA-256 `d07788e24e6200928fa9685d0778e7d903cb8c3b32d44fd7d67aadaa685d550e`
+- `acceptance/attempt-5-time-contract.tests.ps1` — SHA-256 `6641538284bc8ba00b2bbadc661b2f33edd9406b238d445cfb3c48333139442b`
+- `acceptance/attempt-5-command-launch.ps1` — SHA-256 `4e278a03386813c9d48bd4366124403916d0f7c0bd57632cea45d4f1ccc6f11d`
+- `acceptance/attempt-5-command-launch.tests.ps1` — SHA-256 `cbcebe59ff763e745189e58a3c1ad28b2818c7503f79059c113ed59eb1842ce5`
+- `acceptance/acceptance-attempt-5-handoff.md` — SHA-256 `995e6c99b43a68a50c1582e6075fa0069c8b13b8fdf8b1cd876ecc650d915d21`
+
+Formal state after this TEAM B handoff preparation:
+
+- Acceptance Attempt 5: **NOT ADMITTED**
+- eligible: `false`
+- started: `false`
+- formal invocation count: `0`
+- decision: `null`
+- new formal root: `D:\tmp\lo-runtime-acceptance-attempt-5`
+- Runtime checkout: `a1c3cd6d6d2dd25fab063539e9fe40fbb327b846`
+- PDFHow checkout: `b41fde5db9829ede7e6e217de6ac12c2b475b7fc`
+- Release: `367637128`, required `draft: true`, `published_at: null`, `releaseQualified: false`
+
+Attempt 5 must start from zero in its fresh root and cannot reuse or backfill Attempt 1/2/3/4 evidence. TEAM B has not executed or admitted Attempt 5 and has not predeclared PASS or FAIL. Release assets may not be replaced, re-uploaded, renamed, removed, or modified; the Release may not be published; no unnecessary native/WASM build may be triggered. The independent acceptance owner must first verify the committed and pushed handoff against the fixed remote state and separately persist the correctly spelled statement `Acceptance Attempt 5: ADMITTED`. Until then, no normative Attempt 5 command may run.
