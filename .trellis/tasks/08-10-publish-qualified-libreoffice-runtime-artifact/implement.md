@@ -769,3 +769,23 @@ Current formal state:
 - latest Build WASM run: `31211473147`, with no later native/WASM build.
 
 The exact signature and verification inventory are persisted in `acceptance/acceptance-attempt-4-handoff.md`. This admission does not imply PASS. The formal command may be invoked exactly once only after this admission commit is pushed and the remote feature ref is reverified. Any nonzero exit, timeout, assertion failure, crash, or missing evidence closes Attempt 4 immediately and prohibits retry, continuation, failed-sample restart, replacement, supplementation, or backfill.
+
+### Acceptance Attempt 4 independent closure — 2026-08-12
+
+**Acceptance Attempt 4: CLOSED / FAIL**
+
+The independently admitted command package was invoked exactly once from fresh detached checkout `3fbb14eba9ad009790f6f5b9ed1ac513096bdb77`, with formal root `D:\tmp\lo-runtime-acceptance-attempt-4`. Commands 1–12 completed. Command 13, `runtime-install`, returned child exit code `1` before the 600-second timeout.
+
+The formal helper resolved pnpm to `D:\Applications\Scoop\apps\nvm\current\nodejs\nodejs\pnpm.cmd`, but the fixed Windows `.cmd` branch supplied `cmd.exe /d /s /c` an extra-outer-quoted command string. `cmd.exe` rejected the resulting leading doubled quote before pnpm started. The formal exception was `Unexpected exit code 1, expected 0: runtime-install. Stop immediately; no retry or backfill is permitted.` This is a normative command-package Windows `.cmd` launch/quoting defect, not a dependency-install result, network fluctuation, or timeout.
+
+The single invocation was terminated fail-closed. Retry, continuation, failed-sample restart, replacement, supplementation, and backfill were not performed. Runtime build, workflow/CLI contracts, Node gates and cleanup assertions, PDFHow install, Chromium candidate gate, all five cold-start samples, and formal final Build WASM/Release immutability checks are **NOT RUN**. The formal completion marker and automatic evidence inventory are absent. No formal residual processes remain.
+
+Pre-failure evidence passed fresh Runtime/PDFHow checkout and ref checks, remediation ancestry, Build WASM preflight, Release identity, all-five-asset fresh download, archive path safety, exact eight-file inventory, provenance, ABI/schema, pthread mode, forbidden-worker absence, and `releaseQualified: false`. These preliminary results cannot qualify the candidate or override FAIL.
+
+The independent owner signed and persisted:
+
+- `acceptance/acceptance-attempt-4-receipt.rejected.json`;
+- `acceptance/acceptance-attempt-4-evidence.json`;
+- `acceptance/acceptance-attempt-4-report.md`.
+
+Preserve `D:\tmp\lo-runtime-acceptance-attempt-4` unchanged. Release `367637128` must remain draft/unpublished, `releaseQualified` must remain `false`, and all five assets must remain immutable. Attempt 4 may not be rerun or continued. Any later acceptance requires TEAM B remediation, a new Attempt 5 handoff and formal root, and explicit independent admission before execution.

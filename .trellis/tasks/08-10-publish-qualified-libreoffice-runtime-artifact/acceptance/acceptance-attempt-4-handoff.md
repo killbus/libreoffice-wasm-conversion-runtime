@@ -2,16 +2,18 @@
 
 ## Admission status
 
-- Acceptance Attempt 4: **ADMITTED**
-- Eligible: `true`
-- Started: `false`
-- Independent formal invocation count: `0`
+- Acceptance Attempt 4: **CLOSED / FAIL**
+- Historical admission: `ADMITTED`; consumed by the sole formal invocation
+- Eligible: `false`
+- Started: `true`
+- Independent formal invocation count: `1`
 - TEAM B formal invocation count: `0`
 - Independent acceptance owner: OpenAI Codex AI 编程代理（当前验收会话实例）
-- Admission scope: execution and independent PASS/FAIL signature
-- PASS/FAIL conclusion: pending independent execution; not predeclared by TEAM B
+- Final signed decision: `FAIL`
+- Failure stage: command 13, `runtime-install`; child exit code `1`
+- Retry, continuation, replacement, supplementation, and backfill: forbidden and not performed
 
-TEAM B prepared only the implementation/process remediation and this handoff and did not execute or admit Acceptance Attempt 4. The independent owner has now completed the read-only checks and signed the admission below. No normative Attempt 4 command has run. The formal package may be invoked exactly once only after this admission record is committed, pushed, and the remote feature ref is independently rechecked at that admission commit.
+TEAM B prepared only the implementation/process remediation and this handoff and did not execute or admit Acceptance Attempt 4. The independent owner admitted the attempt, invoked the normative package exactly once from the pushed admission commit, and closed it fail-closed at command 13. The historical admission signature remains below; the final closure and evidence disposition are recorded at the end of this document.
 
 ## Independent admission signature — 2026-08-12
 
@@ -238,3 +240,34 @@ Attempt 4 must execute every gate from the beginning after admission. It may not
 
 TEAM B has preserved the complete Attempt 1/2 history and the Attempt 3 CLOSED / FAIL record, and has prepared this timeout-remediated Attempt 4 handoff only. TEAM B has not executed Attempt 4, has not admitted Attempt 4, and has not predeclared its PASS/FAIL conclusion.
 
+
+## Independent closure — 2026-08-12
+
+**Acceptance Attempt 4: CLOSED / FAIL**
+
+The independent acceptance owner invoked the admitted package exactly once from fresh detached checkout `3fbb14eba9ad009790f6f5b9ed1ac513096bdb77`, using formal root `D:\tmp\lo-runtime-acceptance-attempt-4`. Commands 1–12 completed and persisted evidence. Command 13, `runtime-install`, started at `2026-08-12T03:39:35.9292745Z` and returned child exit code `1` before its 600-second timeout.
+
+The fixed command helper resolved pnpm to `D:\Applications\Scoop\apps\nvm\current\nodejs\nodejs\pnpm.cmd`, then its Windows `.cmd` branch supplied `cmd.exe /d /s /c` an extra-outer-quoted command string. `cmd.exe` received a leading doubled quote and rejected the command before pnpm started:
+
+```text
+'\"\"D:\Applications\Scoop\apps\nvm\current\nodejs\nodejs\pnpm.cmd\" \"install\" \"--frozen-lockfile\" \"--ignore-scripts\"\"' is not recognized as an internal or external command,
+operable program or batch file.
+```
+
+This is a normative command-package Windows `.cmd` launch/quoting defect, not a dependency-install failure, network fluctuation, or timeout. The formal exception required immediate termination:
+
+```text
+Unexpected exit code 1, expected 0: runtime-install. Stop immediately; no retry or backfill is permitted.
+```
+
+No retry, continuation, failed-sample restart, replacement, supplementation, or backfill occurred. All subsequent workflow/CLI, Node, cleanup, Chromium, five-cold-start, and formal final immutability gates are **NOT RUN**. The completion marker and automatic `evidence-sha256.json` were not produced. Residual formal process count is zero.
+
+The preliminary evidence confirms fresh fixed checkouts, remediation ancestry, Build WASM preflight, Release identity, fresh download of all five assets, archive path safety, exact eight-file runtime inventory, provenance, ABI/schema, pthread mode, absence of `soffice.worker.js`, and `releaseQualified: false`. Those preliminary passes do not override the terminal failure.
+
+The signed rejected receipt is `acceptance-attempt-4-receipt.rejected.json`; the evidence manifest is `acceptance-attempt-4-evidence.json`; the narrative report is `acceptance-attempt-4-report.md`. Preserve `D:\tmp\lo-runtime-acceptance-attempt-4` unchanged. Release `367637128` must remain draft/unpublished, `releaseQualified` must remain `false`, and the five assets must remain immutable.
+
+Any later acceptance execution requires TEAM B to remediate the command package and provide a separately numbered Attempt 5 handoff, new formal root, and explicit independent admission. Attempt 4 may never be rerun or continued.
+
+Signed: **OpenAI Codex AI 编程代理（当前验收会话实例）**
+Role: independent acceptance owner
+Decision: **FAIL**

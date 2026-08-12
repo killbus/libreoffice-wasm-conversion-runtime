@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "kind": "libreoffice-wasm-runtime-acceptance-receipt",
+  "acceptanceAttempt": 4,
+  "decision": "rejected",
+  "signedDecision": "FAIL",
+  "releaseQualified": false,
+  "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+  "payloadArchiveSha256": "e9aac8dde2fb627251155fc97651c2bd35bec63b01e39f882d342c024a87de9a",
+  "releaseId": "367637128",
+  "tagName": "runtime-artifact-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+  "targetCommit": "df3f73c789e6d2abf71cbcd75186118d2bbc795a",
+  "runtimeCheckout": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+  "pdfHowCheckout": "b41fde5db9829ede7e6e217de6ac12c2b475b7fc",
+  "teamBHandoffCommit": "9779ef9412a3572f2a4a0f700e7bdaff57715cf8",
+  "formalCheckoutCommit": "3fbb14eba9ad009790f6f5b9ed1ac513096bdb77",
+  "acceptanceOwner": "OpenAI Codex AI 编程代理（当前验收会话实例）",
+  "generatedAt": "2026-08-12T03:50:13Z",
+  "admissionStatus": "ADMITTED",
+  "attemptStarted": true,
+  "formalInvocationCount": 1,
+  "retryOrBackfillPermitted": false,
+  "terminalFailure": {
+    "commandIndex": 13,
+    "commandName": "runtime-install",
+    "startedAt": "2026-08-12T03:39:35.9292745Z",
+    "timeoutSeconds": 600,
+    "childExitCode": 1,
+    "formalProcessExitCode": null,
+    "formalProcessExitCodeNote": "The command was launched once as a detached monitored process; the OS exit code was not retained after process disposal. Formal stderr records the terminal exception and the child command log records exit code 1.",
+    "message": "Unexpected exit code 1, expected 0: runtime-install. Stop immediately; no retry or backfill is permitted.",
+    "resolvedExecutable": "D:\\Applications\\Scoop\\apps\\nvm\\current\\nodejs\\nodejs\\pnpm.cmd",
+    "arguments": [
+      "install",
+      "--frozen-lockfile",
+      "--ignore-scripts"
+    ],
+    "workingDirectory": "D:\\tmp\\lo-runtime-acceptance-attempt-4\\runtime-repository",
+    "stderr": "'\\\"\\\"D:\\Applications\\Scoop\\apps\\nvm\\current\\nodejs\\nodejs\\pnpm.cmd\\\" \\\"install\\\" \\\"--frozen-lockfile\\\" \\\"--ignore-scripts\\\"\\\"' is not recognized as an internal or external command,\noperable program or batch file.\n",
+    "failureClass": "normative command-package Windows .cmd launch/quoting defect",
+    "failureExplanation": "The fixed helper resolved pnpm to a .cmd file and passed cmd.exe /d /s /c an extra-outer-quoted command line. cmd.exe received a leading doubled quote and rejected the command before pnpm started.",
+    "residualFormalProcessCount": 0
+  },
+  "gateResults": [
+    {
+      "gate": "fresh-runtime-and-pdfhow-checkouts-and-ref-verification",
+      "status": "passed",
+      "summary": "Both repositories were freshly cloned, detached at the fixed commits, and their required remote refs and Runtime remediation ancestry were verified."
+    },
+    {
+      "gate": "native-workflow-preflight-release-download-and-archive-contract",
+      "status": "passed",
+      "summary": "The latest native workflow baseline, Release identity, all five freshly downloaded assets, archive path safety, exact inventory, provenance, ABI/schema, pthread mode, forbidden-worker absence, and releaseQualified false were verified."
+    },
+    {
+      "gate": "runtime-install",
+      "status": "failed",
+      "summary": "The normative Windows .cmd launch wrapper produced an invalid doubled-quote cmd.exe command line. The child exited 1 before pnpm started."
+    },
+    {
+      "gate": "all-subsequent-attempt-4-gates",
+      "status": "not-run",
+      "summary": "Fail-closed execution stopped immediately. Workflow/CLI gates, Node gates, Chromium gate, five cold starts, and formal final immutability gates were not run."
+    }
+  ],
+  "rejectionReasons": [
+    "The mandatory runtime-install command returned child exit code 1 because the normative .cmd launch wrapper produced a command line rejected by cmd.exe.",
+    "The formal command package requires immediate termination and prohibits retry, continuation, failed-sample restart, replacement, supplementation, or backfill after any nonzero exit.",
+    "The required workflow/CLI, Node, Chromium, cleanup, five-cold-start, and final formal immutability evidence therefore does not exist for Acceptance Attempt 4."
+  ],
+  "requiredDisposition": [
+    "Preserve D:\\tmp\\lo-runtime-acceptance-attempt-4 and all Attempt 4 evidence unchanged.",
+    "Keep Release 367637128 draft and releaseQualified false; do not publish or represent the candidate as accepted.",
+    "Do not rerun, supplement, or continue Acceptance Attempt 4.",
+    "Any further acceptance execution requires a separately documented TEAM B remediation and a newly numbered, explicitly admitted attempt with a new root."
+  ],
+  "evidenceManifest": "acceptance-attempt-4-evidence.json",
+  "report": "acceptance-attempt-4-report.md",
+  "signature": {
+    "identity": "OpenAI Codex AI 编程代理（当前验收会话实例）",
+    "role": "independent acceptance owner",
+    "decision": "FAIL",
+    "signedAt": "2026-08-12T03:50:13Z"
+  }
+}

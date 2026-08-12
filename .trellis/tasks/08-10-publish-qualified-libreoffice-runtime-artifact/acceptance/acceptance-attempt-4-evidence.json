@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "kind": "libreoffice-wasm-runtime-acceptance-attempt-evidence",
+  "acceptanceAttempt": 4,
+  "acceptanceOwner": "OpenAI Codex AI 编程代理（当前验收会话实例）",
+  "decision": "rejected",
+  "generatedAt": "2026-08-12T03:50:13Z",
+  "admission": {
+    "status": "ADMITTED",
+    "teamBHandoffCommit": "9779ef9412a3572f2a4a0f700e7bdaff57715cf8",
+    "formalCheckoutCommit": "3fbb14eba9ad009790f6f5b9ed1ac513096bdb77",
+    "handoffFile": "acceptance-attempt-4-handoff.md",
+    "formalCommandFile": "attempt-4-commands.ps1",
+    "formalCommandFileSha256": "c6f52640bc9cd19d0dccf6fc8da91edb4a4251474e56c6db978c842b24e6b8c8",
+    "downloadHelperFile": "attempt-4-download-assets.mjs",
+    "downloadHelperFileSha256": "eaa675440202c62c848e6628597157ec30f52a751731da643765d67c6b25120e",
+    "timeContractHelperFile": "attempt-4-time-contract.ps1",
+    "timeContractHelperFileSha256": "d07788e24e6200928fa9685d0778e7d903cb8c3b32d44fd7d67aadaa685d550e",
+    "timeContractTestFile": "attempt-4-time-contract.tests.ps1",
+    "timeContractTestFileSha256": "3f42151806763042931aba2aa0b3e3c35c278e4d6919f8fb317d49c6be8c7aa7"
+  },
+  "fixedInputs": {
+    "runtimeCheckout": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+    "pdfHowCheckout": "b41fde5db9829ede7e6e217de6ac12c2b475b7fc",
+    "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+    "releaseId": 367637128,
+    "releaseTag": "runtime-artifact-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+    "releaseTarget": "df3f73c789e6d2abf71cbcd75186118d2bbc795a",
+    "archiveSha256": "e9aac8dde2fb627251155fc97651c2bd35bec63b01e39f882d342c024a87de9a",
+    "nativeWorkflowRunId": 31211473147,
+    "nativeCommit": "71d33678ed74872ebbb1bc37f5778143f8f5e401",
+    "fixture": "D:\\Repositories\\pdfhow.com-next\\scratch\\岭南版美术四年级期末复习知识点(3).docx",
+    "fixtureSha256": "a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59df"
+  },
+  "formalInvocation": {
+    "command": "pwsh -NoProfile -File .trellis/tasks/08-10-publish-qualified-libreoffice-runtime-artifact/acceptance/attempt-4-commands.ps1 -PinnedDocxFixture D:\\Repositories\\pdfhow.com-next\\scratch\\岭南版美术四年级期末复习知识点(3).docx -AcceptanceRoot D:\\tmp\\lo-runtime-acceptance-attempt-4",
+    "workingDirectory": "D:\\tmp\\lo-runtime-acceptance-attempt-4-formal-checkout-3fbb14e",
+    "checkoutCommit": "3fbb14eba9ad009790f6f5b9ed1ac513096bdb77",
+    "checkoutMode": "fresh detached checkout downloaded from GitHub after the admission commit was pushed and reverified",
+    "acceptanceRoot": "D:\\tmp\\lo-runtime-acceptance-attempt-4",
+    "startedAt": "2026-08-12T03:36:04.9323156Z",
+    "invocationCount": 1,
+    "retryPolicy": "disabled",
+    "result": "terminal fail-closed stop after runtime-install child exit code 1",
+    "completionMarkerPresent": false,
+    "automaticEvidenceInventoryPresent": false
+  },
+  "environment": {
+    "os": "Microsoft Windows 10.0.22621",
+    "architecture": "X64",
+    "powerShell": "7.6.4",
+    "node": "v24.16.0",
+    "git": "2.53.0.windows.1",
+    "githubCli": "2.83.2",
+    "playwright": "not reached; version not collected by the formal invocation",
+    "chromium": "not reached; browser was not installed or launched by the formal invocation",
+    "keyEnvironment": {
+      "CI": "1",
+      "PLAYWRIGHT_WORKERS": "1",
+      "PLAYWRIGHT_HTML_OPEN": "never",
+      "OFFICE_BROWSER_DOCX_FIXTURE": "D:\\Repositories\\pdfhow.com-next\\scratch\\岭南版美术四年级期末复习知识点(3).docx",
+      "OFFICE_RUNTIME_ROOT": "D:\\tmp\\lo-runtime-acceptance-attempt-4\\verified-extract",
+      "ACCEPTANCE_RETRY_POLICY": "disabled",
+      "GIT_TERMINAL_PROMPT": "0",
+      "npm_config_fetch_retries": "0",
+      "npm_config_fetch_retry_maxtimeout": "0",
+      "npm_config_fetch_retry_mintimeout": "0"
+    }
+  },
+  "terminalFailure": {
+    "commandIndex": 13,
+    "commandName": "runtime-install",
+    "startedAt": "2026-08-12T03:39:35.9292745Z",
+    "timeoutSeconds": 600,
+    "childExitCode": 1,
+    "formalProcessExitCode": null,
+    "formalProcessExitCodeNote": "The command was launched once as a detached monitored process; the OS exit code was not retained after process disposal. Formal stderr records the terminal exception and the child command log records exit code 1.",
+    "message": "Unexpected exit code 1, expected 0: runtime-install. Stop immediately; no retry or backfill is permitted.",
+    "resolvedExecutable": "D:\\Applications\\Scoop\\apps\\nvm\\current\\nodejs\\nodejs\\pnpm.cmd",
+    "arguments": [
+      "install",
+      "--frozen-lockfile",
+      "--ignore-scripts"
+    ],
+    "workingDirectory": "D:\\tmp\\lo-runtime-acceptance-attempt-4\\runtime-repository",
+    "stderr": "'\\\"\\\"D:\\Applications\\Scoop\\apps\\nvm\\current\\nodejs\\nodejs\\pnpm.cmd\\\" \\\"install\\\" \\\"--frozen-lockfile\\\" \\\"--ignore-scripts\\\"\\\"' is not recognized as an internal or external command,\noperable program or batch file.\n",
+    "failureClass": "normative command-package Windows .cmd launch/quoting defect",
+    "failureExplanation": "The fixed helper resolved pnpm to a .cmd file and passed cmd.exe /d /s /c an extra-outer-quoted command line. cmd.exe received a leading doubled quote and rejected the command before pnpm started.",
+    "residualFormalProcessCount": 0
+  },
+  "completedCommands": [
+    "01-clone-runtime",
+    "02-checkout-runtime",
+    "03-verify-runtime-head",
+    "04-verify-runtime-remote-refs",
+    "05-verify-runtime-remediation-contained-in-feature-branch",
+    "06-clone-pdfhow",
+    "07-checkout-pdfhow",
+    "08-verify-pdfhow-head",
+    "09-verify-pdfhow-remote-refs",
+    "10-preflight-no-new-native-wasm-build",
+    "11-release-identity-and-download-all-assets",
+    "12-verify-and-extract-release-archive"
+  ],
+  "failedCommand": "13-runtime-install",
+  "passedGateEvidence": {
+    "freshRuntimeAndPdfHowCheckouts": true,
+    "preflightNoNewNativeWasmBuild": true,
+    "releaseIdentityAndAllFiveAssetDownloads": true,
+    "archivePathSafetyAndExactInventory": true,
+    "provenanceAbiSchemaPthreadAndWorkerAbsence": true,
+    "releaseQualifiedFalse": true
+  },
+  "notRun": [
+    "runtime wrapper/package build",
+    "runtime workflow guard and verifier/stage CLI contract gates",
+    "downloaded-byte Node positive, negative, reuse, recovery, ABI, and cleanup gates",
+    "PDFHow dependency install and Playwright Chromium install",
+    "complete retry-free Chromium candidate gate",
+    "five consecutive fresh-browser cold-start samples",
+    "formal final Build WASM and Release/asset immutability gates",
+    "formal evidence-sha256 inventory and ATTEMPT-4-COMMAND-COMPLETED marker"
+  ],
+  "rawEvidenceRoot": "D:\\tmp\\lo-runtime-acceptance-attempt-4\\evidence",
+  "rawEvidenceFiles": [
+    {
+      "name": "00-fixed-inputs.json",
+      "size": 936,
+      "sha256": "9581e12dbd7c46df5e362848bfc42bde2992226236cc5305872fa6d69f9a206d"
+    },
+    {
+      "name": "01-clone-runtime.command.json",
+      "size": 1273,
+      "sha256": "18080fec966bec3fb9e52a25e3167ade6aa35549b6f575bb96cbde6305e2d2bc"
+    },
+    {
+      "name": "01-clone-runtime.stderr.log",
+      "size": 76,
+      "sha256": "1ae5f7aaa92663ab8f53494cc4696248944d515dad189c2de3c2b6d54012881c"
+    },
+    {
+      "name": "01-clone-runtime.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "02-checkout-runtime.command.json",
+      "size": 1205,
+      "sha256": "e17a30df8bfccb1516190d24bdb3265c48ed98065012265d79baabd1fdfb273e"
+    },
+    {
+      "name": "02-checkout-runtime.stderr.log",
+      "size": 83,
+      "sha256": "9b5f7a2d20eadaeaea250a2a27b12fb7ffe5c29ee68cd780c1ec261333791ea3"
+    },
+    {
+      "name": "02-checkout-runtime.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "03-verify-runtime-head.command.json",
+      "size": 1161,
+      "sha256": "e373f90448e72b96e150989c82088dde193327489d982793d714268e56c21ba7"
+    },
+    {
+      "name": "03-verify-runtime-head.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "03-verify-runtime-head.stdout.log",
+      "size": 41,
+      "sha256": "74f33dd13a0299588d59eefc4a8ab625855102b715fd4df43a2930f009d8c27e"
+    },
+    {
+      "name": "04-verify-runtime-remote-refs.command.json",
+      "size": 1279,
+      "sha256": "210ff2c6ea18b309ad8ced304e67ee25339f82f0cfd277e263a96d55dadabbb9"
+    },
+    {
+      "name": "04-verify-runtime-remote-refs.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "04-verify-runtime-remote-refs.stdout.log",
+      "size": 161,
+      "sha256": "f44a52166cf163f17b7bb9c9331c701599b57b5e96110959ceb9a7eb6a1506a9"
+    },
+    {
+      "name": "05-verify-runtime-remediation-contained-in-feature-branch.command.json",
+      "size": 1392,
+      "sha256": "726020b31748aaae2626ac473724212be7ecde766807592736f1c1ed91f39dbc"
+    },
+    {
+      "name": "05-verify-runtime-remediation-contained-in-feature-branch.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "05-verify-runtime-remediation-contained-in-feature-branch.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "06-clone-pdfhow.command.json",
+      "size": 1249,
+      "sha256": "cb664851aa172c5635e7e8387f5c2c2b673af479f9880a6882f005980c94e05a"
+    },
+    {
+      "name": "06-clone-pdfhow.stderr.log",
+      "size": 75,
+      "sha256": "bf61952ce758c88036f089c990c5f2ac9f0113437fed79170e74d9a372d3d7a0"
+    },
+    {
+      "name": "06-clone-pdfhow.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "07-checkout-pdfhow.command.json",
+      "size": 1201,
+      "sha256": "88eea2f98c710f703b541ab8c882b09fccf062eb8977d0db9ac5f42994f560d7"
+    },
+    {
+      "name": "07-checkout-pdfhow.stderr.log",
+      "size": 70,
+      "sha256": "72e848d09ab63d920c10c863a8509fe6c268bc40a2eb777bae2afe454bbdeb62"
+    },
+    {
+      "name": "07-checkout-pdfhow.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "08-verify-pdfhow-head.command.json",
+      "size": 1157,
+      "sha256": "d96661fed95b73de1afa4f3474661cf7e4731ef440bf5929dc55e33b5934c169"
+    },
+    {
+      "name": "08-verify-pdfhow-head.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "08-verify-pdfhow-head.stdout.log",
+      "size": 41,
+      "sha256": "11db84a4bb6ab97772728a74cf9cd6d55379b4c67ef54b870a49b1fc05cb396f"
+    },
+    {
+      "name": "09-verify-pdfhow-remote-refs.command.json",
+      "size": 1204,
+      "sha256": "d681d143735985438dbc1c1379ba86f8074e8e236592458f900c8483226b9799"
+    },
+    {
+      "name": "09-verify-pdfhow-remote-refs.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "09-verify-pdfhow-remote-refs.stdout.log",
+      "size": 57,
+      "sha256": "1ff0b28975f821d3c8bfe8f27a0f1929afca1c9fa045df83fe67bf2494844447"
+    },
+    {
+      "name": "10-preflight-no-new-native-wasm-build.command.json",
+      "size": 1250,
+      "sha256": "0286255cab06b2a964fd567459d3cb1a2dd0d90adb7b02280d296d3c2eee4e6f"
+    },
+    {
+      "name": "10-preflight-no-new-native-wasm-build.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "10-preflight-no-new-native-wasm-build.stdout.log",
+      "size": 14347,
+      "sha256": "d0152760be74a093645cb1608ddbfd229d7a0c7d87efd4e3d6cc1eaf37e58750"
+    },
+    {
+      "name": "11-release-identity-and-download-all-assets.command.json",
+      "size": 1547,
+      "sha256": "a502f36d9fde7983119250f92cef6093f031ae2d3749b670faa8688fa210ebe8"
+    },
+    {
+      "name": "11-release-identity-and-download-all-assets.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "11-release-identity-and-download-all-assets.stdout.log",
+      "size": 2184,
+      "sha256": "faf84418cd9033c519ed9c6048f7cd0e9609ef474840ed4b3d05ff654d6a5354"
+    },
+    {
+      "name": "12-verify-and-extract-release-archive.command.json",
+      "size": 1787,
+      "sha256": "2ae73cfd9f9425fff9b426a55b5215de24d97e04e791634dc8ec69915e962f40"
+    },
+    {
+      "name": "12-verify-and-extract-release-archive.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "12-verify-and-extract-release-archive.stdout.log",
+      "size": 2460,
+      "sha256": "a691885bdcd75445f54d8b760148efdd97f530658c2aee68bfc490e321d59d3e"
+    },
+    {
+      "name": "13-runtime-install.command.json",
+      "size": 1198,
+      "sha256": "3464799a99a00d6ac39e6325e2b3b7ce736af3145e92091a1712a9db8fdb95df"
+    },
+    {
+      "name": "13-runtime-install.stderr.log",
+      "size": 215,
+      "sha256": "02ea9a436d1076d08ffdc582ac303a51ea6935e56d6940de223e72ffb3771bbd"
+    },
+    {
+      "name": "13-runtime-install.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "archive-assertions.json",
+      "size": 1378,
+      "sha256": "50f2a7d1d322881b4ff2604cd7e5fd79e54430976a7396dfc5f073ad50d021be"
+    },
+    {
+      "name": "archive-verification-report.json",
+      "size": 2460,
+      "sha256": "a691885bdcd75445f54d8b760148efdd97f530658c2aee68bfc490e321d59d3e"
+    },
+    {
+      "name": "preflight-native-workflow-assertions.json",
+      "size": 261,
+      "sha256": "25b654cfd12604a63466ec4586a516a7099e4700801f013b57fef317e62a6077"
+    }
+  ],
+  "externalLaunchArtifacts": [
+    {
+      "name": "lo-runtime-acceptance-attempt-4-formal-launch.json",
+      "size": 991,
+      "sha256": "926b69d7231d8cb53824c7aac326eba6bcb9683b6d3530edcacc1c7986c9918a"
+    },
+    {
+      "name": "lo-runtime-acceptance-attempt-4-formal.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "lo-runtime-acceptance-attempt-4-formal.stderr.log",
+      "size": 682,
+      "sha256": "cd86833705e310dfb115e706d56538cb9e03e8b4d16a654b4330fd1f18aec627"
+    }
+  ],
+  "postFailureDispositionCheck": {
+    "isAcceptanceGateEvidence": false,
+    "checkedAt": "2026-08-12T03:45:03.2529173Z",
+    "releaseDraft": true,
+    "releasePublishedAt": null,
+    "releaseQualifiedRequired": false,
+    "allFiveAssetIdentitiesUnchanged": true,
+    "latestNativeWorkflowRunId": 31211473147,
+    "latestNativeWorkflowCreatedAt": "2026-08-07T19:26:24Z",
+    "latestNativeWorkflowHeadSha": "71d33678ed74872ebbb1bc37f5778143f8f5e401",
+    "latestNativeWorkflowConclusion": "success",
+    "noNewNativeWasmBuild": true
+  },
+  "failClosedDisposition": {
+    "attemptClosed": true,
+    "decision": "FAIL",
+    "retryPerformed": false,
+    "continuationPerformed": false,
+    "failedSampleRestartPerformed": false,
+    "replacementPerformed": false,
+    "supplementationPerformed": false,
+    "backfillPerformed": false,
+    "formalRootPreserved": true,
+    "releaseMustRemainDraft": true,
+    "releaseQualifiedMustRemainFalse": true
+  }
+}
