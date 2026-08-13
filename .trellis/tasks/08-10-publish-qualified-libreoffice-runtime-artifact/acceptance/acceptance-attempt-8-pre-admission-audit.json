@@ -1,0 +1,57 @@
+{
+  "attemptNumber": 8,
+  "checks": {
+    "admissionRecordAbsent": true,
+    "admissionTripleIdentityBinding": true,
+    "commandPackageIdentity": true,
+    "defaultExecutionRootsAbsent": [
+      {
+        "exists": false,
+        "root": "D:\\tmp\\lo-runtime-acceptance-attempt-8-preparation"
+      },
+      {
+        "exists": false,
+        "root": "D:\\tmp\\lo-runtime-acceptance-attempt-8-formal"
+      },
+      {
+        "exists": false,
+        "root": "D:\\tmp\\lo-runtime-acceptance-attempt-8-invocation"
+      }
+    ],
+    "formalStaticOfflineBoundary": true,
+    "markerOrdering": true,
+    "preparationManifestSchemaContract": true,
+    "protocolSchemaAndState": true
+  },
+  "classification": "pre-admission protocol audit",
+  "commandPackage": {
+    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-command-package.json",
+    "sha256": "dfb346745f3b0e0153a72cf1331134cdf17d61c92ff5ce0eaa3a7fba9730c23c"
+  },
+  "evidenceStatus": "not acceptance evidence",
+  "execution": {
+    "chromiumGateRun": false,
+    "coldStartSamplesRun": 0,
+    "dispositionAuditRun": false,
+    "formalRun": false,
+    "preparationRun": false
+  },
+  "generatedAt": "2026-08-13T06:59:47.449Z",
+  "kind": "acceptance-attempt-8-pre-admission-audit",
+  "packageVerifierOutput": "{\"status\":\"verified\",\"manifest\":\"D:\\\\Repositories\\\\libreoffice-wasm-conversion-runtime\\\\.trellis\\\\tasks\\\\08-10-publish-qualified-libreoffice-runtime-artifact\\\\acceptance\\\\attempt-8-command-package.json\",\"files\":17}",
+  "passed": true,
+  "protocol": {
+    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-protocol.json",
+    "sha256": "baf7249b08b5422971ae459896747c74c0c2dad4d9f298328025afb2b3830e06"
+  },
+  "schemaVersion": 1,
+  "state": {
+    "decision": null,
+    "eligible": false,
+    "formalInvocationCount": 0,
+    "preparationExecuted": false,
+    "started": false,
+    "status": "NOT ADMITTED"
+  },
+  "statement": "Protocol-only pre-admission audit. Not acceptance evidence. Attempt 8 remains NOT ADMITTED with formal invocation count 0."
+}

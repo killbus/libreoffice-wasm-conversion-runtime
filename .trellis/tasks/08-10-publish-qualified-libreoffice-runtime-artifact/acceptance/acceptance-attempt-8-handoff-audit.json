@@ -1,0 +1,45 @@
+{
+  "attemptNumber": 8,
+  "checks": {
+    "commandPackageSchemaStateAndIdentity": true,
+    "handoffStateIdentityAndBindingContract": true,
+    "preAdmissionAuditSchemaStatusAndIdentity": true,
+    "protocolSchemaAndState": true,
+    "taskStateAndIdentity": true
+  },
+  "classification": "pre-admission handoff consistency audit",
+  "commandPackage": {
+    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-command-package.json",
+    "sha256": "dfb346745f3b0e0153a72cf1331134cdf17d61c92ff5ce0eaa3a7fba9730c23c"
+  },
+  "evidenceStatus": "not acceptance evidence",
+  "generatedAt": "2026-08-13T07:00:40.069Z",
+  "handoff": {
+    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\acceptance-attempt-8-handoff.md",
+    "sha256": "369b24e84320e7ffb8883b3bb4081f13517f9d0c1cdcb423f5597e76da4871ea"
+  },
+  "kind": "acceptance-attempt-8-handoff-consistency-audit",
+  "passed": true,
+  "preAdmissionAudit": {
+    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\acceptance-attempt-8-pre-admission-audit.json",
+    "sha256": "711a47f3f7388af7470aa2e631991940c85f9de084d85327f5f6791463cf36df"
+  },
+  "protocol": {
+    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-protocol.json",
+    "sha256": "baf7249b08b5422971ae459896747c74c0c2dad4d9f298328025afb2b3830e06"
+  },
+  "schemaVersion": 1,
+  "state": {
+    "decision": null,
+    "eligible": false,
+    "formalInvocationCount": 0,
+    "preparationExecuted": false,
+    "started": false,
+    "status": "NOT ADMITTED"
+  },
+  "statement": "Handoff/schema/state/identity consistency audit only. Not acceptance evidence. Attempt 8 remains NOT ADMITTED with formal invocation count 0.",
+  "task": {
+    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\task.json",
+    "sha256": "488c0a18774817340088edc42beea05e48aa5836171a32f41afce69e877cce2e"
+  }
+}

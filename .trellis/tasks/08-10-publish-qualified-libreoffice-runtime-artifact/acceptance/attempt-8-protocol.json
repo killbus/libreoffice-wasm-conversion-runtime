@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kind": "acceptance-attempt-8-phase-separated-protocol",
+  "attemptNumber": 8,
+  "authoredAt": "2026-08-13T00:00:00Z",
+  "currentState": {
+    "status": "NOT ADMITTED",
+    "eligible": false,
+    "started": false,
+    "formalInvocationCount": 0,
+    "decision": null,
+    "preparationExecuted": false
+  },
+  "fixedInputs": {
+    "runtimeCommit": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+    "pdfHowCommit": "b41fde5db9829ede7e6e217de6ac12c2b475b7fc",
+    "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+    "releaseId": 367637128,
+    "releaseTag": "runtime-artifact-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+    "releaseTarget": "df3f73c789e6d2abf71cbcd75186118d2bbc795a",
+    "archiveName": "libreoffice-wasm-runtime-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b.zip",
+    "archiveSha256": "e9aac8dde2fb627251155fc97651c2bd35bec63b01e39f882d342c024a87de9a",
+    "pinnedDocxSha256": "a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59df",
+    "nativeCommit": "71d33678ed74872ebbb1bc37f5778143f8f5e401",
+    "nativeWorkflowRunId": 31211473147,
+    "nativeWorkflowCreatedAt": "2026-08-07T19:26:24Z"
+  },
+  "preparation": {
+    "classification": "preparation",
+    "evidenceStatus": "not acceptance evidence",
+    "retryPermitted": true,
+    "formalInvocationCountEffect": 0,
+    "requiredOperations": [
+      "clone/fetch/ls-remote",
+      "GitHub queries",
+      "Release downloads",
+      "dependency installation",
+      "Chromium installation",
+      "candidate workspace preparation"
+    ],
+    "completionArtifacts": [
+      "attempt-8-preparation-manifest.json",
+      "attempt-8-sealed-inputs.json"
+    ]
+  },
+  "preInvocation": {
+    "classification": "pre-invocation verification",
+    "evidenceStatus": "not acceptance evidence",
+    "requiredChecks": [
+      "independent ADMITTED record with schemaVersion 1 and kind acceptance-attempt-8-admission",
+      "admission binding to command-package manifest SHA-256",
+      "admission binding to preparation manifest SHA-256",
+      "admission binding to sealed-input manifest SHA-256",
+      "command package identity",
+      "preparation manifest schema and passed status",
+      "sealed local input exact inventories",
+      "fixed identity consistency",
+      "fresh formal and invocation-control roots"
+    ],
+    "markerCreationRule": "Create the one-shot formal invocation marker atomically only after every required check passes. No candidate behavior gate may start before the marker exists.",
+    "failureBeforeMarker": "formal invocation count remains 0 and no acceptance decision exists"
+  },
+  "formal": {
+    "classification": "formal acceptance",
+    "networkPolicy": "offline",
+    "externalNetworkPermitted": false,
+    "networkEnforcement": [
+      "sealed local inputs",
+      "no clone/fetch/ls-remote/GitHub/Release/download/install/preparation commands",
+      "package-manager offline mode",
+      "browser download disabled",
+      "closed-port proxy sink with localhost-only bypass"
+    ],
+    "retryPermitted": false,
+    "continuationPermitted": false,
+    "replacementPermitted": false,
+    "supplementationPermitted": false,
+    "backfillPermitted": false,
+    "failedRootReusePermitted": false,
+    "preparationOperationsPermitted": false,
+    "expectedGateCount": 8
+  },
+  "closure": {
+    "automatic": true,
+    "artifacts": [
+      "acceptance-attempt-8-evidence.json",
+      "acceptance-attempt-8-receipt.accepted.json or acceptance-attempt-8-receipt.rejected.json",
+      "acceptance-attempt-8-report.md"
+    ],
+    "failClosedOnMissingRunnerCompletion": true
+  },
+  "disposition": {
+    "classification": "post-formal remote disposition audit",
+    "evidenceStatus": "not acceptance evidence",
+    "independentFromFormalEvidence": true,
+    "readOnly": true,
+    "retryPermitted": true,
+    "mayChangeFormalDecision": false,
+    "mayBackfillFormalEvidence": false
+  }
+}

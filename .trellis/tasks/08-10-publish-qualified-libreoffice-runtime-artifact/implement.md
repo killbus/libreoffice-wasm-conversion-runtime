@@ -841,3 +841,34 @@ Post-admission state:
 - formal root: `D:\tmp\lo-runtime-acceptance-attempt-5` (must be created only by the single formal invocation)
 
 Admission does not imply PASS. The pushed admission commit must be independently confirmed as the remote feature ref before the formal command starts. The formal execution must use a new checkout distinct from the admission checkout. Any command failure, timeout, assertion failure, crash, or missing evidence closes Attempt 5 FAIL with no retry, continuation, replacement, supplementation, or backfill. A monitoring or transport `stream disconnected` may be retried only for observation and never permits a second formal invocation.
+
+### Acceptance Attempt 8 protocol refactor handoff — 2026-08-13
+
+TEAM B submitted a protocol-only Acceptance Attempt 8 handoff. Attempt 8 was not prepared, admitted, or invoked. Current state remains **NOT ADMITTED**, eligible `false`, started `false`, formal invocation count `0`, and decision `null`. The default preparation, invocation-control, and formal roots were absent when the pre-admission audit was generated.
+
+The refactored protocol separates three evidence domains:
+
+1. **Retryable preparation — not acceptance evidence.** All clone/fetch/`ls-remote`, GitHub queries, Release queries/downloads, dependency installation, Chromium installation, archive extraction, preparation-helper checks, and PDFHow local-candidate workspace preparation are isolated in `attempt-8-prepare.ps1`. A successful run creates a schema-checked preparation manifest and sealed exact inventories without starting formal acceptance.
+2. **Offline, retry-free formal acceptance.** `attempt-8-invoke-formal.ps1` requires an independent schema-versioned ADMITTED record bound to the exact command-package, preparation-manifest, and sealed-input-manifest SHA-256 values, then verifies package identity, preparation manifest state, sealed local inputs, fixed identities, and fresh roots. Only afterward does it atomically create the one-shot formal marker. `attempt-8-formal.ps1` contains only eight local candidate behavior gates and forbids retry, continuation, supplementation, backfill, failed-root reuse, network-capable commands, dependency installation, and browser download.
+3. **Independent post-formal disposition audit — not acceptance evidence.** `attempt-8-disposition-audit.mjs` performs only read-only, retryable remote queries outside the formal root. It cannot change the formal decision or backfill formal evidence.
+
+Automatic closure is provided by `attempt-8-close.mjs`, which creates or byte-verifies the evidence, matching receipt, and report. It is resumable only when existing output is byte-identical and otherwise fails closed.
+
+TEAM B local protocol verification passed:
+
+- PowerShell parser: all five Attempt 8 PowerShell files passed;
+- production-same Windows launcher test: passed on PowerShell `7.6.4`;
+- Node syntax checks: all Attempt 8 `.mjs` files passed;
+- protocol tests: `16` passed, `0` failed;
+- 17-file command package generate/verify: passed;
+- pre-admission audit: passed, classification `not acceptance evidence`;
+- handoff/schema/state consistency audit: passed, classification `not acceptance evidence`.
+
+Identity records:
+
+- `acceptance/attempt-8-command-package.json` — SHA-256 `dfb346745f3b0e0153a72cf1331134cdf17d61c92ff5ce0eaa3a7fba9730c23c`;
+- `acceptance/acceptance-attempt-8-pre-admission-audit.json` — SHA-256 `711a47f3f7388af7470aa2e631991940c85f9de084d85327f5f6791463cf36df`;
+- `acceptance/acceptance-attempt-8-handoff.md` — protocol-only handoff for independent audit;
+- `acceptance/acceptance-attempt-8-handoff-audit.json` — passed pre-admission handoff consistency audit, not acceptance evidence.
+
+These results are not acceptance evidence. Before preparation or formal invocation can be treated under Attempt 8, the independent acceptance owner must audit protocol/package/schema/state/handoff consistency. Preparation may then be run separately and retried, but remains not acceptance evidence. A subsequent independent admission must bind the exact command package and verified sealed inputs before the one-shot marker may be created. Until that admission exists, formal invocation count remains `0`.
