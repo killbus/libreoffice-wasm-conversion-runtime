@@ -1,0 +1,420 @@
+{
+  "schemaVersion": 1,
+  "kind": "acceptance-attempt-6-independent-failure-evidence",
+  "generatedAt": "2026-08-13T02:34:09.855Z",
+  "attemptNumber": 6,
+  "decision": "FAIL",
+  "formalRoot": "D:\\tmp\\lo-runtime-acceptance-attempt-6",
+  "evidenceRoot": "D:\\tmp\\lo-runtime-acceptance-attempt-6\\evidence",
+  "formalInvocationCount": 1,
+  "failedCommandIndex": 22,
+  "failedCommand": "pdfhow-full-retry-free-chromium-candidate-gate",
+  "failureStage": "PDFHow Vite web-server startup before Chromium browser/test execution",
+  "failureClass": "command-package/PDFHow preparation integration defect",
+  "childExitCode": 1,
+  "formalProcessExitCode": null,
+  "formalProcessExitCodeNote": "The terminal command evidence records child exit code 1. The independent closure does not rely on a separately retained outer pwsh exit code.",
+  "timeoutReached": false,
+  "commandsCompletedBeforeFailure": 21,
+  "totalCommandsAttempted": 22,
+  "totalExpectedCommands": 29,
+  "retryCount": 0,
+  "completionMarkerPresent": false,
+  "automaticEvidenceInventoryPresent": false,
+  "chromiumBrowserStarted": false,
+  "browserTestsStarted": false,
+  "coldStartsRun": 0,
+  "conversionRunInChromiumGate": false,
+  "finalInvariantGatesRun": false,
+  "formalFailureObservedAtUtc": "2026-08-12T10:25:11Z",
+  "postFailureContamination": {
+    "occurred": true,
+    "manualRerunOccurred": true,
+    "candidateMetadataAddedAtUtc": "2026-08-12T10:38:49Z",
+    "addedPath": "libreoffice-wasm-conversion-runtime-dev/LOCAL-CANDIDATE-METADATA.json",
+    "postFailureResultsAdmissible": false,
+    "note": "The formal root changed after terminal failure. No post-failure file or result is used to satisfy any formal gate."
+  },
+  "evidenceFileCount": 73,
+  "evidenceBytes": 91558,
+  "evidenceFiles": [
+    {
+      "name": "00-fixed-inputs.json",
+      "size": 936,
+      "sha256": "b4ac8d7243a375f21d4c0bfe3c047ae19a23e36dc0e5b0800ed573750846f269"
+    },
+    {
+      "name": "01-windows-cmd-bat-command-launch-contract.command.json",
+      "size": 2151,
+      "sha256": "4fd38e5fb362320dd59521eb8508c6a78fc25dc7cb374881713602638c9882b4"
+    },
+    {
+      "name": "01-windows-cmd-bat-command-launch-contract.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "01-windows-cmd-bat-command-launch-contract.stdout.log",
+      "size": 1360,
+      "sha256": "9fc2f175311db3683ac164a573d47ad1870253c942d551f756b89f5569f6b8c2"
+    },
+    {
+      "name": "02-clone-runtime.command.json",
+      "size": 1805,
+      "sha256": "8b76636bd44e2a772ea6180f57dbc3857e5d28d79c43d98a2b59c9a7aab72e9f"
+    },
+    {
+      "name": "02-clone-runtime.stderr.log",
+      "size": 76,
+      "sha256": "b3d277714e79043129c312559062b33ea33eac58640d3e78bd4903da3ade2384"
+    },
+    {
+      "name": "02-clone-runtime.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "03-checkout-runtime.command.json",
+      "size": 1638,
+      "sha256": "7f4a552983b90e9a87dfb3ec6159f0b6a9d2233261f83e95a17e003bb2df0aa4"
+    },
+    {
+      "name": "03-checkout-runtime.stderr.log",
+      "size": 83,
+      "sha256": "9b5f7a2d20eadaeaea250a2a27b12fb7ffe5c29ee68cd780c1ec261333791ea3"
+    },
+    {
+      "name": "03-checkout-runtime.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "04-verify-runtime-head.command.json",
+      "size": 1540,
+      "sha256": "a72de26205b7168d2cb51d38dcce260b75f294559cf8f2f2797884c3e2f1f7f6"
+    },
+    {
+      "name": "04-verify-runtime-head.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "04-verify-runtime-head.stdout.log",
+      "size": 41,
+      "sha256": "74f33dd13a0299588d59eefc4a8ab625855102b715fd4df43a2930f009d8c27e"
+    },
+    {
+      "name": "05-verify-runtime-remote-refs.command.json",
+      "size": 1759,
+      "sha256": "d14ec30cd275cafe612ccad01c210d774416f6ff809ea6db8398c7ddead63583"
+    },
+    {
+      "name": "05-verify-runtime-remote-refs.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "05-verify-runtime-remote-refs.stdout.log",
+      "size": 161,
+      "sha256": "74af1c06d257361e4a524725edb66023ed37c8a7474f14043b30ee78b7f5b058"
+    },
+    {
+      "name": "06-verify-runtime-remediation-contained-in-feature-branch.command.json",
+      "size": 1901,
+      "sha256": "aec8019999611ac1a6d51619fbdf0caa0257634d9ad523f983ea7616bd3a146b"
+    },
+    {
+      "name": "06-verify-runtime-remediation-contained-in-feature-branch.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "06-verify-runtime-remediation-contained-in-feature-branch.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "07-clone-pdfhow.command.json",
+      "size": 1760,
+      "sha256": "da1e008062647c924ed0535504eb56892db2e089752168486b4990426fafed33"
+    },
+    {
+      "name": "07-clone-pdfhow.stderr.log",
+      "size": 75,
+      "sha256": "a5dbfb8ab866d5ab1af18e35d6650a2039e0ca85537e41cd7010ffa3a918f4bf"
+    },
+    {
+      "name": "07-clone-pdfhow.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "08-checkout-pdfhow.command.json",
+      "size": 1634,
+      "sha256": "f7b5087c193110c297e0f4a88200dd1e77c6e7a058eb4e59091b47bc9c9a92bc"
+    },
+    {
+      "name": "08-checkout-pdfhow.stderr.log",
+      "size": 70,
+      "sha256": "72e848d09ab63d920c10c863a8509fe6c268bc40a2eb777bae2afe454bbdeb62"
+    },
+    {
+      "name": "08-checkout-pdfhow.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "09-verify-pdfhow-head.command.json",
+      "size": 1536,
+      "sha256": "28c7dd8250b61fd4ed1d40fe918eb9a5a3a4db1457d36f5bcc731a9e855e779d"
+    },
+    {
+      "name": "09-verify-pdfhow-head.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "09-verify-pdfhow-head.stdout.log",
+      "size": 41,
+      "sha256": "11db84a4bb6ab97772728a74cf9cd6d55379b4c67ef54b870a49b1fc05cb396f"
+    },
+    {
+      "name": "10-verify-pdfhow-remote-refs.command.json",
+      "size": 1611,
+      "sha256": "47b80099761227a753b9b869def24ca5c72a92edadda78c0f2ae86594981f2c0"
+    },
+    {
+      "name": "10-verify-pdfhow-remote-refs.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "10-verify-pdfhow-remote-refs.stdout.log",
+      "size": 57,
+      "sha256": "1ff0b28975f821d3c8bfe8f27a0f1929afca1c9fa045df83fe67bf2494844447"
+    },
+    {
+      "name": "11-preflight-no-new-native-wasm-build.command.json",
+      "size": 1650,
+      "sha256": "dad64043038131ddfd067aa2e80c0be84b4a715070562ca48ec1554282e27ec3"
+    },
+    {
+      "name": "11-preflight-no-new-native-wasm-build.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "11-preflight-no-new-native-wasm-build.stdout.log",
+      "size": 14347,
+      "sha256": "d0152760be74a093645cb1608ddbfd229d7a0c7d87efd4e3d6cc1eaf37e58750"
+    },
+    {
+      "name": "12-release-identity-and-download-all-assets.command.json",
+      "size": 2116,
+      "sha256": "0a1a077f7961eb55db9aa0c87af639847ea5ebca6ac338b79b4a1ba8d74d5fe4"
+    },
+    {
+      "name": "12-release-identity-and-download-all-assets.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "12-release-identity-and-download-all-assets.stdout.log",
+      "size": 2184,
+      "sha256": "4ca99928e705b4c758e68384266ef9ab5824ab318ca4b4f780b4444d357bd63f"
+    },
+    {
+      "name": "13-verify-and-extract-release-archive.command.json",
+      "size": 2798,
+      "sha256": "d21ae253ad72d74dac8249c86ab292d6c19188dff3110826e04078535ecee4c9"
+    },
+    {
+      "name": "13-verify-and-extract-release-archive.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "13-verify-and-extract-release-archive.stdout.log",
+      "size": 2483,
+      "sha256": "a1957b7fbaff29e1e4222499c50122b3345ed555140ba968b18c0c3fecd7edc4"
+    },
+    {
+      "name": "14-runtime-install.command.json",
+      "size": 1712,
+      "sha256": "e3c379c3c39ffe15aa353173f32b7519b36b5f101afd35068c0e0e6372d39740"
+    },
+    {
+      "name": "14-runtime-install.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "14-runtime-install.stdout.log",
+      "size": 2137,
+      "sha256": "56936876acc84eb926b576166aadf235824534c2a827eea26ca21bc19aec771d"
+    },
+    {
+      "name": "15-runtime-wrapper-build-not-native-wasm.command.json",
+      "size": 1623,
+      "sha256": "838097afe6784c0fb6ce0d112f883d3251419825247436e3f8ee2f5df68caeb3"
+    },
+    {
+      "name": "15-runtime-wrapper-build-not-native-wasm.stderr.log",
+      "size": 7,
+      "sha256": "a76d5e5c2d78925500c72bbddd01798c03cebb13249d0f7d1e7f235b7f731b23"
+    },
+    {
+      "name": "15-runtime-wrapper-build-not-native-wasm.stdout.log",
+      "size": 4274,
+      "sha256": "63d973ac9bad9f02c8134c18b249ed790d74fa1f895467c459a22dacd8089d8f"
+    },
+    {
+      "name": "16-runtime-workflow-and-cli-contract-gates.command.json",
+      "size": 2090,
+      "sha256": "600335751500f4d19e92323de5f8ee6dfe3daafa87299814a92427619ad920d8"
+    },
+    {
+      "name": "16-runtime-workflow-and-cli-contract-gates.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "16-runtime-workflow-and-cli-contract-gates.stdout.log",
+      "size": 4741,
+      "sha256": "f9cd3ef9840cdec60c674ae73ddc94a7fa08d9fcddc47805c9fe5be55dc2143c"
+    },
+    {
+      "name": "17-verifier-cli-help-contract.command.json",
+      "size": 1627,
+      "sha256": "fb373df55e521491b0bcc85c47c701b4f83d5defed03650b91f21b40f57788f6"
+    },
+    {
+      "name": "17-verifier-cli-help-contract.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "17-verifier-cli-help-contract.stdout.log",
+      "size": 205,
+      "sha256": "7c832c60c1b3dd0210aa4b6df05e4c53c5484cfaf857ae7f42983870ec2aa42c"
+    },
+    {
+      "name": "18-stage-cli-help-contract.command.json",
+      "size": 1628,
+      "sha256": "4ec349c06dbe30b9841ae5b3fbf3a0b4e486894f2eba3afa4198045bb3d94773"
+    },
+    {
+      "name": "18-stage-cli-help-contract.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "18-stage-cli-help-contract.stdout.log",
+      "size": 259,
+      "sha256": "a2bc8870fd7e03736fbb01520ab93a44c5cef4719507c41d55776f35cd1c2dae"
+    },
+    {
+      "name": "19-node-positive-negative-reuse-recovery-abi-cleanup.command.json",
+      "size": 2347,
+      "sha256": "40a58f99394750494ea238c7aa293f3406a1d45d694762ac4af30e4f6f48f6c2"
+    },
+    {
+      "name": "19-node-positive-negative-reuse-recovery-abi-cleanup.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "19-node-positive-negative-reuse-recovery-abi-cleanup.stdout.log",
+      "size": 1057,
+      "sha256": "a7b7700cecd3a617fd94e2b9cec73fbe2b0cb92a94c0ffc89f3381620050f6ea"
+    },
+    {
+      "name": "20-pdfhow-install.command.json",
+      "size": 1708,
+      "sha256": "c0e647ce334cba01e240a5408ad2fdf790a430688460b95a880b3442177462e9"
+    },
+    {
+      "name": "20-pdfhow-install.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "20-pdfhow-install.stdout.log",
+      "size": 8380,
+      "sha256": "284e56d05ad4d02521d90dc158d384d52a0c38a306c99e62e9a76c68fb2672f1"
+    },
+    {
+      "name": "21-playwright-install-chromium.command.json",
+      "size": 1739,
+      "sha256": "e0e78cabedee6f91d169ffeadfe885cc0e979a21f6c9ad001c88350ae8b4706b"
+    },
+    {
+      "name": "21-playwright-install-chromium.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "21-playwright-install-chromium.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "22-pdfhow-full-retry-free-chromium-candidate-gate.command.json",
+      "size": 2664,
+      "sha256": "2493795db621eddbec05f11ea64f23316cb5f6f4b4757dd86da7519501d70e45"
+    },
+    {
+      "name": "22-pdfhow-full-retry-free-chromium-candidate-gate.stderr.log",
+      "size": 1117,
+      "sha256": "ab60bf1feb7ad8fd7e38250ddb32cf3d0e140075691ecab338b05d9e829d5c57"
+    },
+    {
+      "name": "22-pdfhow-full-retry-free-chromium-candidate-gate.stdout.log",
+      "size": 76,
+      "sha256": "445fda92e341b3487d86f57d07ec201d02552fee23ee62ae99b829a11b9e086a"
+    },
+    {
+      "name": "archive-assertions.json",
+      "size": 1378,
+      "sha256": "50f2a7d1d322881b4ff2604cd7e5fd79e54430976a7396dfc5f073ad50d021be"
+    },
+    {
+      "name": "archive-verification-report.json",
+      "size": 2483,
+      "sha256": "a1957b7fbaff29e1e4222499c50122b3345ed555140ba968b18c0c3fecd7edc4"
+    },
+    {
+      "name": "node-gate-assertions.json",
+      "size": 319,
+      "sha256": "eccd92dfedfecf7e2ef1f043ed6f29112fdfc48bf4cf032a14b53164bdd7b15f"
+    },
+    {
+      "name": "node-gate-work/node-smoke-result.json",
+      "size": 1868,
+      "sha256": "1b89d009bce8660ab88c0b0a0b5c4c1ac6d2177b45acb1aa979b49c497942a86"
+    },
+    {
+      "name": "pdfhow-full-gate-output/.last-run.json",
+      "size": 45,
+      "sha256": "e22df5d0991eb28c09093b1e678b3fa8cd1fab48185d38e67cf79fb6e63ad5ea"
+    },
+    {
+      "name": "preflight-native-workflow-assertions.json",
+      "size": 261,
+      "sha256": "25b654cfd12604a63466ec4586a516a7099e4700801f013b57fef317e62a6077"
+    }
+  ],
+  "gatesNotRun": [
+    "complete retry-free Chromium candidate gate",
+    "five consecutive fresh-browser cold-start samples",
+    "final native/WASM build immutability check",
+    "final Release identity and asset immutability check",
+    "automatic evidence inventory and completion marker generation"
+  ],
+  "preservationRequired": true,
+  "reusePermitted": false,
+  "continuationPermitted": false,
+  "retryPermitted": false,
+  "backfillPermitted": false,
+  "supplementationPermitted": false
+}
