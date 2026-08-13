@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "acceptance-attempt-7-pre-admission-consistency-audit",
+  "classification": "targeted pre-admission diagnostic follow-up",
+  "evidenceStatus": "not acceptance evidence",
+  "acceptanceEvidence": false,
+  "generatedAt": "2026-08-13T02:02:04.915Z",
+  "passed": true,
+  "formalAttempt": {
+    "attempt": 7,
+    "status": "NOT ADMITTED",
+    "eligible": false,
+    "started": false,
+    "invocationCount": 0,
+    "decision": null,
+    "root": "D:\\tmp\\lo-runtime-acceptance-attempt-7",
+    "rootExists": false
+  },
+  "packageHashes": {
+    "attempt-7-commands.ps1": "9ce7db401d3e15f24350acbadc43950ea1621c4e53ea8cf8b25493715e1ff028",
+    "attempt-7-download-assets.mjs": "6cd10dbc733d0cd3b9b1c65e8287ca476e835609c0113c8d8694e109227fbaf5",
+    "attempt-7-time-contract.ps1": "3f63a41cf8f5a0c488f07bed5a6c1b61f46f3a77827b22b79dcb339c9ca14e34",
+    "attempt-7-time-contract.tests.ps1": "ca1e5a33b36517254b258eb35659c7858dec2f7072cd942b318c806f9a513fdb",
+    "attempt-7-command-launch.ps1": "61ea15a71d720c128dfa4095896753d098f435844135d4adbec788c2e6faa21f",
+    "attempt-7-command-launch.tests.ps1": "067ed89937d9afc05e124e1c0fa53d8d5066dfcc17e7db3ae92ae3cb37cb8e7a",
+    "attempt-7-prepare-candidate.tests.mjs": "7816e3ad96f8c93a94715a236932e66179365d2660511d734af9a39a604e4a5f",
+    "attempt-7-verify-prepared-candidate.mjs": "dc493ed4f05c67df1dfb47ce043d7973dd38e8aa5fd095a59ec8e3a2bd701e10",
+    "targeted-pre-admission-diagnostic-archive-to-pdfhow.mjs": "171fe9740afff51c0dbdc69521d59f786c5640cb3b595a34a1c453801500bd19",
+    "acceptance-attempt-7-targeted-pre-admission-diagnostic.json": "5a833bcc172a4c4ff959dc6d3212d25cba3f72b0513862de6caacbab983ca105"
+  },
+  "checks": {
+    "targetedDiagnostic": {
+      "passed": true,
+      "root": "D:\\tmp\\lo-runtime-targeted-pre-admission-diagnostic-20260813-01",
+      "generatedAt": "2026-08-13T01:58:16.680Z",
+      "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b"
+    },
+    "state": {
+      "passed": true,
+      "formalRootAbsent": true
+    },
+    "handoffHashes": {
+      "passed": true,
+      "count": 10
+    },
+    "identityAndSchema": {
+      "passed": true,
+      "runtimeCommit": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+      "pdfHowCommit": "b41fde5db9829ede7e6e217de6ac12c2b475b7fc",
+      "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+      "releaseId": 367637128,
+      "archiveSha256": "e9aac8dde2fb627251155fc97651c2bd35bec63b01e39f882d342c024a87de9a"
+    },
+    "handoffConsistency": {
+      "passed": true
+    }
+  }
+}

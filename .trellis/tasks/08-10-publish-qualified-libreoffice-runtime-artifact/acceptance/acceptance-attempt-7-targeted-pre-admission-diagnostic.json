@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "kind": "release-archive-to-pdfhow-local-candidate-diagnostic",
+  "classification": "targeted pre-admission diagnostic",
+  "evidenceStatus": "not acceptance evidence",
+  "acceptanceEvidence": false,
+  "passed": true,
+  "generatedAt": "2026-08-13T01:58:16.680Z",
+  "diagnosticRoot": "D:\\tmp\\lo-runtime-targeted-pre-admission-diagnostic-20260813-01",
+  "formalAcceptanceRoot": false,
+  "formalAttemptStarted": false,
+  "formalInvocationCount": 0,
+  "chromiumGateRun": false,
+  "coldStartsRun": 0,
+  "conversionRun": false,
+  "finalInvariantGatesRun": false,
+  "scope": [
+    "fresh Release bytes",
+    "prepare-libreoffice-runtime-candidate.mjs",
+    "LOCAL-CANDIDATE-METADATA.json",
+    "SHA256SUMS",
+    "package.json",
+    "exact inventory",
+    "PDFHow resolver success"
+  ],
+  "networkRetries": [
+    {
+      "label": "Release identity query",
+      "attempts": 1,
+      "failures": []
+    },
+    {
+      "label": "fresh Release archive download",
+      "attempts": 1,
+      "failures": []
+    },
+    {
+      "label": "fresh PDFHow fixed-checkout clone",
+      "attempts": 1,
+      "failures": []
+    },
+    {
+      "label": "PDFHow fixed commit checkout",
+      "attempts": 1,
+      "failures": []
+    }
+  ],
+  "checks": {
+    "freshReleaseBytes": {
+      "passed": true,
+      "releaseId": 367637128,
+      "assetId": 508126614,
+      "name": "libreoffice-wasm-runtime-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b.zip",
+      "bytes": 248934231,
+      "sha256": "e9aac8dde2fb627251155fc97651c2bd35bec63b01e39f882d342c024a87de9a",
+      "path": "D:\\tmp\\lo-runtime-targeted-pre-admission-diagnostic-20260813-01\\release-download\\libreoffice-wasm-runtime-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b.zip"
+    },
+    "archiveExtraction": {
+      "passed": true,
+      "inventory": [
+        "ASSET-SHA256SUMS",
+        "CANDIDATE-MANIFEST.json",
+        "dist/browser.d.ts",
+        "dist/browser.js",
+        "dist/browser.worker.global.js",
+        "wasm/loader.cjs",
+        "wasm/soffice.cjs",
+        "wasm/soffice.data",
+        "wasm/soffice.js",
+        "wasm/soffice.wasm"
+      ],
+      "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+      "runtimeAssetCount": 8
+    },
+    "pdfHowSource": {
+      "kind": "fresh isolated clone from remote",
+      "source": "https://github.com/killbus/pdfhow.com-next.git"
+    },
+    "officialPreparationHelper": {
+      "passed": true,
+      "helper": "D:\\tmp\\lo-runtime-targeted-pre-admission-diagnostic-20260813-01\\pdfhow-repository\\scripts\\prepare-libreoffice-runtime-candidate.mjs",
+      "pdfHowCommit": "b41fde5db9829ede7e6e217de6ac12c2b475b7fc",
+      "destination": "D:\\tmp\\lo-runtime-targeted-pre-admission-diagnostic-20260813-01\\pdfhow-repository\\third_party\\libreoffice-wasm-conversion-runtime-dev",
+      "controlFiles": {
+        "LOCAL-CANDIDATE-METADATA.json": "f617c076bf0c555b53f82bdbd9bdff2ad9f52f73be8027b6e0860d963217daf7",
+        "SHA256SUMS": "83bb7bb697dcf4b8feb59934ad928aa22b8d87c18104ebeed451a3eb7aff9c32",
+        "package.json": "b45164666207dd21c968f22011bb6124e99a922da3dc928af435447e6f559dea"
+      },
+      "inventory": [
+        "LOCAL-CANDIDATE-METADATA.json",
+        "SHA256SUMS",
+        "dist/browser.d.ts",
+        "dist/browser.js",
+        "dist/browser.worker.global.js",
+        "package.json",
+        "wasm/loader.cjs",
+        "wasm/soffice.cjs",
+        "wasm/soffice.data",
+        "wasm/soffice.js",
+        "wasm/soffice.wasm"
+      ]
+    },
+    "pdfHowResolver": {
+      "passed": true,
+      "module": "file:///D:/tmp/lo-runtime-targeted-pre-admission-diagnostic-20260813-01/pdfhow-repository/tests/office-conversion/runtime-candidate.ts",
+      "root": "D:\\tmp\\lo-runtime-targeted-pre-admission-diagnostic-20260813-01\\pdfhow-repository\\third_party\\libreoffice-wasm-conversion-runtime-dev",
+      "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+      "browserModulePath": "D:\\tmp\\lo-runtime-targeted-pre-admission-diagnostic-20260813-01\\pdfhow-repository\\third_party\\libreoffice-wasm-conversion-runtime-dev\\dist\\browser.js",
+      "staticAssetRoles": [
+        "browserWorker",
+        "browserGlue",
+        "wasmBinary",
+        "filesystemData"
+      ]
+    }
+  }
+}
