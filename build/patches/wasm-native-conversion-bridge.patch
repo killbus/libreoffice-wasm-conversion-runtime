@@ -58,7 +58,7 @@ index d00594174..38db70599 100644
  #include <sfx2/docfilt.hxx>
  #include <sfx2/docfile.hxx>
  #include <sfx2/viewsh.hxx>
-@@ -2646,6 +2651,924 @@ static uno::Reference<css::uno::XComponentContext> xContext;
+@@ -2646,6 +2651,947 @@ static uno::Reference<css::uno::XComponentContext> xContext;
  static uno::Reference<css::lang::XMultiServiceFactory> xSFactory;
  static uno::Reference<css::lang::XMultiComponentFactory> xFactory;
 
@@ -67,6 +67,12 @@ index d00594174..38db70599 100644
 +{
 +
 +constexpr sal_Int32 NATIVE_CONVERSION_SCHEMA_VERSION = 1;
++
++void nativeConversionTrace(const char* pEvent) noexcept
++{
++    fprintf(stderr, "[LOK_CONVERT_BRIDGE] event=%s\n", pEvent);
++    fflush(stderr);
++}
 +
 +struct NativeConversionRequest
 +{
@@ -699,6 +705,7 @@ index d00594174..38db70599 100644
 +
 +int nativeConversionWriteResult(const NativeConversionResult& rResult, char** ppResultJSON)
 +{
++    nativeConversionTrace("result-serialize-enter");
 +    tools::JsonWriter aJSON;
 +    aJSON.put("schemaVersion", NATIVE_CONVERSION_SCHEMA_VERSION);
 +    aJSON.put("ok", rResult.mbOk);
@@ -710,12 +717,15 @@ index d00594174..38db70599 100644
 +        aJSON.put("message", rResult.maMessage);
 +
 +    const OString aEncoded = aJSON.finishAndGetAsOString();
++    nativeConversionTrace("result-serialize-return");
++    nativeConversionTrace("result-allocation-enter");
 +    char* pAllocation = static_cast<char*>(malloc(aEncoded.getLength() + 1));
 +    if (!pAllocation)
 +        return 2;
 +
 +    memcpy(pAllocation, aEncoded.getStr(), aEncoded.getLength() + 1);
 +    *ppResultJSON = pAllocation;
++    nativeConversionTrace("result-allocation-return");
 +    return 0;
 +}
 +
@@ -751,14 +761,18 @@ index d00594174..38db70599 100644
 +const char* nativeConversionCleanup(
 +    const uno::Reference<lang::XComponent>& xComponent) noexcept
 +{
++    nativeConversionTrace("cleanup-enter");
 +    try
 +    {
 +        const uno::Reference<util::XCloseable> xCloseable(xComponent, uno::UNO_QUERY);
++        nativeConversionTrace("cleanup-query-return");
 +        if (xCloseable.is())
 +        {
 +            try
 +            {
++                nativeConversionTrace("cleanup-close-enter");
 +                xCloseable->close(true);
++                nativeConversionTrace("cleanup-close-return");
 +                return "clean";
 +            }
 +            catch (...)
@@ -767,7 +781,9 @@ index d00594174..38db70599 100644
 +                // fallback disposal succeeds.
 +                try
 +                {
++                    nativeConversionTrace("cleanup-fallback-dispose-enter");
 +                    xComponent->dispose();
++                    nativeConversionTrace("cleanup-fallback-dispose-return");
 +                }
 +                catch (...)
 +                {
@@ -778,7 +794,9 @@ index d00594174..38db70599 100644
 +
 +        try
 +        {
++            nativeConversionTrace("cleanup-dispose-enter");
 +            xComponent->dispose();
++            nativeConversionTrace("cleanup-dispose-return");
 +            return "clean";
 +        }
 +        catch (...)
@@ -952,7 +970,10 @@ index d00594174..38db70599 100644
 +    fflush(stderr);
 +
 +    if (xComponent.is())
++    {
 +        aResult.mpCleanup = nativeConversionCleanup(xComponent);
++        nativeConversionTrace("cleanup-call-return");
++    }
 +    bCleanupDone = true;
 +    aCleanupGuard.dismiss();
 +
@@ -974,7 +995,9 @@ index d00594174..38db70599 100644
 +        aResult.maMessage = u"LibreOffice conversion failed"_ustr;
 +    }
 +
-+    return nativeConversionWriteResult(aResult, ppResultJSON);
++    const int nResult = nativeConversionWriteResult(aResult, ppResultJSON);
++    nativeConversionTrace("impl-return-ready");
++    return nResult;
 +}
 +
 +} // anonymous namespace
@@ -983,7 +1006,7 @@ index d00594174..38db70599 100644
  static LibreOfficeKitDocument* lo_documentLoad(LibreOfficeKit* pThis, const char* pURL)
  {
      return lo_documentLoadWithOptions(pThis, pURL, nullptr);
-@@ -8416,6 +9339,44 @@ static void lo_destroy(LibreOfficeKit* pThis)
+@@ -8416,6 +9362,44 @@ static void lo_destroy(LibreOfficeKit* pThis)
  // WASM shims for LibreOfficeKit vtable calls
  // These provide stable exports that don't require vtable traversal from JS
 

@@ -100,6 +100,49 @@ describe('native conversion source and build gates', () => {
     );
   });
 
+  it('keeps post-export diagnostics able to isolate the native hang stage', () => {
+    const writer = patch.slice(
+      patch.indexOf('int nativeConversionWriteResult'),
+      patch.indexOf('int nativeConversionWriteBoundaryFailure')
+    );
+    for (const event of [
+      'result-serialize-enter',
+      'result-serialize-return',
+      'result-allocation-enter',
+      'result-allocation-return',
+    ]) {
+      expect(writer).toContain(`nativeConversionTrace("${event}")`);
+    }
+
+    const cleanup = patch.slice(
+      patch.indexOf('const char* nativeConversionCleanup'),
+      patch.indexOf('int nativeConvertDocumentImpl')
+    );
+    for (const event of [
+      'cleanup-enter',
+      'cleanup-query-return',
+      'cleanup-close-enter',
+      'cleanup-close-return',
+      'cleanup-fallback-dispose-enter',
+      'cleanup-fallback-dispose-return',
+      'cleanup-dispose-enter',
+      'cleanup-dispose-return',
+    ]) {
+      expect(cleanup).toContain(`nativeConversionTrace("${event}")`);
+    }
+
+    const implementation = patch.slice(
+      patch.indexOf('int nativeConvertDocumentImpl'),
+      patch.indexOf('} // anonymous namespace')
+    );
+    expect(implementation).toMatch(
+      /event=hidden-path[\s\S]*?nativeConversionCleanup\(xComponent\)[\s\S]*?cleanup-call-return[\s\S]*?nativeConversionWriteResult\(aResult, ppResultJSON\)[\s\S]*?impl-return-ready/
+    );
+    expect(patch).toMatch(
+      /impl-return-ready[\s\S]*?event=abi-return/
+    );
+  });
+
   it('strictly validates request JSON before adapting filter data', () => {
     expect(patch).toContain('class NativeConversionJSONParser');
     expect(patch).toContain('Unknown request field');
