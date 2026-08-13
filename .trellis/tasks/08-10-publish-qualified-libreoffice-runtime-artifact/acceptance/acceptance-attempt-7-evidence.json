@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "kind": "acceptance-attempt-7-independent-failure-evidence",
+  "generatedAt": "2026-08-13T03:56:27.082Z",
+  "attemptNumber": 7,
+  "decision": "FAIL",
+  "formalRoot": "D:\\tmp\\lo-runtime-acceptance-attempt-7",
+  "evidenceRoot": "D:\\tmp\\lo-runtime-acceptance-attempt-7\\evidence",
+  "invocationControlRoot": "D:\\tmp\\lo-runtime-acceptance-attempt-7-invocation-control",
+  "formalInvocationCount": 1,
+  "admittedCommit": "a49ee353115a40d2a30a508695ee8842a28e5b3e",
+  "formalStartedAt": "2026-08-13T03:36:01.1194931Z",
+  "formalCompletedAt": "2026-08-13T03:39:02.6100988Z",
+  "formalProcessExitCode": 1,
+  "supervisorError": null,
+  "failedCommandIndex": 11,
+  "failedCommand": "verify-pdfhow-remote-refs",
+  "failureStage": "pinned PDFHow origin/main remote-ref verification before all candidate and browser gates",
+  "failureClass": "retry-free network command timeout",
+  "rootCause": "The admitted git ls-remote origin refs/heads/main command produced no stdout or stderr and did not complete within its fixed 60-second timeout. The fail-closed runner killed it and stopped immediately.",
+  "timeoutSeconds": 60,
+  "timeoutReached": true,
+  "childExitCode": null,
+  "childExitCodeNote": "The timed-out git process was killed; the runner did not persist a child exit code for timeout failures.",
+  "commandsCompletedBeforeFailure": 10,
+  "totalCommandsAttempted": 11,
+  "totalExpectedCommands": 33,
+  "retryCount": 0,
+  "supervisorCompletionMarkerPresent": true,
+  "runnerCompletionMarkerPresent": false,
+  "automaticEvidenceInventoryPresent": false,
+  "chromiumBrowserStarted": false,
+  "browserTestsStarted": false,
+  "coldStartsRun": 0,
+  "conversionRunInChromiumGate": false,
+  "finalInvariantGatesRun": false,
+  "gatesNotRun": [
+    "command 12 preflight Build WASM invariance check",
+    "Release identity check and download of all five assets",
+    "Release archive verification and extraction",
+    "PDFHow preparation-helper contract and local-candidate preparation/verification",
+    "Runtime install/build and workflow/CLI/Node gates",
+    "PDFHow install and Playwright Chromium installation",
+    "retry-free Chromium candidate gate",
+    "five consecutive independent cold-start samples",
+    "final native/WASM build invariance check",
+    "final Release identity and five-asset immutability check",
+    "runner evidence SHA-256 inventory and ATTEMPT-7-COMMAND-COMPLETED marker"
+  ],
+  "formalFailureObservedAtUtc": "2026-08-13T03:39:02.6100988Z",
+  "postFailureManualActivityDetectedAsOfSignature": false,
+  "postFailureResultsAdmissible": false,
+  "formalRootPreservationRequired": true,
+  "evidenceFileCount": 34,
+  "evidenceBytes": 22834,
+  "evidenceFiles": [
+    {
+      "name": "00-fixed-inputs.json",
+      "size": 936,
+      "sha256": "fb34369279a8aabca74dca15ef472cbaa3ab616b74afcbc79703665583f08e4d"
+    },
+    {
+      "name": "01-windows-cmd-bat-command-launch-contract.command.json",
+      "size": 2201,
+      "sha256": "8ca1d33cdda5b9378b33e97dc61aee050d008ae675d5d1a1679e3beda680ade3"
+    },
+    {
+      "name": "01-windows-cmd-bat-command-launch-contract.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "01-windows-cmd-bat-command-launch-contract.stdout.log",
+      "size": 1352,
+      "sha256": "ec301ccba3dc5b36bdd92749033c8e64e64a084b2f879a449419d98ca3f81d73"
+    },
+    {
+      "name": "02-powershell-json-timestamp-contract.command.json",
+      "size": 2184,
+      "sha256": "6f420ffbe85ca3a8a3d6c8c7e48ba180aed153603fd9e0a538c5dd235269034f"
+    },
+    {
+      "name": "02-powershell-json-timestamp-contract.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "02-powershell-json-timestamp-contract.stdout.log",
+      "size": 358,
+      "sha256": "b8604cc45e7a86266d236819423a9c5134d8509e8a028573b15562e1554995e9"
+    },
+    {
+      "name": "03-clone-runtime.command.json",
+      "size": 1813,
+      "sha256": "871792aa5eb11a9038fc84683944a591392836d62e7b8d1273b725024f4503e8"
+    },
+    {
+      "name": "03-clone-runtime.stderr.log",
+      "size": 76,
+      "sha256": "6f8824c1dcdd758cbca5a55e92f5dbe5a8ff97b0f4ad64438a53ada00730297d"
+    },
+    {
+      "name": "03-clone-runtime.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "04-checkout-runtime.command.json",
+      "size": 1646,
+      "sha256": "dbb5e4ed7a094ac926d8f95fd69c6de83a9deedb98ee13b4f8bf17b07fa9465d"
+    },
+    {
+      "name": "04-checkout-runtime.stderr.log",
+      "size": 83,
+      "sha256": "9b5f7a2d20eadaeaea250a2a27b12fb7ffe5c29ee68cd780c1ec261333791ea3"
+    },
+    {
+      "name": "04-checkout-runtime.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "05-verify-runtime-head.command.json",
+      "size": 1548,
+      "sha256": "1000ea1b367fd0a00bc6d8888bd2e406ba08a7b98366772fc98b08e0056bb2d8"
+    },
+    {
+      "name": "05-verify-runtime-head.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "05-verify-runtime-head.stdout.log",
+      "size": 41,
+      "sha256": "74f33dd13a0299588d59eefc4a8ab625855102b715fd4df43a2930f009d8c27e"
+    },
+    {
+      "name": "06-verify-runtime-remote-refs.command.json",
+      "size": 1767,
+      "sha256": "e741bf49dd3aa95f1bfa0f9f4eecb8306d4602fb8f47dc4ce12bc658bd9d40c2"
+    },
+    {
+      "name": "06-verify-runtime-remote-refs.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "06-verify-runtime-remote-refs.stdout.log",
+      "size": 161,
+      "sha256": "70fb9a4bd55f66e361ad8ec8ba4ca2bee6b2d01aabd1eca1a9583bea7b2db2a8"
+    },
+    {
+      "name": "07-verify-runtime-remediation-contained-in-feature-branch.command.json",
+      "size": 1909,
+      "sha256": "cc9c89f52c3cac0b0602c130d8a76e1469d0ee16b8e85d0754f84625acee7046"
+    },
+    {
+      "name": "07-verify-runtime-remediation-contained-in-feature-branch.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "07-verify-runtime-remediation-contained-in-feature-branch.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "08-clone-pdfhow.command.json",
+      "size": 1768,
+      "sha256": "8cb17980e789784ed5e70df050f9bc471da7008749fbe2e187fdebac639e7a6a"
+    },
+    {
+      "name": "08-clone-pdfhow.stderr.log",
+      "size": 75,
+      "sha256": "9abb87e93c988c957500ad0e72e21f08397fec03bc99dd7df3a4df7c303e1b2f"
+    },
+    {
+      "name": "08-clone-pdfhow.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "09-checkout-pdfhow.command.json",
+      "size": 1642,
+      "sha256": "ad1e3afd5d3e5a3adf1b5667037fa3c5544b4683319b924ee72e4796b1b52254"
+    },
+    {
+      "name": "09-checkout-pdfhow.stderr.log",
+      "size": 70,
+      "sha256": "72e848d09ab63d920c10c863a8509fe6c268bc40a2eb777bae2afe454bbdeb62"
+    },
+    {
+      "name": "09-checkout-pdfhow.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "10-verify-pdfhow-head.command.json",
+      "size": 1544,
+      "sha256": "16970d5358afc63f63575897251b6905255c65160c9832439401aede89094e5f"
+    },
+    {
+      "name": "10-verify-pdfhow-head.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "10-verify-pdfhow-head.stdout.log",
+      "size": 41,
+      "sha256": "11db84a4bb6ab97772728a74cf9cd6d55379b4c67ef54b870a49b1fc05cb396f"
+    },
+    {
+      "name": "11-verify-pdfhow-remote-refs.command.json",
+      "size": 1619,
+      "sha256": "807900a3ced3848cb5c344b938dd438942914a685dfaf980110ef3420a1b34fc"
+    },
+    {
+      "name": "11-verify-pdfhow-remote-refs.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "11-verify-pdfhow-remote-refs.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "invocationControlFileCount": 4,
+  "invocationControlBytes": 1467,
+  "invocationControlFiles": [
+    {
+      "name": "formal-invocation-completion.json",
+      "size": 226,
+      "sha256": "2fe64d34520942fbcf925402d639e707bb361baa3d8c17d90042d25702337e98"
+    },
+    {
+      "name": "formal-invocation-start.json",
+      "size": 781,
+      "sha256": "e14c18a12b935de627200ea31039878e11a563d9873638390d4ad192c994172a"
+    },
+    {
+      "name": "formal-runner.stderr.log",
+      "size": 460,
+      "sha256": "878b4a8f0a8bb7168ad5dcff429af2a774a6bcb0ac3b3a54ea1aed7de348de84"
+    },
+    {
+      "name": "formal-runner.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "invocationAuditFiles": [
+    {
+      "path": "D:\\tmp\\lo-runtime-acceptance-attempt-7-invocation.lock",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:\\tmp\\attempt7-formal-launch-process.json",
+      "size": 381,
+      "sha256": "9c11ba572340e15d8680b521df421ec5d72757fa408559632a5ac0bbf476ec08"
+    },
+    {
+      "path": "D:\\tmp\\attempt7-formal-supervisor.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:\\tmp\\attempt7-formal-supervisor.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "D:\\tmp\\attempt7-formal-wrapper-20260813-01.ps1",
+      "size": 2883,
+      "sha256": "fddeb73c24bcb040ba556725f717c217ea5ed9749b92e96e7a96b6ab9193e394"
+    }
+  ],
+  "dispositionChecks": {
+    "checkedAt": "2026-08-13T03:51:37.3887528Z",
+    "releaseId": 367637128,
+    "releaseRemainsDraft": true,
+    "publishedAtIsNull": true,
+    "releaseQualifiedRemainsFalse": true,
+    "tag": "runtime-artifact-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
+    "target": "df3f73c789e6d2abf71cbcd75186118d2bbc795a",
+    "assets": [
+      {
+        "id": 508126612,
+        "name": "ASSET-SHA256SUMS",
+        "size": 677,
+        "sha256": "83bb7bb697dcf4b8feb59934ad928aa22b8d87c18104ebeed451a3eb7aff9c32",
+        "updatedAt": "2026-08-10T01:41:06Z"
+      },
+      {
+        "id": 508126611,
+        "name": "CANDIDATE-MANIFEST.json",
+        "size": 2365,
+        "sha256": "c33b76b49346b08d0cdcbf1ce64db3025f9ceacd29113664279c56e0dae8dab0",
+        "updatedAt": "2026-08-10T01:41:06Z"
+      },
+      {
+        "id": 508126614,
+        "name": "libreoffice-wasm-runtime-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b.zip",
+        "size": 248934231,
+        "sha256": "e9aac8dde2fb627251155fc97651c2bd35bec63b01e39f882d342c024a87de9a",
+        "updatedAt": "2026-08-10T01:54:27Z"
+      },
+      {
+        "id": 508126610,
+        "name": "SHA256SUMS",
+        "size": 333,
+        "sha256": "df1e89e0364660c75d00fcaa4cf77fbd80176986812a8009e9a3e176e9bc9dac",
+        "updatedAt": "2026-08-10T01:41:06Z"
+      },
+      {
+        "id": 508140311,
+        "name": "STAGING-REPORT.json",
+        "size": 4571,
+        "sha256": "2094842f73c67cd31481741480a27646607f4a18eda3337bf5dfaebc714c7cc6",
+        "updatedAt": "2026-08-10T01:54:32Z"
+      }
+    ],
+    "latestNativeWasmRun": {
+      "id": 31211473147,
+      "createdAt": "2026-08-07T19:26:24Z",
+      "headSha": "71d33678ed74872ebbb1bc37f5778143f8f5e401",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "runtimeMain": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+    "pdfHowMain": "b41fde5db9829ede7e6e217de6ac12c2b475b7fc"
+  },
+  "evidenceBoundary": {
+    "commands1Through10Completed": true,
+    "command11TimedOut": true,
+    "command12AndLaterAbsent": true,
+    "preAdmissionDiagnosticsAdmissible": false,
+    "preAdmissionDiagnosticsClassification": "not acceptance evidence",
+    "noRetryContinuationReplacementSupplementationOrBackfillPermitted": true
+  }
+}
