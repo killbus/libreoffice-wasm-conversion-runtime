@@ -100,7 +100,7 @@ describe('native conversion source and build gates', () => {
     );
   });
 
-  it('keeps post-export diagnostics able to isolate the native hang stage', () => {
+  it('keeps native diagnostics able to isolate pre- and post-hidden hangs', () => {
     const writer = patch.slice(
       patch.indexOf('int nativeConversionWriteResult'),
       patch.indexOf('int nativeConversionWriteBoundaryFailure')
@@ -135,6 +135,35 @@ describe('native conversion source and build gates', () => {
       patch.indexOf('int nativeConvertDocumentImpl'),
       patch.indexOf('} // anonymous namespace')
     );
+    let previousPreHiddenMarker = -1;
+    for (const event of [
+      'impl-enter',
+      'request-parse-enter',
+      'request-parse-return',
+      'preconditions-return',
+      'solar-mutex-enter',
+      'solar-mutex-return',
+      'desktop-create-enter',
+      'desktop-create-return',
+      'load-enter',
+      'load-return',
+      'hidden-check-enter',
+      'hidden-check-return',
+      'export-query-enter',
+      'export-query-return',
+      'export-enter',
+      'export-return',
+    ]) {
+      const markerIndex = implementation.indexOf(
+        `nativeConversionTrace("${event}")`
+      );
+      expect(markerIndex, event).toBeGreaterThan(previousPreHiddenMarker);
+      previousPreHiddenMarker = markerIndex;
+    }
+    expect(implementation.indexOf("event=hidden-path")).toBeGreaterThan(
+      previousPreHiddenMarker
+    );
+
     expect(implementation).toMatch(
       /event=hidden-path[\s\S]*?nativeConversionCleanup\(xComponent\)[\s\S]*?cleanup-call-return[\s\S]*?nativeConversionWriteResult\(aResult, ppResultJSON\)[\s\S]*?impl-return-ready/
     );

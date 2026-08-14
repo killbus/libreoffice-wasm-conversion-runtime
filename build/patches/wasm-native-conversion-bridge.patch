@@ -813,9 +813,14 @@ index d00594174..38db70599 100644
 +int nativeConvertDocumentImpl(LibreOfficeKit* pKit, const char* pRequestJSON,
 +                              char** ppResultJSON)
 +{
++    nativeConversionTrace("impl-enter");
 +    NativeConversionResult aResult;
 +    NativeConversionRequest aRequest;
-+    if (!nativeConversionParseRequest(pRequestJSON, aRequest, aResult.maMessage))
++    nativeConversionTrace("request-parse-enter");
++    const bool bRequestParsed
++        = nativeConversionParseRequest(pRequestJSON, aRequest, aResult.maMessage);
++    nativeConversionTrace("request-parse-return");
++    if (!bRequestParsed)
 +        return nativeConversionWriteResult(aResult, ppResultJSON);
 +
 +    if (!pKit || !gImpl || pKit != static_cast<LibreOfficeKit*>(gImpl))
@@ -829,7 +834,10 @@ index d00594174..38db70599 100644
 +        return nativeConversionWriteResult(aResult, ppResultJSON);
 +    }
 +
++    nativeConversionTrace("preconditions-return");
++    nativeConversionTrace("solar-mutex-enter");
 +    SolarMutexGuard aGuard;
++    nativeConversionTrace("solar-mutex-return");
 +    uno::Reference<lang::XComponent> xComponent;
 +    bool bCleanupDone = false;
 +    bool bConverted = false;
@@ -850,7 +858,9 @@ index d00594174..38db70599 100644
 +        bMarkerArmed = true;
 +#endif
 +
++        nativeConversionTrace("desktop-create-enter");
 +        uno::Reference<frame::XDesktop2> xComponentLoader = frame::Desktop::create(xContext);
++        nativeConversionTrace("desktop-create-return");
 +        if (!xComponentLoader.is())
 +        {
 +            aResult.mpStage = "load";
@@ -882,9 +892,11 @@ index d00594174..38db70599 100644
 +                    comphelper::makePropertyValue(u"Password"_ustr, aRequest.maPassword));
 +            }
 +
++            nativeConversionTrace("load-enter");
 +            xComponent = xComponentLoader->loadComponentFromURL(
 +                aRequest.maInputURL, u"_blank"_ustr, 0,
 +                comphelper::containerToSequence(aLoadProperties));
++            nativeConversionTrace("load-return");
 +
 +#if defined(__EMSCRIPTEN__)
 +            aResult.mbVisibleFrameSetupEntered
@@ -897,7 +909,9 @@ index d00594174..38db70599 100644
 +            }
 +            else
 +            {
++                nativeConversionTrace("hidden-check-enter");
 +                aResult.mbHiddenLoad = nativeConversionHiddenLoadConfirmed(xComponent);
++                nativeConversionTrace("hidden-check-return");
 +                if (!aResult.mbHiddenLoad || aResult.mbVisibleFrameSetupEntered)
 +                {
 +                    aResult.mpStage = "load";
@@ -907,8 +921,10 @@ index d00594174..38db70599 100644
 +                else
 +                {
 +                    pFailureStage = "export";
++                    nativeConversionTrace("export-query-enter");
 +                    const uno::Reference<frame::XStorable> xStorable(xComponent,
 +                                                                     uno::UNO_QUERY_THROW);
++                    nativeConversionTrace("export-query-return");
 +                    std::vector<beans::PropertyValue> aExportProperties;
 +                    aExportProperties.reserve(5);
 +                    aExportProperties.push_back(comphelper::makePropertyValue(
@@ -928,9 +944,11 @@ index d00594174..38db70599 100644
 +                            u"FilterData"_ustr, aRequest.maFilterData));
 +                    }
 +
++                    nativeConversionTrace("export-enter");
 +                    xStorable->storeToURL(
 +                        aRequest.maOutputURL,
 +                        comphelper::containerToSequence(aExportProperties));
++                    nativeConversionTrace("export-return");
 +                    bConverted = true;
 +                }
 +            }
