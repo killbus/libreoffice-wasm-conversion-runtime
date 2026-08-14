@@ -58,7 +58,7 @@ index d00594174..38db70599 100644
  #include <sfx2/docfilt.hxx>
  #include <sfx2/docfile.hxx>
  #include <sfx2/viewsh.hxx>
-@@ -2646,6 +2651,947 @@ static uno::Reference<css::uno::XComponentContext> xContext;
+@@ -2646,6 +2651,965 @@ static uno::Reference<css::uno::XComponentContext> xContext;
  static uno::Reference<css::lang::XMultiServiceFactory> xSFactory;
  static uno::Reference<css::lang::XMultiComponentFactory> xFactory;
 
@@ -1024,7 +1024,7 @@ index d00594174..38db70599 100644
  static LibreOfficeKitDocument* lo_documentLoad(LibreOfficeKit* pThis, const char* pURL)
  {
      return lo_documentLoadWithOptions(pThis, pURL, nullptr);
-@@ -8416,6 +9362,44 @@ static void lo_destroy(LibreOfficeKit* pThis)
+@@ -8416,6 +9380,44 @@ static void lo_destroy(LibreOfficeKit* pThis)
  // WASM shims for LibreOfficeKit vtable calls
  // These provide stable exports that don't require vtable traversal from JS
 
