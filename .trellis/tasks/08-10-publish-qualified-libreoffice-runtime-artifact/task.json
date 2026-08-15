@@ -545,7 +545,7 @@
     "releaseNpmLatestObserved": "2.7.2",
     "releaseLikelyNextVersionIfEnabled": "scenario-dependent: the existing fork prerequisite history contains feat commits and would imply 2.8.0 if intentionally upstreamed/published; no 2.7.3 claim is currently defensible for unmodified lifecycle commit 1bb549d because it does not apply to canonical v2.7.2",
     "releaseLikelyNextVersionBasis": "canonical upstream/main is exactly v2.7.2, but isolated cherry-pick proved that 1bb549d depends on fork-only native-conversion/source evolution; a patch-version outcome would require a newly split canonical-compatible fix and its own verification",
-    "releasePreMergeRequirement": "keep fork PR #3 Draft; do not repoint canonical package metadata to the fork; first choose canonical-upstream integration versus fork-only integration, add an explicit canonical-repository guard for inherited Release workflows, deduplicate/serialize canonical publication, and verify npm trusted publishing before any publication authorization",
+    "releasePreMergeRequirement": "keep fork PR #3 Draft; first review and land the isolated fork guard b1e034b (or an equivalent repository guard) before any fork main merge; do not repoint canonical package metadata to the fork; canonical publication still requires trigger deduplication/serialization and npm trusted-publishing verification",
     "releaseActiveRepositoryIsFork": true,
     "releaseActiveRepositoryParent": "matbeedotcom/libreoffice-document-converter",
     "releaseConfiguredRepositoryUrlDisposition": "matches the canonical parent and is inherited unchanged by the fork; do not repoint @matbee package metadata to the fork without an explicit ownership transfer decision",
@@ -583,6 +583,18 @@
     "canonicalLifecycleApplicabilityTestsRun": false,
     "canonicalLifecycleApplicabilityTestsDisposition": "not run because source applicability failed before a buildable candidate existed; no WASM build, Chrome, or PDFHow run was triggered",
     "canonicalLifecyclePrerequisiteFact": "src/native-conversion-bridge.ts was introduced after v2.7.2 by fork commit f270031 and later renamed/refactored by df3b5a9; 1bb549d routes non-image conversion through runNativeConversionWhenReady from that fork-only module",
-    "canonicalLifecycleReleaseDisposition": "keep fork PR #3 Draft; choose either an explicit upstream prerequisite feature series or author a newly split canonical-compatible lifecycle patch, then re-run applicability and minimal verification before assigning any canonical release version"
+    "canonicalLifecycleReleaseDisposition": "keep fork PR #3 Draft; choose either an explicit upstream prerequisite feature series or author a newly split canonical-compatible lifecycle patch, then re-run applicability and minimal verification before assigning any canonical release version",
+    "forkReleaseGuardPreparedDate": "2026-08-15",
+    "forkReleaseGuardBase": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846 (origin/main)",
+    "forkReleaseGuardBranch": "origin/fix/fork-release-workflow-guard",
+    "forkReleaseGuardCommit": "b1e034b620ac84ab46468e388eb75795715e8321",
+    "forkReleaseGuardCommitSubject": "fix(release): skip inherited publish job on forks",
+    "forkReleaseGuardScope": "one-line jobs.release.if change in .github/workflows/publish.yml",
+    "forkReleaseGuardCondition": "github.repository == 'matbeedotcom/libreoffice-document-converter' && (push event || successful CI workflow_run)",
+    "forkReleaseGuardEffect": "the inherited Release workflow may be instantiated on the fork, but the release job skips before checkout/install/typecheck/lint/build/test/semantic-release; canonical behavior remains enabled",
+    "forkReleaseGuardValidation": "offline js-yaml parse passed; git diff --check passed; branch push observed zero workflow runs",
+    "forkReleaseGuardPullRequestCreated": false,
+    "forkReleaseGuardMerged": false,
+    "forkReleaseGuardPublicationPerformed": false
   }
 }
