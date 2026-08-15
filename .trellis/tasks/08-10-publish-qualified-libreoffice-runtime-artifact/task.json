@@ -627,7 +627,12 @@
     "runtimeLifecyclePostGuardPullRequestState": "OPEN DRAFT",
     "runtimeLifecyclePostGuardCiRun": 31895034889,
     "runtimeLifecyclePostGuardCiConclusion": "SUCCESS",
-    "runtimeLifecyclePostGuardGitHubMergeabilityObserved": "UNKNOWN / UNKNOWN at the read-only query; no merge action was attempted",
+    "runtimeLifecyclePostGuardGitHubMergeabilityObserved": "MERGEABLE / CLEAN on the refreshed read-only query; no merge action was attempted",
+    "runtimeLifecyclePostGuardGitHubBaseRefOidObserved": "6c1ad6fbe615870ed23856cdddaff408c5d65cf3",
+    "runtimeLifecyclePostGuardCiBaseSha": "6c1ad6fbe615870ed23856cdddaff408c5d65cf3",
+    "runtimeLifecyclePostGuardCiBaseCoverage": "Actions run 31895034889 reports PR base SHA 6c1ad6f; PR #2 merged as that commit at 2026-08-14T18:39:47Z before the PR #3 CI run began at 2026-08-15T16:16:03Z, so the successful CI covered PR #2's converter validation change",
+    "runtimeLifecyclePostGuardMainDeltaAfterCiBase": "only PR #4's release-workflow guard commits b1e034b and dcbe6db; no runtime, package, or test source changed after the CI base",
+    "runtimeLifecyclePostGuardRetestDisposition": "no duplicate JS CI, Chrome/PDFHow, or build:wasm run is justified solely for PR #4; current-main merge-tree is clean and the only untested base delta is the release workflow guard already validated post-merge",
     "runtimeLifecyclePostGuardMergeBase": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
     "runtimeLifecyclePostGuardCommitDistance": "current main has 4 main-only commits and PR #3 has 1 PR-only commit relative to their merge base",
     "runtimeLifecyclePostGuardMainOnlyCommits": [
