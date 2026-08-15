@@ -471,7 +471,7 @@
     "pdfHowCleanupMs": 30.483600000006845,
     "pdfHowTotalMs": 162245.2118,
     "retainedTeardownObservation": "resolved in repaired JS wrapper: the prior exact two PThread-not-exported aborts came from two direct reads of the generated unexported Module.PThread accessor; final runtime-owned and PDFHow runs completed graceful destroy without abort or force termination",
-    "nextSessionFocus": "review and merge the published feature-branch lifecycle repair when appropriate; only generalize and rerun the PDFHow diagnostic in a separately authorized consumer change; keep Attempt 8 formal preparation paused until separately admitted",
+    "nextSessionFocus": "monitor Draft PR #3 CI and review the minimal single-commit runtime lifecycle integration for merge when appropriate; only generalize and rerun the PDFHow diagnostic in a separately authorized consumer change; keep Attempt 8 formal preparation paused until separately admitted",
     "runtimeWrapperRepairSourceState": "committed as 8d51562a12d9754300b58a6e8b94ba1f7808a5c1 over 391e0459fd3768bcb77729fe7f2e7a9c4c810829",
     "runtimeWrapperRepairBuildScope": "TypeScript/JavaScript dist only",
     "runtimeExactArtifactStageRoot": "D:\\tmp\\lo-runtime-teardown-fixed-20260815-2255b",
@@ -510,6 +510,15 @@
     "pdfHowProductionLandingStatus": "deferred; current temporary file dependency remains non-formal evidence only",
     "pdfHowPermanentHarnessDecision": "do not alter or claim a permanent harness without a separate source change and corresponding rerun",
     "remainingDirtyClassification": "d423446 prevalidation worktree copy; unrebuilt native diagnostic patch/generated WASM; one-off Chrome profile diagnostic assets",
-    "nativeWasmBuildRunForCurrentCandidate": false
+    "nativeWasmBuildRunForCurrentCandidate": false,
+    "runtimeLifecycleIntegrationBase": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+    "runtimeLifecycleIntegrationBranch": "origin/fix/emscripten-lifecycle-integration",
+    "runtimeLifecycleIntegrationCommit": "1bb549db377f2440042eaf754d2fd396bf145bfa",
+    "runtimeLifecycleIntegrationPullRequest": 3,
+    "runtimeLifecycleIntegrationPullRequestState": "OPEN DRAFT",
+    "runtimeLifecycleIntegrationCiRun": 31895034889,
+    "runtimeLifecycleIntegrationCiStatusObserved": "IN_PROGRESS",
+    "runtimeLifecycleIntegrationScope": "single lifecycle commit; 14 files; excludes accumulated Attempt 2-8 task/protocol history and PDFHow temporary consumer changes",
+    "runtimeLifecycleIntegrationVerification": "focused 7 files/44 tests; CI-equivalent 27 files/233 passed/1 skipped; lint 0 errors/23 warnings; typecheck passed; JS tsup build passed; no build:wasm"
   }
 }

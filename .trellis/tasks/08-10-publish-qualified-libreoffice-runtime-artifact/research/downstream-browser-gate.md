@@ -524,3 +524,11 @@ The PDFHow Vite and smoke changes remain useful consumer evidence, but their pac
 ### Feature-branch publication verification
 
 The committed non-formal lifecycle repair and its Trellis classification were published by a non-force push of `0d2b962..83a009f` to `origin/feat/publish-qualified-libreoffice-runtime-artifact`. The local remote-tracking ref matched `83a009f06a52a1242cde55e843524a897c2ca100` after the push. A branch-scoped `gh run list` returned no workflow runs, consistent with no CI, publication, or manual `build-wasm.yml` invocation being triggered. No WASM/native rebuild, formal Acceptance invocation, or Attempt 8 marker occurred; Attempt 8 remains not admitted and unstarted.
+
+### Minimal main-integration extraction
+
+A merge-readiness audit found that `feat/publish-qualified-libreoffice-runtime-artifact` contains the accumulated Attempt 2-8 task/protocol history (100 files and roughly 14,000 added lines relative to `origin/main`), so it is not the minimal code-integration boundary for the lifecycle repair. In an isolated worktree based on `origin/main` commit `a1c3cd6d6d2dd25fab063539e9fe40fbb327b846`, commit `8d51562` cherry-picked without conflict as the single commit `1bb549db377f2440042eaf754d2fd396bf145bfa`. The resulting diff is exactly the expected 14 lifecycle files.
+
+Local verification on that isolated branch passed: focused lifecycle tests `7/7` files and `44/44` tests; the CI-equivalent non-converter set `27/27` files with `233` passed and `1` skipped; lint with `0` errors and `23` existing warnings; TypeScript typecheck; and the JS/TypeScript `tsup` build. No `build:wasm` command, native/WASM rebuild, browser smoke, or PDFHow consumer change was run.
+
+The minimal branch was published as `origin/fix/emscripten-lifecycle-integration` and opened as Draft PR `#3` against `main`. The PR is `OPEN` and `DRAFT`, contains one commit and the same 14 files, and its normal CI run `31895034889` was observed `IN_PROGRESS`. This is reviewable runtime integration only: Attempt 8 remains not admitted and unstarted, with formal invocation count `0` and no invocation marker.
