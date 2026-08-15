@@ -543,8 +543,8 @@
     "releaseCurrentMergeEffect": "would trigger two Release workflow executions, each repeating install/typecheck/lint/build/test before semantic-release currently exits without publication",
     "releaseRaceAssessment": "duplicate Release executions are confirmed and un-serialized; the observed canonical pair overlapped at workflow level, the push path published first, and the workflow_run path later no-opd. No write collision was observed, but no concurrency rule guarantees that ordering",
     "releaseNpmLatestObserved": "2.7.2",
-    "releaseLikelyNextVersionIfEnabled": "scenario-dependent: 2.8.0 if the fork accumulated history is made publishable; 2.7.3 if only lifecycle fix 1bb549d is upstreamed onto canonical v2.7.2",
-    "releaseLikelyNextVersionBasis": "the fork is 21 commits after v2.7.2 and contains feat commits, while canonical upstream/main is exactly v2.7.2 and lifecycle commit 1bb549d is a fix commit",
+    "releaseLikelyNextVersionIfEnabled": "scenario-dependent: the existing fork prerequisite history contains feat commits and would imply 2.8.0 if intentionally upstreamed/published; no 2.7.3 claim is currently defensible for unmodified lifecycle commit 1bb549d because it does not apply to canonical v2.7.2",
+    "releaseLikelyNextVersionBasis": "canonical upstream/main is exactly v2.7.2, but isolated cherry-pick proved that 1bb549d depends on fork-only native-conversion/source evolution; a patch-version outcome would require a newly split canonical-compatible fix and its own verification",
     "releasePreMergeRequirement": "keep fork PR #3 Draft; do not repoint canonical package metadata to the fork; first choose canonical-upstream integration versus fork-only integration, add an explicit canonical-repository guard for inherited Release workflows, deduplicate/serialize canonical publication, and verify npm trusted publishing before any publication authorization",
     "releaseActiveRepositoryIsFork": true,
     "releaseActiveRepositoryParent": "matbeedotcom/libreoffice-document-converter",
@@ -553,6 +553,36 @@
     "releaseCanonicalPriorPushRun": 29847909355,
     "releaseCanonicalPriorWorkflowRunRun": 29848046052,
     "releaseCanonicalLatestTag": "v2.7.2",
-    "releaseCanonicalDuplicateBehavior": "the canonical push path completed the v2.7.2 release; the overlapping workflow_run path later found v2.7.2 and 0 commits, then released nothing"
+    "releaseCanonicalDuplicateBehavior": "the canonical push path completed the v2.7.2 release; the overlapping workflow_run path later found v2.7.2 and 0 commits, then released nothing",
+    "canonicalRepositoryViewerPermission": "READ",
+    "canonicalRepositoryOpenPullRequestsObserved": 0,
+    "canonicalLifecycleApplicabilityPreflightDate": "2026-08-15",
+    "canonicalLifecycleApplicabilityBase": "b72a3d584bc28c5111afafcf25def7a24fb5fcb0 (upstream/main, v2.7.2)",
+    "canonicalLifecycleApplicabilityCandidate": "1bb549db377f2440042eaf754d2fd396bf145bfa",
+    "canonicalLifecycleApplicabilityCommand": "git cherry-pick --no-commit 1bb549db377f2440042eaf754d2fd396bf145bfa",
+    "canonicalLifecycleApplicabilityResult": "CONFLICT; commit does not apply standalone to canonical v2.7.2",
+    "canonicalLifecycleApplicabilityContentConflicts": [
+      "src/browser.ts",
+      "src/browser.worker.ts",
+      "src/converter-node.ts",
+      "src/converter.ts"
+    ],
+    "canonicalLifecycleApplicabilityModifyDeleteConflict": "src/native-conversion-bridge.ts is absent on canonical v2.7.2 but modified by 1bb549d",
+    "canonicalLifecycleApplicabilityConflictHunkGroups": 10,
+    "canonicalLifecycleApplicabilityNonConflictingPaths": [
+      "src/emscripten-pthread.ts",
+      "src/emscripten-startup-policy.ts",
+      "src/fork-worker.cts",
+      "src/subprocess.cts",
+      "src/types.ts",
+      "tests/emscripten-pthread.test.ts",
+      "tests/emscripten-startup-policy.test.ts",
+      "tests/native-conversion-ready-retry.test.ts",
+      "wasm/loader.cjs"
+    ],
+    "canonicalLifecycleApplicabilityTestsRun": false,
+    "canonicalLifecycleApplicabilityTestsDisposition": "not run because source applicability failed before a buildable candidate existed; no WASM build, Chrome, or PDFHow run was triggered",
+    "canonicalLifecyclePrerequisiteFact": "src/native-conversion-bridge.ts was introduced after v2.7.2 by fork commit f270031 and later renamed/refactored by df3b5a9; 1bb549d routes non-image conversion through runNativeConversionWhenReady from that fork-only module",
+    "canonicalLifecycleReleaseDisposition": "keep fork PR #3 Draft; choose either an explicit upstream prerequisite feature series or author a newly split canonical-compatible lifecycle patch, then re-run applicability and minimal verification before assigning any canonical release version"
   }
 }
