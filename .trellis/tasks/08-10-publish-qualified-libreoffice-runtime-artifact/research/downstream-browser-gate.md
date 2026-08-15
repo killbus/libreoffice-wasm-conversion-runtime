@@ -510,3 +510,13 @@ On 2026-08-15, the retained source state was rechecked without rebuilding WASM o
 The verified runtime JS lifecycle repair was committed as `8d51562a12d9754300b58a6e8b94ba1f7808a5c1` (`fix(runtime): harden Emscripten lifecycle`). Two earlier commit attempts were not executed because the approval service returned transient rate-limit/stream-disconnect errors; the unchanged third attempt succeeded. The exact pre-commit staged diff is retained at `D:\tmp\libreoffice-runtime-lifecycle-staged-20260815.patch`, SHA-256 `1c97311ea7beed0c056eaa708c995ee4d0304670ef7b060ec9398c07bb902b0e`.
 
 The PDFHow `package.json` currently identifies the exact temporary local tgz under `D:\tmp`. That state is valid retained non-formal consumer evidence but is not a production dependency cutover. The temporary `file:` dependency and unrebuilt native/WASM experiment remain outside the runtime lifecycle commit boundary. Attempt 8 remains not admitted and unstarted, with formal invocation count `0` and no invocation marker.
+
+### Remaining worktree classification after lifecycle landing
+
+The lifecycle repair is now committed independently. The remaining runtime dirty state is not part of that verified package cut:
+
+- `src/index.ts` plus `tests/convert-document-validation.test.ts` reproduce the separately committed pre-validation fix `d423446`; duplicating it on this branch is deferred to normal branch integration.
+- `build/patches/wasm-native-conversion-bridge.patch`, `tests/native-conversion-source.test.ts`, and the generated `wasm/soffice.*` files belong to an unrebuilt native diagnostic experiment. They are not qualified by the exact run `31802763221` package result and are not included in the lifecycle commit.
+- `dev-server.mjs`, `scripts/release-runtime/browser-profile-diagnostic.mjs`, and `tests/browser/profile-diagnostic.html` are retained one-off diagnostic assets. The script's historical transformed `no-initial-run` comparison is no longer a production prerequisite now that the startup policy is committed.
+
+The PDFHow Vite and smoke changes remain useful consumer evidence, but their package declaration points to a temporary `D:\tmp` tgz and the smoke is hash-bound to this candidate. Generalizing that harness is a new consumer source change and would require its own rerun. It is therefore deferred rather than represented as a permanent production landing in this non-formal task phase.
