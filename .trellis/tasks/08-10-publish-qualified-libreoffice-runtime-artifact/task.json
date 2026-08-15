@@ -523,6 +523,28 @@
     "runtimeLifecycleIntegrationCiConclusion": "SUCCESS",
     "runtimeLifecycleIntegrationCiDuration": "1m46s",
     "runtimeLifecycleIntegrationMergePerformed": false,
-    "runtimeLifecycleIntegrationMergeDisposition": "remain DRAFT; do not merge without separate release authorization because .github/workflows/publish.yml runs on push to main and invokes semantic-release"
+    "runtimeLifecycleIntegrationMergeDisposition": "remain DRAFT; do not merge without separate release authorization because .github/workflows/publish.yml runs on push to main and invokes semantic-release",
+    "runtimeLifecycleIntegrationMergeableObserved": true,
+    "runtimeLifecycleIntegrationMergeStateObserved": "CLEAN",
+    "releaseImpactAuditDate": "2026-08-15",
+    "releaseWorkflowDuplicateTriggers": [
+      "push to main",
+      "successful CI workflow_run on main"
+    ],
+    "releaseWorkflowConcurrencyConfigured": false,
+    "releasePriorPushRun": 31829699766,
+    "releasePriorWorkflowRunRun": 31829838418,
+    "releasePriorRunsOutcome": "both SUCCESS as workflows but semantic-release published nothing because package.json repositoryUrl targets matbeedotcom/libreoffice-document-converter and the checked-out killbus main SHA did not equal that repository main SHA",
+    "releaseConfiguredRepositoryUrl": "git+https://github.com/matbeedotcom/libreoffice-document-converter.git",
+    "releaseActiveRepository": "killbus/libreoffice-wasm-conversion-runtime",
+    "releaseActiveMainSha": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+    "releaseConfiguredUpstreamMainShaObserved": "b72a3d584bc28c5111afafcf25def7a24fb5fcb0",
+    "releaseCurrentMergeWouldPublish": false,
+    "releaseCurrentMergeEffect": "would trigger two Release workflow executions, each repeating install/typecheck/lint/build/test before semantic-release currently exits without publication",
+    "releaseRaceAssessment": "duplicate release executions are confirmed and un-serialized; prior runs overlapped at workflow level, while semantic-release write-step overlap was not observed and remains a race exposure if repository metadata is corrected",
+    "releaseNpmLatestObserved": "2.7.2",
+    "releaseLikelyNextVersionIfEnabled": "2.8.0",
+    "releaseLikelyNextVersionBasis": "v2.7.2 is the latest tag/npm version and origin/main already contains feat commits after that tag; the lifecycle fix does not reduce the default semantic-release minor bump",
+    "releasePreMergeRequirement": "correct repository metadata/repositoryUrl, remove or serialize the duplicate Release trigger, and verify npm trusted-publication credentials before authorizing merge/publication"
   }
 }

@@ -536,3 +536,19 @@ The minimal branch was published as `origin/fix/emscripten-lifecycle-integration
 Draft PR `#3` CI run `31895034889` completed successfully: `check` passed in `1m46s`. The PR remains open and draft; no merge, WASM build, or formal Acceptance action occurred.
 
 Merge boundary: `publish.yml` runs on pushes to `main` and invokes `semantic-release`. Draft PR `#3` remains unmerged until separate release authorization; green CI alone is not publication authorization.
+
+### Read-only release-impact audit for Draft PR #3
+
+Draft PR #3 remains OPEN and DRAFT; GitHub reports it MERGEABLE with merge state CLEAN, and CI run 31895034889 remains SUCCESS. This audit made no PR mutation and did not merge, publish, rebuild WASM, rerun Chrome/PDFHow, or create any Attempt 8 marker.
+
+The current publish.yml has two independent triggers for the same Release job: a push to main, and a successful CI workflow_run on main. It has no concurrency group. The previous PR #2 merge demonstrates both paths: push run 31829699766 and workflow-run run 31829838418 both completed successfully after independently repeating install, typecheck, lint, JS build, tests, and semantic-release. Their workflow lifetimes overlapped; their semantic-release write steps did not overlap in that sample, but no workflow rule guarantees serialization.
+
+Both prior runs selected git+https://github.com/matbeedotcom/libreoffice-document-converter.git as the release repository and then reported that local main did not match remote main, so no new version was published.
+
+The log wording says the local branch is behind, while semantic-release 25.0.2 implements this branch as exact HEAD equality after its push-auth check fails. The active workflow checks out killbus/libreoffice-wasm-conversion-runtime, currently at origin/main=a1c3cd6d6d2dd25fab063539e9fe40fbb327b846, while package.json repository.url points to matbeedotcom/libreoffice-document-converter, whose observed main is b72a3d584bc28c5111afafcf25def7a24fb5fcb0. Those SHAs differ, so the current configuration exits before release analysis/publication.
+
+Therefore merging Draft PR #3 under the current configuration would not publish a package or GitHub semantic release, but it would trigger two redundant Release workflow executions in addition to normal CI. This is a current-state observation, not a safe release mechanism: correcting only the repository URL would remove the existing no-publication guard and expose the un-serialized duplicate triggers.
+
+The public npm baseline remains @matbee/libreoffice-converter@2.7.2 with latest=2.7.2. origin/main is already 21 commits after tag v2.7.2 and includes feat(task-0810) and feat(conversion) commits. Under the repository default semantic-release analyzer, a successful release after the lifecycle fix lands would therefore be expected to select minor version 2.8.0, not patch version 2.7.3. This is a version-analysis prediction, not publication evidence; npm trusted-publishing authorization has not yet reached its verification step in the observed runs.
+
+Pre-merge release boundary: keep PR #3 Draft and unmerged. Before separate publication authorization, align repository metadata with the active repository, reduce the Release workflow to one trigger or add a serialization/deduplication design, and prove the npm trusted-publishing path. Attempt 8 remains not admitted and unstarted, formal invocation count remains 0, and no invocation marker exists.
