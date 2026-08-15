@@ -602,6 +602,11 @@
     "forkReleaseGuardCiConclusion": "SUCCESS",
     "forkReleaseGuardCiDuration": "1m44s",
     "forkReleaseGuardWorkflowRunsObserved": "one pull_request CI run only; no Release or Build WASM run",
+    "forkReleaseGuardIndependentReviewDate": "2026-08-15",
+    "forkReleaseGuardIndependentReviewVerdict": "no blocking correctness issue found in the one-line repository guard",
+    "forkReleaseGuardIndependentReviewSemantics": "on the fork, inherited Release workflows may still be instantiated but the guarded release job skips before checkout/install/typecheck/lint/build/test/semantic-release; canonical push and successful-CI workflow_run behavior remains enabled",
+    "forkReleaseGuardIndependentReviewResidualBoundary": "exact repository matching is intentionally fail-closed on rename or transfer; canonical duplicate triggers and publication serialization remain unresolved and are outside this guard",
+    "forkReleaseGuardMergeAuthorization": "not granted; keep PR #4 OPEN DRAFT until separately and explicitly authorized",
     "forkReleaseGuardMerged": false,
     "forkReleaseGuardPublicationPerformed": false
   }
