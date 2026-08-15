@@ -649,6 +649,14 @@
     "runtimeLifecyclePostGuardReviewState": "no reviews, latest reviews, comments, or reviewDecision were present; PR remained OPEN DRAFT and MERGEABLE / CLEAN",
     "runtimeLifecyclePostGuardMainProtection": "GitHub REST returned 404 Branch not protected for main",
     "runtimeLifecyclePostGuardRepositoryRulesets": "none; repository rulesets API returned []",
-    "runtimeLifecyclePostGuardRemainingForkMergeGate": "governance only: separate user authorization to make PR #3 ready and merge; no GitHub review, branch-protection, ruleset, CI, mergeability, or release-guard blocker was observed"
+    "runtimeLifecyclePostGuardRemainingForkMergeGate": "governance gate satisfied by explicit user authorization; PR #3 was made Ready and merged",
+    "runtimeLifecycleMergeResult": "PR #3 MERGED from exact head 1bb549db377f2440042eaf754d2fd396bf145bfa as merge commit 91e6f72ed78b1737ecb181ea28c689737c385e9c at 2026-08-15T20:06:09Z",
+    "runtimeLifecyclePostMergeMainCi": "run 31905773845 SUCCESS; check job 1m34s; install, lint, type check, build, and test passed",
+    "runtimeLifecyclePostMergePushRelease": "run 31905773880 SKIPPED with release steps=[]",
+    "runtimeLifecyclePostMergeWorkflowRunRelease": "run 31905850298 SKIPPED with release steps=[]",
+    "runtimeLifecyclePostMergeBuildWasm": "none; Build WASM run query for merge SHA 91e6f72 returned []",
+    "runtimeLifecyclePostMergePublication": "none; both Release jobs skipped before semantic-release and GitHub release list remained the single pre-existing 2026-08-10 draft",
+    "runtimeLifecyclePostMergeRetest": "no extra Chrome/PDFHow or build:wasm rerun because no untested package/runtime source delta was introduced",
+    "runtimeLifecyclePostMergeFormalBoundary": "non-formal fork integration only; Attempt 8 remains not admitted and unstarted, with no invocation marker and no formal Acceptance claim"
   }
 }
