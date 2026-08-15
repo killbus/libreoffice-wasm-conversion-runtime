@@ -471,7 +471,7 @@
     "pdfHowCleanupMs": 30.483600000006845,
     "pdfHowTotalMs": 162245.2118,
     "retainedTeardownObservation": "resolved in repaired JS wrapper: the prior exact two PThread-not-exported aborts came from two direct reads of the generated unexported Module.PThread accessor; final runtime-owned and PDFHow runs completed graceful destroy without abort or force termination",
-    "nextSessionFocus": "obtain separate release authorization before converting or merging Draft PR #3 because a main push triggers the Release workflow and semantic-release; only generalize and rerun the PDFHow diagnostic in a separately authorized consumer change; keep Attempt 8 formal preparation paused until separately admitted",
+    "nextSessionFocus": "obtain separate authorization before updating or merging Draft PR #3; if its branch is updated against guarded main, observe the ordinary CI result without running build:wasm or repeating Chrome/PDFHow absent a source/package change; keep the canonical applicability decision separate and keep Attempt 8 formal preparation paused until separately admitted",
     "runtimeWrapperRepairSourceState": "committed as 8d51562a12d9754300b58a6e8b94ba1f7808a5c1 over 391e0459fd3768bcb77729fe7f2e7a9c4c810829",
     "runtimeWrapperRepairBuildScope": "TypeScript/JavaScript dist only",
     "runtimeExactArtifactStageRoot": "D:\\tmp\\lo-runtime-teardown-fixed-20260815-2255b",
@@ -523,7 +523,7 @@
     "runtimeLifecycleIntegrationCiConclusion": "SUCCESS",
     "runtimeLifecycleIntegrationCiDuration": "1m46s",
     "runtimeLifecycleIntegrationMergePerformed": false,
-    "runtimeLifecycleIntegrationMergeDisposition": "remain DRAFT; do not merge without separate release authorization because .github/workflows/publish.yml runs on push to main and invokes semantic-release",
+    "runtimeLifecycleIntegrationMergeDisposition": "remain DRAFT; PR #4 removed the fork publication hazard by making both Release paths skip before semantic-release, but PR #3 still has no separate update/merge authorization and its unchanged commit is not a standalone canonical v2.7.2 patch",
     "runtimeLifecycleIntegrationMergeableObserved": true,
     "runtimeLifecycleIntegrationMergeStateObserved": "CLEAN",
     "releaseImpactAuditDate": "2026-08-15",
@@ -620,6 +620,25 @@
     "forkReleaseGuardPostMergeBuildWasmDisposition": "no Build WASM run observed for merge commit dcbe6db; the merge SHA produced only main CI plus push and workflow_run Release workflows",
     "forkReleaseGuardPostMergeGitHubReleaseDisposition": "no new GitHub release; the release list still contained only the pre-existing draft runtime-artifact release created on 2026-08-10",
     "forkReleaseGuardPublicationPerformed": false,
-    "forkReleaseGuardPublicationEvidence": "both possible Release executions skipped with zero steps, so semantic-release and npm/GitHub publication code did not execute"
+    "forkReleaseGuardPublicationEvidence": "both possible Release executions skipped with zero steps, so semantic-release and npm/GitHub publication code did not execute",
+    "runtimeLifecyclePostGuardAuditDate": "2026-08-15",
+    "runtimeLifecyclePostGuardMainSha": "dcbe6db434181e85f00bc6edbfe1c4954d44d7a3",
+    "runtimeLifecyclePostGuardHeadSha": "1bb549db377f2440042eaf754d2fd396bf145bfa",
+    "runtimeLifecyclePostGuardPullRequestState": "OPEN DRAFT",
+    "runtimeLifecyclePostGuardCiRun": 31895034889,
+    "runtimeLifecyclePostGuardCiConclusion": "SUCCESS",
+    "runtimeLifecyclePostGuardGitHubMergeabilityObserved": "UNKNOWN / UNKNOWN at the read-only query; no merge action was attempted",
+    "runtimeLifecyclePostGuardMergeBase": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+    "runtimeLifecyclePostGuardCommitDistance": "current main has 4 main-only commits and PR #3 has 1 PR-only commit relative to their merge base",
+    "runtimeLifecyclePostGuardMainOnlyCommits": [
+      "d423446 fix(converter): validate formats before runtime startup",
+      "6c1ad6f Merge pull request #2 from killbus/fix/prevalidate-conversion-options-20260814",
+      "b1e034b fix(release): skip inherited publish job on forks",
+      "dcbe6db Merge pull request #4 from killbus/fix/fork-release-workflow-guard"
+    ],
+    "runtimeLifecyclePostGuardMergeTreeResult": "CLEAN; git merge-tree --write-tree returned aa12883c6db6ea1178c15ffdd9f0b970294ec3de with exit code 0 and did not modify the index or worktree",
+    "runtimeLifecyclePostGuardReleaseGuardDisposition": "PR #3 changes 14 runtime/test files and does not change .github/workflows/publish.yml; the clean three-way merge therefore retains guarded main's fork Release behavior",
+    "runtimeLifecyclePostGuardVerificationScope": "read-only GitHub PR/CI/ref query, targeted fetch of main and PR head, and local commit/diff/merge-tree analysis only; no Chrome, PDFHow, build:wasm, Release, publication, branch update, or merge",
+    "runtimeLifecyclePostGuardMergeAuthorization": "not granted; PR #3 remains Draft"
   }
 }
