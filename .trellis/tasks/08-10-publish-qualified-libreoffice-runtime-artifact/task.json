@@ -642,7 +642,8 @@
       "dcbe6db Merge pull request #4 from killbus/fix/fork-release-workflow-guard"
     ],
     "runtimeLifecyclePostGuardMergeTreeResult": "CLEAN; git merge-tree --write-tree returned aa12883c6db6ea1178c15ffdd9f0b970294ec3de with exit code 0 and did not modify the index or worktree",
-    "runtimeLifecyclePostGuardReleaseGuardDisposition": "PR #3 changes 14 runtime/test files and does not change .github/workflows/publish.yml; the clean three-way merge therefore retains guarded main's fork Release behavior",
+    "runtimeLifecyclePostGuardReleaseGuardDisposition": "directly verified: current main dcbe6db and simulated merge tree aa12883 contain the identical publish workflow blob 6749bb848052c3bcfb4d1d2c92beda8cf8ee4e92, and that blob contains the canonical-repository guard",
+    "runtimeLifecyclePostGuardPublishWorkflowBlob": "6749bb848052c3bcfb4d1d2c92beda8cf8ee4e92",
     "runtimeLifecyclePostGuardVerificationScope": "read-only GitHub PR/CI/ref query, targeted fetch of main and PR head, and local commit/diff/merge-tree analysis only; no Chrome, PDFHow, build:wasm, Release, publication, branch update, or merge",
     "runtimeLifecyclePostGuardMergeAuthorization": "not granted; PR #3 remains Draft"
   }
