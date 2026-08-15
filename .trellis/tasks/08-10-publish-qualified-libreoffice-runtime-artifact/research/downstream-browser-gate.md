@@ -520,3 +520,7 @@ The lifecycle repair is now committed independently. The remaining runtime dirty
 - `dev-server.mjs`, `scripts/release-runtime/browser-profile-diagnostic.mjs`, and `tests/browser/profile-diagnostic.html` are retained one-off diagnostic assets. The script's historical transformed `no-initial-run` comparison is no longer a production prerequisite now that the startup policy is committed.
 
 The PDFHow Vite and smoke changes remain useful consumer evidence, but their package declaration points to a temporary `D:\tmp` tgz and the smoke is hash-bound to this candidate. Generalizing that harness is a new consumer source change and would require its own rerun. It is therefore deferred rather than represented as a permanent production landing in this non-formal task phase.
+
+### Feature-branch publication verification
+
+The committed non-formal lifecycle repair and its Trellis classification were published by a non-force push of `0d2b962..83a009f` to `origin/feat/publish-qualified-libreoffice-runtime-artifact`. The local remote-tracking ref matched `83a009f06a52a1242cde55e843524a897c2ca100` after the push. A branch-scoped `gh run list` returned no workflow runs, consistent with no CI, publication, or manual `build-wasm.yml` invocation being triggered. No WASM/native rebuild, formal Acceptance invocation, or Attempt 8 marker occurred; Attempt 8 remains not admitted and unstarted.
