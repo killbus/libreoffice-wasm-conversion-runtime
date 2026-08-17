@@ -26,7 +26,7 @@
   "classification": "pre-admission protocol audit",
   "commandPackage": {
     "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\temp\\attempt8-prep-protocol-20260817-v1\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-command-package.json",
-    "sha256": "f22d5a45000695a0636a983f424f2f2f2315dcd24e42ab52cfef0c7555a6480c"
+    "sha256": "e50ae42cce84381a665e91bcf03a784182f480498d044532c4eda3336b9175a1"
   },
   "evidenceStatus": "not acceptance evidence",
   "execution": {
@@ -36,7 +36,7 @@
     "formalRun": false,
     "preparationRun": false
   },
-  "generatedAt": "2026-08-17T03:55:06.871Z",
+  "generatedAt": "2026-08-17T04:39:39.682Z",
   "kind": "acceptance-attempt-8-pre-admission-audit",
   "packageVerifierOutput": "{\"status\":\"verified\",\"manifest\":\"D:\\\\Repositories\\\\libreoffice-wasm-conversion-runtime\\\\temp\\\\attempt8-prep-protocol-20260817-v1\\\\.trellis\\\\tasks\\\\08-10-publish-qualified-libreoffice-runtime-artifact\\\\acceptance\\\\attempt-8-command-package.json\",\"files\":17}",
   "passed": true,

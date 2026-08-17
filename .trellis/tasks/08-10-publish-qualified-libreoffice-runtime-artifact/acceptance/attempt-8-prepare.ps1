@@ -49,6 +49,34 @@ function Assert-Condition {
   if (-not $Condition) { throw $Message }
 }
 
+function ConvertTo-PreparationUtcInstant {
+  param([Parameter(Mandatory = $true)][object]$Value, [Parameter(Mandatory = $true)][string]$Name)
+  if ($Value -is [DateTimeOffset]) { return ([DateTimeOffset]$Value).ToUniversalTime() }
+  if ($Value -is [DateTime]) {
+    $dateTime = [DateTime]$Value
+    if ($dateTime.Kind -eq [DateTimeKind]::Unspecified) { throw "$Name has no UTC offset." }
+    return [DateTimeOffset]::new($dateTime).ToUniversalTime()
+  }
+  if ($Value -is [string]) {
+    $text = ([string]$Value).Trim()
+    if ($text -notmatch '(?:[zZ]|[+-][0-9]{2}:[0-9]{2})$') { throw "$Name has no UTC offset." }
+    $parsed = [DateTimeOffset]::MinValue
+    $styles = [Globalization.DateTimeStyles]::AllowWhiteSpaces -bor [Globalization.DateTimeStyles]::AssumeUniversal -bor [Globalization.DateTimeStyles]::AdjustToUniversal
+    if (-not [DateTimeOffset]::TryParse($text, [Globalization.CultureInfo]::InvariantCulture, $styles, [ref]$parsed)) {
+      throw "$Name is not a valid ISO-8601 timestamp."
+    }
+    return $parsed.ToUniversalTime()
+  }
+  throw "$Name has unsupported timestamp type $($Value.GetType().FullName)."
+}
+
+function Assert-SamePreparationUtcInstant {
+  param([Parameter(Mandatory = $true)][object]$Actual, [Parameter(Mandatory = $true)][object]$Expected, [Parameter(Mandatory = $true)][string]$Message)
+  $actualInstant = ConvertTo-PreparationUtcInstant -Value $Actual -Name 'Actual timestamp'
+  $expectedInstant = ConvertTo-PreparationUtcInstant -Value $Expected -Name 'Expected timestamp'
+  if ($actualInstant.UtcDateTime.Ticks -ne $expectedInstant.UtcDateTime.Ticks) { throw $Message }
+}
+
 function Remove-PreparationPath {
   param([Parameter(Mandatory = $true)][string]$Path)
   $fullPath = [IO.Path]::GetFullPath($Path)
@@ -137,7 +165,7 @@ $workflowQuery = Invoke-PreparationCommand -Name 'github-native-workflow-query' 
 $latestWorkflow = @(($workflowQuery.stdout | ConvertFrom-Json).workflow_runs)[0]
 Assert-Condition ([int64]$latestWorkflow.id -eq $LatestNativeRunId) 'New native/WASM run exists.'
 Assert-Condition ($latestWorkflow.head_sha -eq $LatestNativeHeadSha) 'Latest native workflow head changed.'
-Assert-Condition ($latestWorkflow.created_at -eq $LatestNativeCreatedAt) 'Latest native workflow timestamp changed.'
+Assert-SamePreparationUtcInstant -Actual $latestWorkflow.created_at -Expected $LatestNativeCreatedAt -Message 'Latest native workflow timestamp changed.'
 Assert-Condition ($latestWorkflow.conclusion -eq 'success') 'Frozen native workflow failed.'
 
 Invoke-PreparationCommand -Name 'release-query-download' -Executable 'node' -Arguments @((Join-Path $PSScriptRoot 'attempt-8-download-assets.mjs'), $Download) -WorkingDirectory $PSScriptRoot -TimeoutSeconds 1200 -ResetPaths @($Download) | Out-Null

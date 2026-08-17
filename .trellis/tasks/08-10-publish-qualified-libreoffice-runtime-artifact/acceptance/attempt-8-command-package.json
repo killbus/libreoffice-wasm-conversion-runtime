@@ -43,7 +43,7 @@
     },
     {
       "path": "attempt-8-prepare.ps1",
-      "sha256": "11855040a33ba413e7e90008d8151df3e17533f0b113159fbb0e6cd0cecb0b94"
+      "sha256": "bfb1972ea08ed91a9e84ebcb2d777ff4207edc13e07d9f56e88813b6671a8eb0"
     },
     {
       "path": "attempt-8-formal.ps1",
@@ -92,7 +92,7 @@
     "runtimeCommit": "54b64eafe922552239d5a9d09d0442b5eda5d9f0"
   },
   "formalInvocationCount": 0,
-  "generatedAt": "2026-08-17T03:51:26.366Z",
+  "generatedAt": "2026-08-17T04:35:49.650Z",
   "hashAlgorithm": "sha256",
   "kind": "acceptance-attempt-8-command-package",
   "schemaVersion": 1,

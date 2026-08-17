@@ -120,7 +120,7 @@ Command package manifest:
 
 ```text
 acceptance/attempt-8-command-package.json
-SHA-256 f22d5a45000695a0636a983f424f2f2f2315dcd24e42ab52cfef0c7555a6480c
+SHA-256 e50ae42cce84381a665e91bcf03a784182f480498d044532c4eda3336b9175a1
 ```
 
 The manifest binds 17 protocol and automation files, including the handoff-consistency auditor. The independent admission record must repeat this exact manifest SHA-256. Any change requires regeneration, a new protocol audit, and a new handoff identity; it is not eligible for in-place supplementation after admission.
@@ -141,7 +141,7 @@ Pre-admission audit:
 
 ```text
 acceptance/acceptance-attempt-8-pre-admission-audit.json
-SHA-256 67a727d6092dc5e8ae37c20777a3ad4768eef5867044e7862e80b2315db038c5
+SHA-256 ca099455a75d873179533c8a7ecc8f42fb5053b135acf41e2d28aac771859c2c
 ```
 
 This audit confirms only protocol readiness and current state. It is not Acceptance Attempt 8 evidence.
