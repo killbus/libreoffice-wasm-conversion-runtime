@@ -27,7 +27,7 @@ $ArchiveVerification = Join-Path $PreparationRoot 'archive-verification-report.j
 $ContractWork = Join-Path $PreparationRoot 'preparation-contract-work'
 $ContractReport = Join-Path $PreparationRoot 'preparation-contract-test.json'
 
-$RuntimeCommit = 'a1c3cd6d6d2dd25fab063539e9fe40fbb327b846'
+$RuntimeCommit = '54b64eafe922552239d5a9d09d0442b5eda5d9f0'
 $PdfHowCommit = 'b41fde5db9829ede7e6e217de6ac12c2b475b7fc'
 $CandidateId = '21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b'
 $ReleaseId = 367637128

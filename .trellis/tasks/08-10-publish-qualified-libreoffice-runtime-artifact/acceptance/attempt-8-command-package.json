@@ -7,15 +7,15 @@
   "files": [
     {
       "path": "attempt-8-protocol.json",
-      "sha256": "baf7249b08b5422971ae459896747c74c0c2dad4d9f298328025afb2b3830e06"
+      "sha256": "cc526df45512cd1f2786eebb2554654e8ddb4758fb4f8d24e5b69c5632aff90e"
     },
     {
       "path": "attempt-8-lib.mjs",
-      "sha256": "a91e3999eaedf65468ef5b36d5803b3188f03dcaf6e1f50ef38e6ea170f324cd"
+      "sha256": "a118b969796004c275996a5e872e866281fb8ce2a0a3b9e3266db2c67897c964"
     },
     {
       "path": "attempt-8-package.mjs",
-      "sha256": "5339716895fcdbf8d8d90e30e3cb2414637b0aec141e0f14c3a4dc533b50e09b"
+      "sha256": "7e02a0f674ece3b3af6013a1ddab0852245f7878b71512e6a3c3c0e27ec7ec1e"
     },
     {
       "path": "attempt-8-command-launch.ps1",
@@ -43,19 +43,19 @@
     },
     {
       "path": "attempt-8-prepare.ps1",
-      "sha256": "9f7302bf81b2acddc226f1e413cc31538a38a29848de050310067921d850be7f"
+      "sha256": "8bfd2d682e687a61892a21cda4350884eb5673db39de3a955b312655b9419b38"
     },
     {
       "path": "attempt-8-formal.ps1",
-      "sha256": "406221a7f8a6c3ee0262b429ff97da043f7a6daee1ffdee707f062a94824ee22"
+      "sha256": "f28249bc32a6c858972869a79128d83554b870ec5d90f51c4a903dedf51b4491"
     },
     {
       "path": "attempt-8-invoke-formal.ps1",
-      "sha256": "139b4f5c373ad21e7cb814ca73f185f560f3036225751bc1cc47a34319fcfd08"
+      "sha256": "bc07c00eea6c1547daea72e675a36c1fca8c2f3f7fc51aa12171507593ec5227"
     },
     {
       "path": "attempt-8-close.mjs",
-      "sha256": "22a452744ca56b5a7f7cc030726e215070c3ee57a961f50f0ef6c0b6f636bb34"
+      "sha256": "cf340e0ff0f06d17b3730389b0c7663721ee65c79f3d01bd52dccc666c5ab06c"
     },
     {
       "path": "attempt-8-disposition-audit.mjs",
@@ -63,15 +63,15 @@
     },
     {
       "path": "attempt-8-pre-admission-audit.mjs",
-      "sha256": "02ffd900feae7100f62c8917a6ddcc08f1fd64cfac25944f8aacc5fd7f00060f"
+      "sha256": "35286b95d4b4f61472d0b86d84b95e70006a3d155ba53f35a862616cd2707669"
     },
     {
       "path": "attempt-8-handoff-audit.mjs",
-      "sha256": "4d59a7de35fbcab33b87d71842d5c26f673ed35a48d94d9f2553dc2b354f09ab"
+      "sha256": "0aaad8312ccb39165cdee3f871c038437bf6c0d534760a01cb122c9e102bddca"
     },
     {
       "path": "attempt-8-protocol.tests.mjs",
-      "sha256": "e0f52d184a025aedd488f761bae761d6bb8ac3a7d1f0ada6c13e39bca5421608"
+      "sha256": "47df78587ff3ea616233158ad37f51b169831fc5436564cd73003751986c2c22"
     }
   ],
   "fixedInputs": {
@@ -86,10 +86,10 @@
     "releaseId": 367637128,
     "releaseTag": "runtime-artifact-21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
     "releaseTarget": "df3f73c789e6d2abf71cbcd75186118d2bbc795a",
-    "runtimeCommit": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846"
+    "runtimeCommit": "54b64eafe922552239d5a9d09d0442b5eda5d9f0"
   },
   "formalInvocationCount": 0,
-  "generatedAt": "2026-08-13T06:58:43.493Z",
+  "generatedAt": "2026-08-17T02:56:24.443Z",
   "hashAlgorithm": "sha256",
   "kind": "acceptance-attempt-8-command-package",
   "schemaVersion": 1,

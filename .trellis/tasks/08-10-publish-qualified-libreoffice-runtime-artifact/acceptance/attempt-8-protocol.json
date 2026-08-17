@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "acceptance-attempt-8-phase-separated-protocol",
   "attemptNumber": 8,
-  "authoredAt": "2026-08-13T00:00:00Z",
+  "authoredAt": "2026-08-17T00:00:00Z",
   "currentState": {
     "status": "NOT ADMITTED",
     "eligible": false,
@@ -12,7 +12,7 @@
     "preparationExecuted": false
   },
   "fixedInputs": {
-    "runtimeCommit": "a1c3cd6d6d2dd25fab063539e9fe40fbb327b846",
+    "runtimeCommit": "54b64eafe922552239d5a9d09d0442b5eda5d9f0",
     "pdfHowCommit": "b41fde5db9829ede7e6e217de6ac12c2b475b7fc",
     "candidateId": "21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b",
     "releaseId": 367637128,

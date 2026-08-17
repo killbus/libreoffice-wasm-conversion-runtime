@@ -1,6 +1,6 @@
 # Acceptance Attempt 8 protocol-refactor handoff
 
-- Date: 2026-08-13
+- Date: 2026-08-17
 - Owner: TEAM B
 - Scope: protocol and automation review only
 - Acceptance state: **NOT ADMITTED**
@@ -120,7 +120,7 @@ Command package manifest:
 
 ```text
 acceptance/attempt-8-command-package.json
-SHA-256 dfb346745f3b0e0153a72cf1331134cdf17d61c92ff5ce0eaa3a7fba9730c23c
+SHA-256 91d26f7439db5592a261469bed74429356c9fe35747347e875ff42c80a5c63e0
 ```
 
 The manifest binds 17 protocol and automation files, including the handoff-consistency auditor. The independent admission record must repeat this exact manifest SHA-256. Any change requires regeneration, a new protocol audit, and a new handoff identity; it is not eligible for in-place supplementation after admission.
@@ -141,7 +141,7 @@ Pre-admission audit:
 
 ```text
 acceptance/acceptance-attempt-8-pre-admission-audit.json
-SHA-256 711a47f3f7388af7470aa2e631991940c85f9de084d85327f5f6791463cf36df
+SHA-256 df8492d41103da2109f1383171e84815f4ee3b13f65d8108e92b6ad6f51a276e
 ```
 
 This audit confirms only protocol readiness and current state. It is not Acceptance Attempt 8 evidence.
