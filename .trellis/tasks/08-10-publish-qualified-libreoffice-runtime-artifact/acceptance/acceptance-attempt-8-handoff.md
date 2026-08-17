@@ -120,7 +120,7 @@ Command package manifest:
 
 ```text
 acceptance/attempt-8-command-package.json
-SHA-256 e50ae42cce84381a665e91bcf03a784182f480498d044532c4eda3336b9175a1
+SHA-256 c210a41bd268075a2bc4d0a4f5ef99da1881d53478ec081e828a9da7602db479
 ```
 
 The manifest binds 17 protocol and automation files, including the handoff-consistency auditor. The independent admission record must repeat this exact manifest SHA-256. Any change requires regeneration, a new protocol audit, and a new handoff identity; it is not eligible for in-place supplementation after admission.
@@ -130,9 +130,9 @@ The manifest binds 17 protocol and automation files, including the handoff-consi
 TEAM B ran only local protocol tests and static checks:
 
 - PowerShell parser: five Attempt 8 `.ps1` files passed;
-- production-same Windows launcher test: passed on PowerShell `7.6.4`, including `.cmd`/`.bat` argument preservation, child exit propagation, fail-closed unsupported tokens, native executables, and `pnpm.cmd`;
+- production-same Windows launcher test: passed on PowerShell `7.6.5`, including `.cmd`/`.bat` argument preservation, child exit propagation, fail-closed unsupported tokens, native executables, and `pnpm.cmd`;
 - Node `--check`: all Attempt 8 `.mjs` files passed;
-- protocol tests: `16` passed, `0` failed;
+- protocol tests: `17` passed, `0` failed;
 - command package generate/verify: passed with 17 files;
 - pre-admission audit: passed and explicitly classified `not acceptance evidence`;
 - handoff/schema/state consistency audit: passed and explicitly classified `not acceptance evidence`.
@@ -141,7 +141,7 @@ Pre-admission audit:
 
 ```text
 acceptance/acceptance-attempt-8-pre-admission-audit.json
-SHA-256 ca099455a75d873179533c8a7ecc8f42fb5053b135acf41e2d28aac771859c2c
+SHA-256 6118f6b9e064ed32e77f2dfb5060994cda042532d5f757d10eba85d826ebc351
 ```
 
 This audit confirms only protocol readiness and current state. It is not Acceptance Attempt 8 evidence.

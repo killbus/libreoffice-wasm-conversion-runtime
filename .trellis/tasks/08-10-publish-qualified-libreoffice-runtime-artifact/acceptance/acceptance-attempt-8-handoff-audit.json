@@ -10,19 +10,19 @@
   "classification": "pre-admission handoff consistency audit",
   "commandPackage": {
     "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\temp\\attempt8-prep-protocol-20260817-v1\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-command-package.json",
-    "sha256": "e50ae42cce84381a665e91bcf03a784182f480498d044532c4eda3336b9175a1"
+    "sha256": "c210a41bd268075a2bc4d0a4f5ef99da1881d53478ec081e828a9da7602db479"
   },
   "evidenceStatus": "not acceptance evidence",
-  "generatedAt": "2026-08-17T04:42:08.138Z",
+  "generatedAt": "2026-08-17T05:48:46.461Z",
   "handoff": {
     "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\temp\\attempt8-prep-protocol-20260817-v1\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\acceptance-attempt-8-handoff.md",
-    "sha256": "7fec775a0b1c0ea19ee81b4dc900432808fcc8bfa1264d20bb1cbc499f7bc16a"
+    "sha256": "3cf4e3c441bc0847149fcdd7158c143252b607d1d689051febf23b3bf975e01a"
   },
   "kind": "acceptance-attempt-8-handoff-consistency-audit",
   "passed": true,
   "preAdmissionAudit": {
     "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\temp\\attempt8-prep-protocol-20260817-v1\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\acceptance-attempt-8-pre-admission-audit.json",
-    "sha256": "ca099455a75d873179533c8a7ecc8f42fb5053b135acf41e2d28aac771859c2c"
+    "sha256": "6118f6b9e064ed32e77f2dfb5060994cda042532d5f757d10eba85d826ebc351"
   },
   "protocol": {
     "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\temp\\attempt8-prep-protocol-20260817-v1\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-protocol.json",
@@ -40,6 +40,6 @@
   "statement": "Handoff/schema/state/identity consistency audit only. Not acceptance evidence. Attempt 8 remains NOT ADMITTED with formal invocation count 0.",
   "task": {
     "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\temp\\attempt8-prep-protocol-20260817-v1\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\task.json",
-    "sha256": "c85885c934ad1c3fa8b78ccce02d23ced59477b6c7f7d9668c82d44de6a1d007"
+    "sha256": "c771176f5693e7f09c28b31dd5ddf184f7ebd7f9e5e5a9e927f9e2a0fe578d81"
   }
 }

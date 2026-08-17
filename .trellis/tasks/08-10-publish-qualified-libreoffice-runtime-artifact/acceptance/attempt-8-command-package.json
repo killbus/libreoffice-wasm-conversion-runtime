@@ -11,7 +11,7 @@
     },
     {
       "path": "attempt-8-lib.mjs",
-      "sha256": "b429c9f0bd7488e072e387ddeb2495fa1a16c9e1835b8f88379cb543412bacc1"
+      "sha256": "407f114f15ba7c54c43250677f1cd7ba6a1a5954e16071e6528df82738c186b9"
     },
     {
       "path": "attempt-8-package.mjs",
@@ -71,7 +71,7 @@
     },
     {
       "path": "attempt-8-protocol.tests.mjs",
-      "sha256": "47df78587ff3ea616233158ad37f51b169831fc5436564cd73003751986c2c22"
+      "sha256": "adc8d08b623b1ad8c3b9316c4e2325ab3e46e28929747a373c8c22afbe3da940"
     }
   ],
   "fixedInputs": {
@@ -92,7 +92,7 @@
     "runtimeCommit": "54b64eafe922552239d5a9d09d0442b5eda5d9f0"
   },
   "formalInvocationCount": 0,
-  "generatedAt": "2026-08-17T04:35:49.650Z",
+  "generatedAt": "2026-08-17T05:37:56.591Z",
   "hashAlgorithm": "sha256",
   "kind": "acceptance-attempt-8-command-package",
   "schemaVersion": 1,
