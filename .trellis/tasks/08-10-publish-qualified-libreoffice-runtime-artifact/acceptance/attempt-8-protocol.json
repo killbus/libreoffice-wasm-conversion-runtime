@@ -23,7 +23,10 @@
     "pinnedDocxSha256": "a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59df",
     "nativeCommit": "71d33678ed74872ebbb1bc37f5778143f8f5e401",
     "nativeWorkflowRunId": 31211473147,
-    "nativeWorkflowCreatedAt": "2026-08-07T19:26:24Z"
+    "nativeWorkflowCreatedAt": "2026-08-07T19:26:24Z",
+    "latestNativeWorkflowRunId": 31802763221,
+    "latestNativeWorkflowHeadSha": "488554990ffd2f4242ccb8cec92a9c8e976faf16",
+    "latestNativeWorkflowCreatedAt": "2026-08-14T13:00:24Z"
   },
   "preparation": {
     "classification": "preparation",
