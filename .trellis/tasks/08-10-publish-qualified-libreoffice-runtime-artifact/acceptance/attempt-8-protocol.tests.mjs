@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { sameInventory } from './attempt-8-lib.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const text = (name) => readFile(path.join(root, name), 'utf8');
@@ -189,6 +190,26 @@ test('ADMITTED record missing sealed-input identity fails before marker and form
   } finally {
     await rm(temp, { recursive: true, force: true });
   }
+});
+
+test('sealed inventory equality is canonical across persisted JSON key order', () => {
+  const actual = {
+    fileCount: 1,
+    totalBytes: 3,
+    inventorySha256: 'inventory-hash',
+    files: [{ path: 'fixture.bin', bytes: 3, sha256: 'file-hash' }],
+  };
+  const persisted = {
+    fileCount: 1,
+    totalBytes: 3,
+    inventorySha256: 'inventory-hash',
+    files: [{ bytes: 3, path: 'fixture.bin', sha256: 'file-hash' }],
+  };
+  assert.doesNotThrow(() => sameInventory(actual, persisted, 'fixture'));
+  assert.throws(
+    () => sameInventory(actual, { ...persisted, files: [{ bytes: 4, path: 'fixture.bin', sha256: 'other' }] }, 'fixture'),
+    /fixture exact inventory changed/,
+  );
 });
 
 test('preparation manifest and command-package schemas are explicit and fail-closed', async () => {

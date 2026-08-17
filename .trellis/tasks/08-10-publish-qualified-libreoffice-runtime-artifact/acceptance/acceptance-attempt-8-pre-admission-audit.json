@@ -25,8 +25,8 @@
   },
   "classification": "pre-admission protocol audit",
   "commandPackage": {
-    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-command-package.json",
-    "sha256": "dfb346745f3b0e0153a72cf1331134cdf17d61c92ff5ce0eaa3a7fba9730c23c"
+    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\temp\\attempt8-prep-protocol-20260817-v1\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-command-package.json",
+    "sha256": "7c367b603be35099a4bddd0ff99e7f05be38743304972013611d59b96197dbf6"
   },
   "evidenceStatus": "not acceptance evidence",
   "execution": {
@@ -36,13 +36,13 @@
     "formalRun": false,
     "preparationRun": false
   },
-  "generatedAt": "2026-08-13T06:59:47.449Z",
+  "generatedAt": "2026-08-17T05:39:50.053Z",
   "kind": "acceptance-attempt-8-pre-admission-audit",
-  "packageVerifierOutput": "{\"status\":\"verified\",\"manifest\":\"D:\\\\Repositories\\\\libreoffice-wasm-conversion-runtime\\\\.trellis\\\\tasks\\\\08-10-publish-qualified-libreoffice-runtime-artifact\\\\acceptance\\\\attempt-8-command-package.json\",\"files\":17}",
+  "packageVerifierOutput": "{\"status\":\"verified\",\"manifest\":\"D:\\\\Repositories\\\\libreoffice-wasm-conversion-runtime\\\\temp\\\\attempt8-prep-protocol-20260817-v1\\\\.trellis\\\\tasks\\\\08-10-publish-qualified-libreoffice-runtime-artifact\\\\acceptance\\\\attempt-8-command-package.json\",\"files\":17}",
   "passed": true,
   "protocol": {
-    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-protocol.json",
-    "sha256": "baf7249b08b5422971ae459896747c74c0c2dad4d9f298328025afb2b3830e06"
+    "path": "D:\\Repositories\\libreoffice-wasm-conversion-runtime\\temp\\attempt8-prep-protocol-20260817-v1\\.trellis\\tasks\\08-10-publish-qualified-libreoffice-runtime-artifact\\acceptance\\attempt-8-protocol.json",
+    "sha256": "69e8f351ea9bc2b6c6bd328283056f8a055aa167001ce72c278bd7e7b7e784c8"
   },
   "schemaVersion": 1,
   "state": {

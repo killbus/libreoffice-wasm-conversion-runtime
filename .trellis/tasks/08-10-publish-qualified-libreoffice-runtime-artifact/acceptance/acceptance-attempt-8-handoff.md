@@ -1,6 +1,6 @@
 # Acceptance Attempt 8 protocol-refactor handoff
 
-- Date: 2026-08-13
+- Date: 2026-08-17
 - Owner: TEAM B
 - Scope: protocol and automation review only
 - Acceptance state: **NOT ADMITTED**
@@ -120,7 +120,7 @@ Command package manifest:
 
 ```text
 acceptance/attempt-8-command-package.json
-SHA-256 dfb346745f3b0e0153a72cf1331134cdf17d61c92ff5ce0eaa3a7fba9730c23c
+SHA-256 7c367b603be35099a4bddd0ff99e7f05be38743304972013611d59b96197dbf6
 ```
 
 The manifest binds 17 protocol and automation files, including the handoff-consistency auditor. The independent admission record must repeat this exact manifest SHA-256. Any change requires regeneration, a new protocol audit, and a new handoff identity; it is not eligible for in-place supplementation after admission.
@@ -130,9 +130,9 @@ The manifest binds 17 protocol and automation files, including the handoff-consi
 TEAM B ran only local protocol tests and static checks:
 
 - PowerShell parser: five Attempt 8 `.ps1` files passed;
-- production-same Windows launcher test: passed on PowerShell `7.6.4`, including `.cmd`/`.bat` argument preservation, child exit propagation, fail-closed unsupported tokens, native executables, and `pnpm.cmd`;
+- production-same Windows launcher test: passed on PowerShell `7.6.5`, including `.cmd`/`.bat` argument preservation, child exit propagation, fail-closed unsupported tokens, native executables, and `pnpm.cmd`;
 - Node `--check`: all Attempt 8 `.mjs` files passed;
-- protocol tests: `16` passed, `0` failed;
+- protocol tests: `17` passed, `0` failed;
 - command package generate/verify: passed with 17 files;
 - pre-admission audit: passed and explicitly classified `not acceptance evidence`;
 - handoff/schema/state consistency audit: passed and explicitly classified `not acceptance evidence`.
@@ -141,7 +141,7 @@ Pre-admission audit:
 
 ```text
 acceptance/acceptance-attempt-8-pre-admission-audit.json
-SHA-256 711a47f3f7388af7470aa2e631991940c85f9de084d85327f5f6791463cf36df
+SHA-256 8d02a83750c2235995b0e63ead86321d4de4bf60269a1b167cc291d88f69ab25
 ```
 
 This audit confirms only protocol readiness and current state. It is not Acceptance Attempt 8 evidence.

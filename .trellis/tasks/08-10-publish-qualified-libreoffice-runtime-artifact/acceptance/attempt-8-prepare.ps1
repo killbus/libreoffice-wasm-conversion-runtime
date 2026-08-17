@@ -27,7 +27,7 @@ $ArchiveVerification = Join-Path $PreparationRoot 'archive-verification-report.j
 $ContractWork = Join-Path $PreparationRoot 'preparation-contract-work'
 $ContractReport = Join-Path $PreparationRoot 'preparation-contract-test.json'
 
-$RuntimeCommit = 'a1c3cd6d6d2dd25fab063539e9fe40fbb327b846'
+$RuntimeCommit = '54b64eafe922552239d5a9d09d0442b5eda5d9f0'
 $PdfHowCommit = 'b41fde5db9829ede7e6e217de6ac12c2b475b7fc'
 $CandidateId = '21fcdfd7e9f49efc08c6ba56c13337cc0be59a9b496f5424adbe57e0fb4a6e7b'
 $ReleaseId = 367637128
@@ -39,11 +39,42 @@ $FixtureSha256 = 'a78495545ae41486aa61c9a0e8c4c78f6491a8e7b3cfacbd4185ed0f124f59
 $NativeCommit = '71d33678ed74872ebbb1bc37f5778143f8f5e401'
 $NativeRunId = 31211473147
 $NativeCreatedAt = '2026-08-07T19:26:24Z'
+$LatestNativeRunId = 31802763221
+$LatestNativeHeadSha = '488554990ffd2f4242ccb8cec92a9c8e976faf16'
+$LatestNativeCreatedAt = '2026-08-14T13:00:24Z'
 $Records = [Collections.Generic.List[object]]::new()
 
 function Assert-Condition {
   param([bool]$Condition, [string]$Message)
   if (-not $Condition) { throw $Message }
+}
+
+function ConvertTo-PreparationUtcInstant {
+  param([Parameter(Mandatory = $true)][object]$Value, [Parameter(Mandatory = $true)][string]$Name)
+  if ($Value -is [DateTimeOffset]) { return ([DateTimeOffset]$Value).ToUniversalTime() }
+  if ($Value -is [DateTime]) {
+    $dateTime = [DateTime]$Value
+    if ($dateTime.Kind -eq [DateTimeKind]::Unspecified) { throw "$Name has no UTC offset." }
+    return [DateTimeOffset]::new($dateTime).ToUniversalTime()
+  }
+  if ($Value -is [string]) {
+    $text = ([string]$Value).Trim()
+    if ($text -notmatch '(?:[zZ]|[+-][0-9]{2}:[0-9]{2})$') { throw "$Name has no UTC offset." }
+    $parsed = [DateTimeOffset]::MinValue
+    $styles = [Globalization.DateTimeStyles]::AllowWhiteSpaces -bor [Globalization.DateTimeStyles]::AssumeUniversal -bor [Globalization.DateTimeStyles]::AdjustToUniversal
+    if (-not [DateTimeOffset]::TryParse($text, [Globalization.CultureInfo]::InvariantCulture, $styles, [ref]$parsed)) {
+      throw "$Name is not a valid ISO-8601 timestamp."
+    }
+    return $parsed.ToUniversalTime()
+  }
+  throw "$Name has unsupported timestamp type $($Value.GetType().FullName)."
+}
+
+function Assert-SamePreparationUtcInstant {
+  param([Parameter(Mandatory = $true)][object]$Actual, [Parameter(Mandatory = $true)][object]$Expected, [Parameter(Mandatory = $true)][string]$Message)
+  $actualInstant = ConvertTo-PreparationUtcInstant -Value $Actual -Name 'Actual timestamp'
+  $expectedInstant = ConvertTo-PreparationUtcInstant -Value $Expected -Name 'Expected timestamp'
+  if ($actualInstant.UtcDateTime.Ticks -ne $expectedInstant.UtcDateTime.Ticks) { throw $Message }
 }
 
 function Remove-PreparationPath {
@@ -132,9 +163,9 @@ Assert-Condition ($pdfHowRefs.stdout -match "(?m)^$PdfHowCommit\s+refs/heads/mai
 
 $workflowQuery = Invoke-PreparationCommand -Name 'github-native-workflow-query' -Executable 'gh' -Arguments @('api', 'repos/killbus/libreoffice-wasm-conversion-runtime/actions/workflows/325462492/runs?per_page=1') -WorkingDirectory $PreparationRoot -TimeoutSeconds 180
 $latestWorkflow = @(($workflowQuery.stdout | ConvertFrom-Json).workflow_runs)[0]
-Assert-Condition ([int64]$latestWorkflow.id -eq $NativeRunId) 'New native/WASM run exists.'
-Assert-Condition ($latestWorkflow.head_sha -eq $NativeCommit) 'Native workflow head changed.'
-Assert-Condition ($latestWorkflow.created_at -eq $NativeCreatedAt) 'Native workflow timestamp changed.'
+Assert-Condition ([int64]$latestWorkflow.id -eq $LatestNativeRunId) 'New native/WASM run exists.'
+Assert-Condition ($latestWorkflow.head_sha -eq $LatestNativeHeadSha) 'Latest native workflow head changed.'
+Assert-SamePreparationUtcInstant -Actual $latestWorkflow.created_at -Expected $LatestNativeCreatedAt -Message 'Latest native workflow timestamp changed.'
 Assert-Condition ($latestWorkflow.conclusion -eq 'success') 'Frozen native workflow failed.'
 
 Invoke-PreparationCommand -Name 'release-query-download' -Executable 'node' -Arguments @((Join-Path $PSScriptRoot 'attempt-8-download-assets.mjs'), $Download) -WorkingDirectory $PSScriptRoot -TimeoutSeconds 1200 -ResetPaths @($Download) | Out-Null
@@ -153,6 +184,7 @@ $fixedInputs = [ordered]@{
   releaseId = $ReleaseId; releaseTag = $ReleaseTag; releaseTarget = $ReleaseTarget
   archiveName = $ArchiveName; archiveSha256 = $ArchiveSha256; pinnedDocxSha256 = $FixtureSha256
   nativeCommit = $NativeCommit; nativeWorkflowRunId = $NativeRunId; nativeWorkflowCreatedAt = $NativeCreatedAt
+  latestNativeWorkflowRunId = $LatestNativeRunId; latestNativeWorkflowHeadSha = $LatestNativeHeadSha; latestNativeWorkflowCreatedAt = $LatestNativeCreatedAt
 }
 $manifest = [ordered]@{
   schemaVersion = 1; kind = 'acceptance-attempt-8-preparation-manifest'; attemptNumber = 8
