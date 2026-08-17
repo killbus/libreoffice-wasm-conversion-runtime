@@ -7,7 +7,7 @@
   "files": [
     {
       "path": "attempt-8-protocol.json",
-      "sha256": "8cc8026a903dc3ecb2a31e590dc8f3ec3aca9711447a6e3bc0c3e134423aa6d7"
+      "sha256": "69e8f351ea9bc2b6c6bd328283056f8a055aa167001ce72c278bd7e7b7e784c8"
     },
     {
       "path": "attempt-8-lib.mjs",
@@ -92,7 +92,7 @@
     "runtimeCommit": "54b64eafe922552239d5a9d09d0442b5eda5d9f0"
   },
   "formalInvocationCount": 0,
-  "generatedAt": "2026-08-17T05:37:56.591Z",
+  "generatedAt": "2026-08-17T11:29:19.362Z",
   "hashAlgorithm": "sha256",
   "kind": "acceptance-attempt-8-command-package",
   "schemaVersion": 1,
